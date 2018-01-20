@@ -30,8 +30,8 @@ app.use((req, res, next) => {
 // ROOMS
 app
 .get('/api/cadavres', (req, res) => {
+    console.log('/api/cadavres : '+JSON.stringify(req.query));
     cadavre.getCadavres(req, (data) => {
-        console.log('/api/cadavres : '+JSON.stringify(req.query));
         res.json(data);
     })
 })
@@ -43,6 +43,7 @@ app
     });
 })
 .post('/api/cadavres/add', (req, res) => {
+    console.log('/api/cadavres/add : '+JSON.stringify(req.body));
     cadavre.addCadavre(req, (data) => {
         res.json(data);
     })

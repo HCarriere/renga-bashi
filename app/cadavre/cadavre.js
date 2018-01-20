@@ -33,7 +33,7 @@ function addCadavre(req, callback) {
         color:null,
         date: new Date(),
     });
-    console.log('params received : '+JSON.stringify(params));
+    //console.log('params received : '+JSON.stringify(params));
     if(params && 
        params.x && 
        params.y && 

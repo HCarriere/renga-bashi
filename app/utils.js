@@ -6,8 +6,8 @@
  * @param  {Object} params
  */
 function getParamsFromRequest(req, params) {
-    console.log(req.body);
-    console.log(JSON.stringify(req.body));
+    // console.log(req.body);
+    // console.log(JSON.stringify(req.body));
 	if(!req.body) {
 		return;
 	}

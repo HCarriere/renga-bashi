@@ -11,7 +11,7 @@ module.exports.Schema = {
         y: Number,
         date: Date,
         path: String,
-        level: Number,
+        level: String,
         rot: Number,
         color: String,
     }),
