@@ -85,7 +85,7 @@ function drawTile(x, y) {
 function drawEnd(end) {
 	ctx.fillStyle = 'white';
 	graphic.setShadow(10, ctx.fillStyle);
-	ctx.fillRect(end.x-end.width/2-offset.x, end.y-end.height/2-offset.y, 
+	ctx.fillRect(end.x-offset.x, end.y-offset.y, 
 	end.width, end.height);
 	graphic.setShadow(0);
 }

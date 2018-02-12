@@ -243,8 +243,18 @@ function setCameraOffset(obj) {
 	if(obj.y-offset.y<height*0.3) offset.y-=Math.abs(obj.vector.y);
 	if(obj.y-offset.y>height*0.7) offset.y+=Math.abs(obj.vector.y);
     // limit
-	offset.x = constrain(Math.floor(offset.x), 0, map.width*tilesProperties.size-width);
-	offset.y = min(Math.floor(offset.y),map.height*tilesProperties.size-height);
+    if(width <= map.width*tilesProperties.size) {
+        // small map on X
+        offset.x = 0;
+    } else {
+	   offset.x = constrain(Math.floor(offset.x), 0, map.width*tilesProperties.size-width); 
+    }
+    if(height <= map.height*tilesProperties.size) {
+       // small map on Y
+        offset.y = 0;
+    } else {
+	   offset.y = min(Math.floor(offset.y),map.height*tilesProperties.size-height);
+    }
 }
 
 function checkCollisionWithEnds(obj) {
