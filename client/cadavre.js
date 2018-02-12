@@ -91,9 +91,8 @@ function launch() {
                 orientations: [ORI.LEFT, ORI.TOP]
             },
         ]);
-    beginLevel(()=>{
+    beginLevel(null, ()=>{
         getNewDeaths();
-        
     });
     
 
