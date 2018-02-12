@@ -199,8 +199,6 @@ function onDeath() {
 }
 
 function beginLevel(level) {
-    levelName = level;
-    
     getMap(function(data){
         map = data;
         map.coord = getMapCoordArray(map);
@@ -211,7 +209,8 @@ function beginLevel(level) {
             x: player.x,
             y: player.y
         }
-    }, levelName);
+        levelName = data.name;
+    }, level);
     
 }
 

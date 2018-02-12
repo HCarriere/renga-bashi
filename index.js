@@ -122,6 +122,7 @@ function getMap(level, callback) {
             cacheMaps[level] = -1;
         } else if(map){
             cacheMaps[level] = JSON.parse(map);
+            cacheMaps[level].name = level;
             callback(cacheMaps[level]);
             return;
         }
