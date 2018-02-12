@@ -91,9 +91,11 @@ function launch() {
                 orientations: [ORI.LEFT, ORI.TOP]
             },
         ]);
-    beginLevel();
+    beginLevel(()=>{
+        getNewDeaths();
+        
+    });
     
-    getNewDeaths();
 
     mainLoop();
 }
@@ -198,7 +200,7 @@ function onDeath() {
     isDead = true; // will realy die when the ground is touched
 }
 
-function beginLevel(level) {
+function beginLevel(level, callback) {
     getMap(function(data){
         map = data;
         map.coord = getMapCoordArray(map);
@@ -210,6 +212,8 @@ function beginLevel(level) {
             y: player.y
         }
         levelName = data.name;
+        
+        callback();
     }, level);
     
 }
