@@ -28,7 +28,7 @@ let characterProperties = {
     size: 20
 }
 let deathCooldown = 300; // TODO real death system
-let levelName = '0';
+let levelName;
 let offset = {
     x:0,
     y:0,
@@ -91,7 +91,7 @@ function launch() {
                 orientations: [ORI.LEFT, ORI.TOP]
             },
         ]);
-    beginLevel('0');
+    beginLevel();
     
     getNewDeaths();
 

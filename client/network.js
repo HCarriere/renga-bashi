@@ -55,6 +55,9 @@ getMap(map => {
 });
 */
 function getMap(callback, level) {
+    if(!level) {
+        level = 'START';
+    }
 	$.ajax({
 		type:'GET',
 		url:server+'/api/map', 
