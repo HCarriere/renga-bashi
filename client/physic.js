@@ -80,8 +80,8 @@ function initPhysicObject(x, y, size, vector, points) {
 }
 
 function addCadavreToCluster(cadavre) {
-    let i = Math.floor(cadavre.x / 100);
-    let j = Math.floor(cadavre.y / 100);
+    let i = Math.floor(cadavre.x / 50);
+    let j = Math.floor(cadavre.y / 50);
     if(!cadavreClusters[i]) {
         cadavreClusters[i] = [];
     }
@@ -96,8 +96,8 @@ function addCadavreToCluster(cadavre) {
 }
 
 function getCurrentCadavreCluster(point, obj) {
-    let ci = Math.floor((point.dx+obj.x) / 100);
-    let cj = Math.floor((point.dy+obj.y) / 100);
+    let ci = Math.floor((point.dx+obj.x) / 50);
+    let cj = Math.floor((point.dy+obj.y) / 50);
     let bigCluster = [];
     for(let i = ci-1; i<ci+3; i++) {
         for(let j=cj-1; j<cj+3; j++) {

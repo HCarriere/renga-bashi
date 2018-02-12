@@ -240,23 +240,14 @@ function getNewDeaths(date) {
 
 
 function setCameraOffset(obj) {
-	if(obj.x-offset.x>width*0.7) offset.x+=Math.abs(obj.vector.x);
-	if(obj.x-offset.x<width*0.3) offset.x-=Math.abs(obj.vector.x);
-	if(obj.y-offset.y<height*0.3) offset.y-=Math.abs(obj.vector.y);
-	if(obj.y-offset.y>height*0.7) offset.y+=Math.abs(obj.vector.y);
+	if(obj.x-offset.x>width*0.7) offset.x+=max(Math.abs(obj.vector.x), 1);
+	if(obj.x-offset.x<width*0.3) offset.x-=max(Math.abs(obj.vector.x), 1);
+	if(obj.y-offset.y<height*0.3) offset.y-=max(Math.abs(obj.vector.y),1);
+	if(obj.y-offset.y>height*0.7) offset.y+=max(Math.abs(obj.vector.y),1);
+    
     // limit
-    if(width <= map.width*tilesProperties.size) {
-        // small map on X
-        offset.x = 0;
-    } else {
-	   offset.x = constrain(Math.floor(offset.x), 0, map.width*tilesProperties.size-width); 
-    }
-    if(height <= map.height*tilesProperties.size) {
-       // small map on Y
-        offset.y = 0;
-    } else {
-	   offset.y = min(Math.floor(offset.y),map.height*tilesProperties.size-height);
-    }
+    offset.x = constrain(offset.x, 0, width);
+    offset.y = constrain(offset.y, 0, height);
 }
 
 function checkCollisionWithEnds(obj) {

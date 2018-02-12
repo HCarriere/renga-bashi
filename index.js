@@ -109,7 +109,7 @@ function getMap(level, callback) {
         return;
     }
     if(level=='START') {
-        level = process.env.START_LEVEL;
+        level = process.env.START_LEVEL || '0';
     }
     if(cacheMaps[level]) {
         callback(cacheMaps[level]);
