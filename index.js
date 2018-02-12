@@ -133,6 +133,7 @@ function getMap(level, callback) {
 function addMap(map, name, callback) {
     fs.writeFile('./maps/'+name+'.json', JSON.stringify(map), err => {
         if(err) {
+            console.log(err);
             callback(err);
         } else {
             callback(name);
