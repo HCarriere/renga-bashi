@@ -39,6 +39,7 @@ function addCadavre(req, callback) {
        params.y && 
        params.level) {
         mongo.add(cadavreSchema, () => {
+            console.log('cadavre added');
             callback({message:'ok'});
         }, params);
     } else {

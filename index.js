@@ -20,6 +20,7 @@ mongo.initMongo();
 server.timeout = 0;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/client'));
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', CORS);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
@@ -27,8 +28,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// ROOMS
 app
+.get('/', (req, res) => {
+    res.sendFile(__dirname + '/client/cadavre.html');
+})
+// ROOMS
 .get('/api/cadavres', (req, res) => {
     console.log('/api/cadavres : '+JSON.stringify(req.query));
     cadavre.getCadavres(req, (data) => {

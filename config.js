@@ -1,6 +1,6 @@
 module.exports = {
     database: {
-        //name:'mongodb://localhost/pire-to-pire',
+        //name:'mongodb://localhost/db',
         defaultAddress:{
             prefix:'mongodb',
             name:'localhost',
