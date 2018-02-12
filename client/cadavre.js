@@ -30,7 +30,7 @@ let characterProperties = {
 let deathCooldown = 300; // TODO real death system
 let levelName = '0';
 let offset = {
-    x:-30,
+    x:0,
     y:0,
 };
 let map;
@@ -65,40 +65,34 @@ function launch() {
     // launch
     stopDrawLoop = false;
 
-    getMap(function(data){
-        map = data;
-        map.coord = getMapCoordArray(map);
-        map.objects = getMapObjects(map);
-        player = initPhysicObject(
-            map.objects.begin.x,
-            map.objects.begin.y,
-            characterProperties.size,
-            {x: 0, y:0},
-            [
-                {
-                    dx: characterProperties.size / 2,
-                    dy: characterProperties.size / 2,
-					orientations: [ORI.RIGHT, ORI.BOTTOM]
-                },
-				{
-                    dx: -characterProperties.size / 2,
-                    dy: characterProperties.size / 2,
-					orientations: [ORI.LEFT, ORI.BOTTOM]
-                },
-                {
-                    dx: characterProperties.size / 2,
-                    dy: -characterProperties.size / 2,
-					orientations: [ORI.RIGHT, ORI.TOP]
-                },
-                {
-                    dx: -characterProperties.size / 2,
-                    dy: -characterProperties.size / 2,
-					orientations: [ORI.LEFT, ORI.TOP]
-                },
-            ]);
-    }, levelName);
-	
-
+    player = initPhysicObject(
+        0, 0,
+        characterProperties.size,
+        {x: 0, y:0},
+        [
+            {
+                dx: characterProperties.size / 2,
+                dy: characterProperties.size / 2,
+                orientations: [ORI.RIGHT, ORI.BOTTOM]
+            },
+            {
+                dx: -characterProperties.size / 2,
+                dy: characterProperties.size / 2,
+                orientations: [ORI.LEFT, ORI.BOTTOM]
+            },
+            {
+                dx: characterProperties.size / 2,
+                dy: -characterProperties.size / 2,
+                orientations: [ORI.RIGHT, ORI.TOP]
+            },
+            {
+                dx: -characterProperties.size / 2,
+                dy: -characterProperties.size / 2,
+                orientations: [ORI.LEFT, ORI.TOP]
+            },
+        ]);
+    beginLevel('0');
+    
     getNewDeaths();
 
     mainLoop();
@@ -127,7 +121,7 @@ function mainLoop() {
     currentFrame++;
     getFPS();
 	
-	if(map) {
+	if(map && player) {
 		gameFrame();
 	}
     ctx.clearRect(0, 0, width, height);
@@ -146,7 +140,9 @@ function mainLoop() {
     // graphics
     if(map) {
         drawMap();
-        drawEnd(map.objects.end);
+        for(let end of map.objects.ends) {
+            drawEnd(end);
+        }
         drawCharacter(player);
     }
     if(cadavres) {
@@ -169,6 +165,8 @@ function gameFrame() {
 	   applyControls(); 
     }
 	
+    // end collision
+    checkCollisionWithEnds(player);
 	
 	// physics
 	for(let o of physicObjects) {
@@ -200,6 +198,23 @@ function onDeath() {
     isDead = true; // will realy die when the ground is touched
 }
 
+function beginLevel(level) {
+    levelName = level;
+    
+    getMap(function(data){
+        map = data;
+        map.coord = getMapCoordArray(map);
+        map.objects = getMapObjects(map);
+        player.x = map.objects.begin.x;
+        player.y = map.objects.begin.y;
+        offset = {
+            x: player.x,
+            y: player.y
+        }
+    }, levelName);
+    
+}
+
 function reinitPlayer() {
     getNewDeaths(lastDeathUpdateDate);
     deathCooldown = 100;
@@ -207,7 +222,7 @@ function reinitPlayer() {
     player.x = map.objects.begin.x;
     player.y = map.objects.begin.y;
     offset.x = 0;
-    offset.y = -338;
+    offset.y = 0;
 }
 
 function getNewDeaths(date) {
@@ -230,6 +245,16 @@ function setCameraOffset(obj) {
     // limit
 	offset.x = constrain(Math.floor(offset.x), 0, map.width*tilesProperties.size-width);
 	offset.y = min(Math.floor(offset.y),map.height*tilesProperties.size-height);
+}
+
+function checkCollisionWithEnds(obj) {
+    for(let end of map.objects.ends) {
+        if(obj.x > end.x && obj.x < end.x+end.width &&
+          obj.y > end.y && obj.y < end.y+end.height) {
+            // collision
+            beginLevel(end.nextLevel);
+        }
+    }
 }
 
 // UTILS //
@@ -379,7 +404,14 @@ function getMapObjects(jsonMap) {
     for(let layer of jsonMap.layers){
         if(layer.type=='objectgroup') {
             for(let obj of layer.objects) {
-                objects[obj.type] = obj;
+                if(obj.type == 'end') {
+                    if(!objects.ends) {
+                        objects.ends = [];
+                    }
+                    objects.ends.push(obj);
+                } else {
+                    objects[obj.type] = obj;
+                }
             }
         }
     }

@@ -49,7 +49,7 @@ function applyPhysic(obj){
     //Check limite
 	obj.vector.x = constrain(obj.vector.x, -CST.SPEEDLIMIT.X, CST.SPEEDLIMIT.X);
 	obj.vector.y = constrain(obj.vector.y, -CST.SPEEDLIMIT.Y, CST.SPEEDLIMIT.Y);
-
+    
     obj.x += obj.vector.x;
     obj.y += obj.vector.y;
 }

@@ -34,6 +34,7 @@
                  "rotation":0,
                  "type":"end",
                  "visible":true,
+                 "nextLevel":"X",
                  "width":62.0796689084323,
                  "x":2496.12002069322,
                  "y":225.038799793068

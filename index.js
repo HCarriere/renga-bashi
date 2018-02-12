@@ -52,6 +52,24 @@ app
         res.json(data);
     })
 })
+.post('/api/map/add', (req, res) => {
+    console.log('/api/map/add : '+JSON.stringify(req.body));
+    
+    if(req.body && 
+       req.body.password == process.env.API_PASSWORD) {
+        console.log('ok');
+    } else {
+        return;
+    }
+    
+    if(req.body && req.body.map && req.body.name) {
+        addMap(req.body.map, req.body.name, message => {
+            res.json(message);
+        });
+    } else {
+        res.json('invalid parameters');
+    }
+})
 
 .get('*', (req, res) => {
     res.status(404);
@@ -105,5 +123,15 @@ function getMap(level, callback) {
             return;
         }
         callback();
+    });
+}
+
+function addMap(map, name, callback) {
+    fs.writeFile('./maps/'+name+'.json', JSON.stringify(map), err => {
+        if(err) {
+            callback(err);
+        } else {
+            callback(name);
+        }
     });
 }

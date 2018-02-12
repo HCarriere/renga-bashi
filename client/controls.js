@@ -8,20 +8,20 @@ function applyControls(){
 	}
     
     // right
-    //if(controls.isActive(controls.CONTROLS.RIGHT)) {
+    if(controls.isActive(controls.CONTROLS.RIGHT)) {
         player.vector.x += CST.AUTOMATIC_RUN_ACC;
-    /*} else {
+    } else {
         if(player.vector.x >= CST.AUTOMATIC_RUN_ACC) 
             player.vector.x -= CST.AUTOMATIC_RUN_ACC;
-    }*/
+    }
     
     // left
-    /*if(controls.isActive(controls.CONTROLS.LEFT)) {
+    if(controls.isActive(controls.CONTROLS.LEFT)) {
         player.vector.x -= CST.AUTOMATIC_RUN_ACC;
     } else {
         if(player.vector.x <= -CST.AUTOMATIC_RUN_ACC) 
             player.vector.x += CST.AUTOMATIC_RUN_ACC;
-    }*/
+    }
     
     // die
     if(controls.isActive(controls.CONTROLS.DIE)) {

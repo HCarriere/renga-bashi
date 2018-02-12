@@ -1,6 +1,6 @@
 'use strict';
 
-const server = 'https://cadavres-api.herokuapp.com'
+const server = 'https://cadavres-api.herokuapp.com';
 //const server = 'http://localhost:3000'
 
 function setDeath(x, y, rotation, color, path, level) {
