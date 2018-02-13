@@ -46,6 +46,13 @@ app
         res.json(data);
     })
 })
+.post('/api/cadavres/remove',
+     mustBeAdmin(),
+     (req, res) => {
+    cadavre.removeCadavres(req, (result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    });
+})
 // maps
 .get('/api/map', (req, res) => {
     console.log('/api/map : '+JSON.stringify(req.query));

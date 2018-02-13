@@ -47,7 +47,20 @@ function addCadavre(req, callback) {
     }
 }
 
+
+function removeCadavres(req, callback) {
+    if(req.body.title) {
+        mongo.remove(mapSchema, (err, result) => {
+            if(err) {
+                return callback(null, 500, err);
+            }
+            return callback(result);
+        }, {level: title});
+    } 
+}
+
 module.exports = {
     getCadavres,
     addCadavre,
+    removeCadavres,
 };
