@@ -27,6 +27,11 @@ function applyControls(){
     if(controls.isActive(controls.CONTROLS.DIE)) {
         onDeath();
     }
+    
+    // admin only : fly
+    if(controls.isActive(controls.CONTROLS.FLY)) {
+        player.vector.y -= 2;
+    }
 }
 
 
@@ -36,6 +41,7 @@ let controls = (function(){
         RIGHT: 2,
         LEFT: 3,
         DIE: 4,
+        FLY: 5,
     };
     const KEY_MAPPING = {
         'z':CONTROLS.JUMP,
@@ -46,6 +52,7 @@ let controls = (function(){
         'ArrowLeft':CONTROLS.LEFT,
         'ArrowRight':CONTROLS.RIGHT,
         'r':CONTROLS.DIE,
+        '$':CONTROLS.FLY,
     };
     
     let activeControls = [];
