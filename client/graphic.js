@@ -62,8 +62,6 @@ function drawCharacter(obj) {
 }
 
 function drawCadavre(cadavre) {
-    ctx.fillStyle = 'white';
-    ctx.fillText(cadavre.cx+', '+cadavre.cy, cadavre.x-15-offset.x, cadavre.y-15-offset.y);
 	ctx.save();
 	ctx.translate(cadavre.x-offset.x, cadavre.y-offset.y);
 	ctx.rotate(cadavre.rot);

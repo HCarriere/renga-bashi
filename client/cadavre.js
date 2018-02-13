@@ -44,8 +44,8 @@ const CST = {
     },
     GRAVITY: 0.5,
     SPEEDLIMIT: {
-        X:4,
-        Y:8,
+        X:14,
+        Y:18,
     },
 	JUMP_POWER: 16, 
 	AUTOMATIC_RUN_ACC: 1,
@@ -200,17 +200,16 @@ function onDeath() {
 }
 
 function beginLevel(level, callback) {
+    cleanCadavres();
     getMap(function(data){
-        map = data;
+        map = data.map;
         map.coord = getMapCoordArray(map);
         map.objects = getMapObjects(map);
         player.x = map.objects.begin.x;
         player.y = map.objects.begin.y;
-        offset = {
-            x: player.x,
-            y: player.y
-        }
-        levelName = data.name;
+        offset.x = player.x - width/2;
+        offset.y = player.y - height/2;
+        levelName = data.title;
         
         callback();
     }, level);
@@ -223,8 +222,8 @@ function reinitPlayer() {
     isDead = false;
     player.x = map.objects.begin.x;
     player.y = map.objects.begin.y;
-    offset.x = 0;
-    offset.y = 0;
+    offset.x = player.x - width/2;
+    offset.y = player.y - height/2;
 }
 
 function getNewDeaths(date) {
@@ -239,15 +238,24 @@ function getNewDeaths(date) {
 }
 
 
+function cleanCadavres() {
+    cadavres = [];
+    cadavreClusters = [];
+}
+
 function setCameraOffset(obj) {
+    // general following
 	if(obj.x-offset.x>width*0.7) offset.x+=max(Math.abs(obj.vector.x), 1);
 	if(obj.x-offset.x<width*0.3) offset.x-=max(Math.abs(obj.vector.x), 1);
 	if(obj.y-offset.y<height*0.3) offset.y-=max(Math.abs(obj.vector.y),1);
 	if(obj.y-offset.y>height*0.7) offset.y+=max(Math.abs(obj.vector.y),1);
     
-    // limit
-    offset.x = constrain(offset.x, 0, width);
-    offset.y = constrain(offset.y, 0, height);
+    // left limit
+    offset.x = max(offset.x, 0);
+    
+    // bottom limit
+    offset.y = min(offset.y, map.height*tilesProperties.size-height);
+    
 }
 
 function checkCollisionWithEnds(obj) {
@@ -407,7 +415,7 @@ function getMapObjects(jsonMap) {
     for(let layer of jsonMap.layers){
         if(layer.type=='objectgroup') {
             for(let obj of layer.objects) {
-                if(obj.type == 'end') {
+                if(obj.type == 'end' && obj.nextLevel) {
                     if(!objects.ends) {
                         objects.ends = [];
                     }

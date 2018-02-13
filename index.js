@@ -13,6 +13,7 @@ const server = http.createServer(app);
 
 const mongo = require('./app/mongo');
 const cadavre = require('./app/cadavre');
+const map = require('./app/map');
 
 const CORS = process.env.CORS || '*';
 mongo.initMongo();
@@ -32,19 +33,12 @@ app
 .get('/', (req, res) => {
     res.sendFile(__dirname + '/client/cadavre.html');
 })
-// ROOMS
+// cadavres
 .get('/api/cadavres', (req, res) => {
     console.log('/api/cadavres : '+JSON.stringify(req.query));
     cadavre.getCadavres(req, (data) => {
         res.json(data);
     })
-})
-.get('/api/map', (req, res) => {
-    console.log('/api/map : '+JSON.stringify(req.query));
-    getMap(req.query.level, map => {
-        if(map && map!=-1) res.json(map);
-        else res.json({error: 'error getting map'});
-    });
 })
 .post('/api/cadavres/add', (req, res) => {
     console.log('/api/cadavres/add : '+JSON.stringify(req.body));
@@ -52,34 +46,30 @@ app
         res.json(data);
     })
 })
-.post('/api/map/add', (req, res) => {
-    console.log('/api/map/add : '+JSON.stringify(req.body));
-    
-    if(req.body && 
-       req.body.password == process.env.API_PASSWORD) {
-        console.log('ok');
-    } else {
-        return;
-    }
-    
-    if(req.body && req.body.map && req.body.name) {
-        addMap(req.body.map, req.body.name, message => {
-            res.json(message);
-        });
-    } else {
-        res.json('invalid parameters');
-    }
+// maps
+.get('/api/map', (req, res) => {
+    console.log('/api/map : '+JSON.stringify(req.query));
+    map.getMap(req, (result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    });
+})
+.post('/api/map/add', 
+      mustBeAdmin(), 
+      (req, res) => {
+    console.log('/api/map/add');
+    map.addMap(req, (result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    });
 })
 
 .get('*', (req, res) => {
     res.status(404);
-	sendJSON(res, {code:404});
 })
 
 // Error handler //////////
 .use((err, req, res, next) => {
     console.log('Express error handler):' + err);
-    sendJSON(res, err);
+    res.json(err);
 });
 
 // application launch
@@ -90,53 +80,33 @@ server.listen(port, (err) => {
     console.log(`API listening to *:${port})`);
 });
 
-
-/**
- * send a JSON to response header
- * @param  {[Object]} response
- * @param  {[Object]} json
- */
-function sendJSON(response, json) {
-	response.contentType('application/json');
-	response.send(JSON.stringify(json, null, 4));
+function handleAPIResponse(res, result, status, err) {
+    if(status) {
+        res.status(status);
+    }
+    if(err) {
+        console.log(err);
+        res.json(err);
+    } else {
+        res.json(result);
+    }
 }
 
-let cacheMaps = [];
-
-function getMap(level, callback) {
-    if(!level) {
-        callback();
-        return;
-    }
-    if(level=='START') {
-        level = process.env.START_LEVEL || '0';
-    }
-    if(cacheMaps[level]) {
-        callback(cacheMaps[level]);
-        return;
-    }
-    console.log('map '+level+' not cached. Reading files...');
-    fs.readFile('./maps/'+level+'.json', (err, map) => {
-        if(err) {
-            console.log('error reading map:'+err);
-            cacheMaps[level] = -1;
-        } else if(map){
-            cacheMaps[level] = JSON.parse(map);
-            cacheMaps[level].name = level;
-            callback(cacheMaps[level]);
+// middleware
+function mustBeAdmin() {
+    return function (req, res, next) {
+        if(!req.body) {
+            res.status(400);
+            res.json('invalid parameters');
             return;
         }
-        callback();
-    });
-}
-
-function addMap(map, name, callback) {
-    fs.writeFile('./maps/'+name+'.json', JSON.stringify(map), err => {
-        if(err) {
-            console.log(err);
-            callback(err);
-        } else {
-            callback(name);
+        
+        if(req.body.password == process.env.API_PASSWORD) {
+            // auth
+            return next();
         }
-    });
+        res.status(403);
+        res.json('invalid credentials');
+        // not auth
+    }
 }

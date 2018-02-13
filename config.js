@@ -7,7 +7,8 @@ module.exports = {
             database:'cadavres'
         },
         collections : {
-            cadavre:'cadavre'
+            cadavre:'cadavre',
+            map:'map',
         },
 		verbose:true,
 		mongooseDebug:false,
