@@ -263,7 +263,9 @@ function checkCollisionWithEnds(obj) {
         if(obj.x > end.x && obj.x < end.x+end.width &&
           obj.y > end.y && obj.y < end.y+end.height) {
             // collision
-            beginLevel(end.properties.nextLevel);
+            beginLevel(end.properties.nextLevel, ()=> {
+                getNewDeaths();
+            });
         }
     }
 }
