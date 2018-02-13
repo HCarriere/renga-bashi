@@ -90,7 +90,7 @@ function addCadavreToCluster(cadavre) {
     }
     cadavre.cx = i;
     cadavre.cy = j;
-    cadavre.color = `rgb(${50+(i*83)%200},${50+(j*97)%200},${(i*j)%250})`;//tests purpose
+    //cadavre.color = `rgb(${50+(i*83)%200},${50+(j*97)%200},${(i*j)%250})`;//tests purpose
     
     cadavreClusters[i][j].push(cadavre);
 }

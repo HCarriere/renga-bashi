@@ -4,6 +4,8 @@ let mongo = require('../mongo');
 let cadavreSchema = require('./schema').Schema;
 let utils = require('../utils');
 
+let guids = [];
+
 function getCadavres(req, callback) {
     let date;
     if(req.query.date) {
@@ -31,8 +33,31 @@ function addCadavre(req, callback) {
         level:null,
         rot:null,
         color:null,
+        guid: null,
         date: new Date(),
     });
+    if(params.guid && checkGuid(params.guid)) {
+        // check guid
+        console.log('A:'+params.guid);
+        if(!guids[params.guid]) {
+            // not present
+            guids[params.guid] = new Date().getTime();
+        } else {
+            // check date
+            console.log('A:checking dates...'+(new Date().getTime() - guids[params.guid]));
+            if(new Date().getTime() - guids[params.guid] > 4500) {
+                // ok 
+                console.log('B:'+guids[params.guid]);
+                delete guids[params.guid];
+            } else {
+                // nok
+                guids[params.guid] = new Date().getTime();
+                return;
+            }
+        }
+    } else {
+        return;
+    }
     //console.log('params received : '+JSON.stringify(params));
     if(params && 
        params.x && 
@@ -57,6 +82,10 @@ function removeCadavres(req, callback) {
             return callback(result);
         }, {level: req.body.title});
     } 
+}
+
+function checkGuid(guid) {
+    return guid.length == 36;
 }
 
 module.exports = {

@@ -18,7 +18,8 @@ let cadavres;
 let player;
 let lastDeathUpdateDate;
 let isDead;
-
+const playerguid = guid();
+const playerColor = getRandomColor();
 let physicObjects = [];
 
 let tilesProperties = {
@@ -183,7 +184,26 @@ function gameFrame() {
 function onTouchGround(obj) {
     if(isDead) {
         // die
-        setDeath(player.x, player.y, player.rot, 'red', '', levelName);
+        $.ajax({
+            type:'POST',
+            url:server+'/api/cadavres/add', 
+            data:{
+                x: player.x,
+                y: player.y,
+                path: controls.getCurrentRunControls(),
+                level: levelName,
+                rot:player.rot,
+                guid: playerguid,
+                color: playerColor,
+            }, 
+            success: data => {
+                console.log(data);
+            },
+            error: (msg) => {
+                console.log('error:'+JSON.stringify(msg));
+            }, 
+            dataType:'json'
+        });
         reinitPlayer();
     } else {
         jumpAmount = 1; // reset jumps
@@ -201,6 +221,7 @@ function onDeath() {
 
 function beginLevel(level, callback) {
     cleanCadavres();
+    controls.resetCurrentRunControlArray();
     getMap(function(data){
         map = data.map;
         map.coord = getMapCoordArray(map);
@@ -218,7 +239,7 @@ function beginLevel(level, callback) {
 
 function reinitPlayer() {
     getNewDeaths(lastDeathUpdateDate);
-    deathCooldown = 100;
+    deathCooldown = 300;
     isDead = false;
     player.x = map.objects.begin.x;
     player.y = map.objects.begin.y;
@@ -429,4 +450,14 @@ function getMapObjects(jsonMap) {
         }
     }
     return objects;
+}
+
+function guid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
 }

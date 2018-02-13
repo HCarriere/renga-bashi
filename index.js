@@ -41,7 +41,7 @@ app
     })
 })
 .post('/api/cadavres/add', (req, res) => {
-    console.log('/api/cadavres/add : '+JSON.stringify(req.body));
+    //console.log('/api/cadavres/add : '+JSON.stringify(req.body));
     cadavre.addCadavre(req, (data) => {
         res.json(data);
     })

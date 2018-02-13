@@ -33,8 +33,8 @@ function drawCharacter(obj) {
         obj.rot = 0;
     }
     ctx.rotate(obj.rot);
-	ctx.fillStyle = '#FFBBBB';
-	graphic.setShadow(10, '#FFBBBB');
+	ctx.fillStyle = playerColor;
+	graphic.setShadow(10, playerColor);
 	ctx.fillRect(-obj.size/2,
 				-obj.size/2, 
 				obj.size,
@@ -56,7 +56,7 @@ function drawCharacter(obj) {
         y: obj.y+Math.random()*10-5,
         dirx: 0,
         diry: 0,
-        color: '#FFBBBB',
+        color: playerColor,
         size: Math.random()+1.5,
     });
 }

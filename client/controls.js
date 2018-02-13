@@ -1,15 +1,18 @@
 'use strict';
 
 function applyControls(){
+    let activeControls = [];
 	// jump
     if(controls.isActive(controls.CONTROLS.JUMP) && jumpAmount > 0) {
 		jumpAmount -= 1;
 		player.vector.y = -CST.JUMP_POWER;
+        activeControls.push(controls.CONTROLS.JUMP);
 	}
     
     // right
     if(controls.isActive(controls.CONTROLS.RIGHT)) {
         player.vector.x += CST.AUTOMATIC_RUN_ACC;
+        activeControls.push(controls.CONTROLS.RIGHT);
     } else {
         if(player.vector.x >= CST.AUTOMATIC_RUN_ACC) 
             player.vector.x -= CST.AUTOMATIC_RUN_ACC;
@@ -18,6 +21,7 @@ function applyControls(){
     // left
     if(controls.isActive(controls.CONTROLS.LEFT)) {
         player.vector.x -= CST.AUTOMATIC_RUN_ACC;
+        activeControls.push(controls.CONTROLS.LEFT);
     } else {
         if(player.vector.x <= -CST.AUTOMATIC_RUN_ACC) 
             player.vector.x += CST.AUTOMATIC_RUN_ACC;
@@ -25,13 +29,17 @@ function applyControls(){
     
     // die
     if(controls.isActive(controls.CONTROLS.DIE)) {
+        activeControls.push(controls.CONTROLS.DIE);
         onDeath();
     }
     
     // admin only : fly
     if(controls.isActive(controls.CONTROLS.FLY)) {
+        activeControls.push(controls.CONTROLS.FLY);
         player.vector.y -= 2;
     }
+    
+    controls.addControlsToCurrentRun(activeControls);
 }
 
 
@@ -57,6 +65,8 @@ let controls = (function(){
     
     let activeControls = [];
     
+    let runControls = [];
+    
     function setActive(control, active) {
         if(KEY_MAPPING[control]) {
             // key exists
@@ -68,10 +78,26 @@ let controls = (function(){
         return activeControls[control];
     }
     
+    function resetCurrentRunControlArray() {
+        runControls = [];
+    }
+
+    // controls -> []
+    function addControlsToCurrentRun(controls) {
+        runControls.push(controls);
+    }
+    
+    function getCurrentRunControls() {
+        return runControls;
+    }
+    
     return {
         setActive,
         isActive,
         CONTROLS,
+        addControlsToCurrentRun,
+        resetCurrentRunControlArray,
+        getCurrentRunControls,
     }
 })();
 

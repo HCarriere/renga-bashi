@@ -1,30 +1,6 @@
 'use strict';
 
-//const server = 'https://cadavres-api.herokuapp.com';
-//const server = 'http://localhost:3000'
 const server = '';
-
-function setDeath(x, y, rotation, color, path, level) {
-	$.ajax({
-		type:'POST',
-		url:server+'/api/cadavres/add', 
-		data:{
-			x: x,
-			y: y,
-			path: path,
-			level: level,
-            rot:rotation,
-            color: color,
-		}, 
-		success: data => {
-			console.log(data);
-		},
-		error: (msg) => {
-			console.log('error:'+JSON.stringify(msg));
-		}, 
-		dataType:'json'
-	});
-}
 
 /*
 getDeaths(deaths => {
@@ -50,11 +26,6 @@ function getDeaths(date, level, callback) {
 	});
 }
 
-/*
-getMap(map => {
-	let myMap = map;
-});
-*/
 function getMap(callback, level) {
     if(!level) {
         level = 'START';
