@@ -61,6 +61,11 @@ function drawCharacter(obj) {
     });
 }
 
+function drawZombie(zombie) {
+    ctx.fillStyle = zombie.color;
+    ctx.fillRect(zombie.x-offset.x, zombie.y-offset.y, 6, 6);
+}
+
 function drawCadavre(cadavre) {
 	ctx.save();
 	ctx.translate(cadavre.x-offset.x, cadavre.y-offset.y);
@@ -75,9 +80,11 @@ function drawCadavre(cadavre) {
 }
 
 function drawTile(x, y) {
-	// ctx.fillStyle = '#4444EE';
-    ctx.fillStyle = `rgb(${30+x%200},${30+y%200},${230})`;
-	ctx.fillRect(x-offset.x, y-offset.y, tilesProperties.size, tilesProperties.size);
+	//ctx.fillStyle = '#4444EE';
+    ctx.fillStyle = `rgb(${(30+x%200)%255},${(30+y%200)%255},${(230)%255})`;
+    //ctx.fillStyle = `rgb(${(30+x%200+currentFrame)%255},${(30+y%200+currentFrame)%255},${(230+currentFrame)%255})`;
+	//ctx.fillStyle = getRandomColor();
+    ctx.fillRect(x-offset.x, y-offset.y, tilesProperties.size, tilesProperties.size);
 }
 
 function drawEnd(end) {

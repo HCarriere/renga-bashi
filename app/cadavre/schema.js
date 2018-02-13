@@ -10,7 +10,7 @@ module.exports.Schema = {
         x: Number,
         y: Number,
         date: Date,
-        path: mongoose.Schema.Types.Mixed,
+        path: [[String]],
         level: String,
         rot: Number,
         color: String,

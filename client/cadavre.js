@@ -13,11 +13,10 @@ let stopDrawLoop;
 let particles;
 let obsoleteParticles;
 
-let jumpAmount;
 let cadavres;
+let zombies;
 let player;
 let lastDeathUpdateDate;
-let isDead;
 const playerguid = guid();
 const playerColor = getRandomColor();
 let physicObjects = [];
@@ -92,6 +91,8 @@ function launch() {
                 orientations: [ORI.LEFT, ORI.TOP]
             },
         ]);
+    player.idDead = false;
+    player.jumpAmount = 0;
     beginLevel(null, ()=>{
         getNewDeaths();
     });
@@ -145,7 +146,15 @@ function mainLoop() {
         for(let end of map.objects.ends) {
             drawEnd(end);
         }
+        
         drawCharacter(player);
+        
+        //zombies
+        if(zombies) {
+            for(let z of zombies) {
+                drawZombie(z);
+            }
+        }
     }
     if(cadavres) {
         for(let c of cadavres) {
@@ -163,13 +172,31 @@ function mainLoop() {
 // GAME MECHANICS //
 function gameFrame() {
     // controls
-    if(!isDead) {
-	   applyControls(); 
+    if(!player.isDead) {
+	   applyPlayerControls();
     }
 	
     // end collision
     checkCollisionWithEnds(player);
 	
+    if(zombies) {
+        for(let z of zombies) {
+            if(z.currentAnimationFrame >= z.path.length) {
+                // end of zombie
+                console.log("end zombie"+z);// todo virer ca
+            } else {
+                applyZombieControls(z, z.path[z.currentAnimationFrame]);
+                z.currentAnimationFrame++;
+            }
+        }
+        // remove zombies
+        for(let i = 0; i<zombies.length; i++) {
+            if(zombies[i].currentAnimationFrame >= zombies[i].path.length) {
+                zombies.splice(i, 1);
+            }
+        }
+    }
+    
 	// physics
 	for(let o of physicObjects) {
 		applyPhysic(o);
@@ -182,7 +209,7 @@ function gameFrame() {
 }
 
 function onTouchGround(obj) {
-    if(isDead) {
+    if(obj.isDead) { 
         // die
         $.ajax({
             type:'POST',
@@ -206,7 +233,7 @@ function onTouchGround(obj) {
         });
         reinitPlayer();
     } else {
-        jumpAmount = 1; // reset jumps
+        obj.jumpAmount = 1; // reset jumps
         obj.state = characterState.DEFAULT;
     }
 }
@@ -216,7 +243,7 @@ function onDeath() {
         return; // can't die now
     }
     
-    isDead = true; // will realy die when the ground is touched
+    player.isDead = true; // will realy die when the ground is touched
 }
 
 function beginLevel(level, callback) {
@@ -238,9 +265,10 @@ function beginLevel(level, callback) {
 }
 
 function reinitPlayer() {
+    zombies = [];
     getNewDeaths(lastDeathUpdateDate);
     deathCooldown = 300;
-    isDead = false;
+    player.isDead = false;
     player.x = map.objects.begin.x;
     player.y = map.objects.begin.y;
     offset.x = player.x - width/2;
@@ -250,6 +278,9 @@ function reinitPlayer() {
 function getNewDeaths(date) {
     getDeaths(date, levelName, data=>{
         for(let c of data){
+            // try to create zombie
+            createZombie(c);
+            
 			cadavres.push(c);
 			// add to cluster
             addCadavreToCluster(c);
@@ -262,6 +293,49 @@ function getNewDeaths(date) {
 function cleanCadavres() {
     cadavres = [];
     cadavreClusters = [];
+    zombies = [];
+}
+
+function createZombie(cadavre) {
+    if(!zombies) {
+        zombies = [];
+    }
+    if(zombies.length>10){ // limit
+        return;
+    }
+    let path = cadavre.path;
+    let col = cadavre.color;
+    cadavre = initPhysicObject(
+        map.objects.begin.x, map.objects.begin.y,
+        characterProperties.size,
+        {x: 0, y:0},
+        [
+            {
+                dx: characterProperties.size / 2,
+                dy: characterProperties.size / 2,
+                orientations: [ORI.RIGHT, ORI.BOTTOM]
+            },
+            {
+                dx: -characterProperties.size / 2,
+                dy: characterProperties.size / 2,
+                orientations: [ORI.LEFT, ORI.BOTTOM]
+            },
+            {
+                dx: characterProperties.size / 2,
+                dy: -characterProperties.size / 2,
+                orientations: [ORI.RIGHT, ORI.TOP]
+            },
+            {
+                dx: -characterProperties.size / 2,
+                dy: -characterProperties.size / 2,
+                orientations: [ORI.LEFT, ORI.TOP]
+            },
+        ]);
+    cadavre.color = col;
+    cadavre.jumpAmount = 0;
+    cadavre.path = path;
+    cadavre.currentAnimationFrame = 0;
+    zombies.push(cadavre);
 }
 
 function setCameraOffset(obj) {

@@ -58,6 +58,22 @@ function addCadavre(req, callback) {
     } else {
         return;
     }
+    //check path
+    if(params.path && params.path.length > 500) {
+        params.path = null;
+    }else {
+        // transform path
+        let newPath = [];
+        for(let i=0; i<500; i++) {
+            if(params.path[i]) {
+                newPath.push(params.path[i]);
+            }else {
+                newPath.push(['0']);
+            }
+        }
+        params.path = newPath;
+    }
+    console.log('path::'+JSON.stringify(params.path));
     //console.log('params received : '+JSON.stringify(params));
     if(params && 
        params.x && 

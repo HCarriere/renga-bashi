@@ -1,10 +1,11 @@
 'use strict';
 
-function applyControls(){
+
+function applyPlayerControls(){
     let activeControls = [];
 	// jump
-    if(controls.isActive(controls.CONTROLS.JUMP) && jumpAmount > 0) {
-		jumpAmount -= 1;
+    if(controls.isActive(controls.CONTROLS.JUMP) && player.jumpAmount > 0) {
+		player.jumpAmount -= 1;
 		player.vector.y = -CST.JUMP_POWER;
         activeControls.push(controls.CONTROLS.JUMP);
 	}
@@ -33,7 +34,7 @@ function applyControls(){
         onDeath();
     }
     
-    // admin only : fly
+    // top
     if(controls.isActive(controls.CONTROLS.FLY)) {
         activeControls.push(controls.CONTROLS.FLY);
         player.vector.y -= 2;
@@ -42,14 +43,49 @@ function applyControls(){
     controls.addControlsToCurrentRun(activeControls);
 }
 
+function applyZombieControls(obj, objControls){
+    if(!objControls || !obj) {
+        return;
+    }
+    if(objControls == ["0"]){
+        return;
+    }
+	// jump
+    if(objControls.includes(controls.CONTROLS.JUMP) && obj.jumpAmount > 0) {
+		obj.jumpAmount -= 1;
+		obj.vector.y = -CST.JUMP_POWER;
+	}
+    
+    // right
+    if(objControls.includes(controls.CONTROLS.RIGHT)) {
+        obj.vector.x += CST.AUTOMATIC_RUN_ACC;
+    } else {
+        if(obj.vector.x >= CST.AUTOMATIC_RUN_ACC) 
+            obj.vector.x -= CST.AUTOMATIC_RUN_ACC;
+    }
+    
+    // left
+    if(objControls.includes(controls.CONTROLS.LEFT)) {
+        obj.vector.x -= CST.AUTOMATIC_RUN_ACC;
+    } else {
+        if(obj.vector.x <= -CST.AUTOMATIC_RUN_ACC) 
+            obj.vector.x += CST.AUTOMATIC_RUN_ACC;
+    }
+    
+    // top
+    if(objControls.includes(controls.CONTROLS.FLY)) {
+        obj.vector.y -= 2;
+    }
+}
+
 
 let controls = (function(){
     const CONTROLS = {
-        JUMP: 1,
-        RIGHT: 2,
-        LEFT: 3,
-        DIE: 4,
-        FLY: 5,
+        JUMP: '1',
+        RIGHT: '2',
+        LEFT: '3',
+        DIE: '4',
+        FLY: '5',
     };
     const KEY_MAPPING = {
         'z':CONTROLS.JUMP,
@@ -78,13 +114,16 @@ let controls = (function(){
         return activeControls[control];
     }
     
+    
     function resetCurrentRunControlArray() {
         runControls = [];
     }
 
     // controls -> []
     function addControlsToCurrentRun(controls) {
-        runControls.push(controls);
+        if(runControls.length < 500) {
+            runControls.push(controls);
+        }
     }
     
     function getCurrentRunControls() {
