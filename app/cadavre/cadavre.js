@@ -55,7 +55,7 @@ function removeCadavres(req, callback) {
                 return callback(null, 500, err);
             }
             return callback(result);
-        }, {level: title});
+        }, {level: req.body.title});
     } 
 }
 
