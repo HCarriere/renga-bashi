@@ -44,8 +44,8 @@ const CST = {
     },
     GRAVITY: 0.5,
     SPEEDLIMIT: {
-        X:14,
-        Y:18,
+        X:4,
+        Y:8,
     },
 	JUMP_POWER: 16, 
 	AUTOMATIC_RUN_ACC: 1,
@@ -263,7 +263,7 @@ function checkCollisionWithEnds(obj) {
         if(obj.x > end.x && obj.x < end.x+end.width &&
           obj.y > end.y && obj.y < end.y+end.height) {
             // collision
-            beginLevel(end.nextLevel);
+            beginLevel(end.properties.nextLevel);
         }
     }
 }
@@ -411,15 +411,15 @@ function getMapCoordArray(jsonMap) {
 
 function getMapObjects(jsonMap) {
     let objects = {};
+    objects.ends = [];
     // get objects layers
     for(let layer of jsonMap.layers){
         if(layer.type=='objectgroup') {
             for(let obj of layer.objects) {
-                if(obj.type == 'end' && obj.nextLevel) {
-                    if(!objects.ends) {
-                        objects.ends = [];
+                if(obj.type == 'end') {
+                    if(obj.properties && obj.properties.nextLevel) {
+                        objects.ends.push(obj);
                     }
-                    objects.ends.push(obj);
                 } else {
                     objects[obj.type] = obj;
                 }
