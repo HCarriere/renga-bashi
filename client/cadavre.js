@@ -209,8 +209,9 @@ function gameFrame() {
 }
 
 function onTouchGround(obj) {
-    if(obj.isDead) { 
+    if(obj.isDead && deathCooldown<=0) { 
         // die
+         deathCooldown = 3000;
         $.ajax({
             type:'POST',
             url:server+'/api/cadavres/add', 
@@ -224,14 +225,16 @@ function onTouchGround(obj) {
                 color: playerColor,
             }, 
             success: data => {
-                console.log(data);
+                // death date
+                lastDeathUpdateDate = data;
+                console.log('lastDeathUpdateDate:'+lastDeathUpdateDate);
+                reinitPlayer();
             },
             error: (msg) => {
                 console.log('error:'+JSON.stringify(msg));
             }, 
             dataType:'json'
         });
-        reinitPlayer();
     } else {
         obj.jumpAmount = 1; // reset jumps
         obj.state = characterState.DEFAULT;
@@ -285,7 +288,7 @@ function getNewDeaths(date) {
 			// add to cluster
             addCadavreToCluster(c);
         }
-        lastDeathUpdateDate = new Date();
+        // lastDeathUpdateDate = new Date();
     });
 }
 
@@ -301,6 +304,9 @@ function createZombie(cadavre) {
         zombies = [];
     }
     if(zombies.length>10){ // limit
+        return;
+    }
+    if(!cadavre.path || cadavre.path.length<=0){
         return;
     }
     let path = cadavre.path;

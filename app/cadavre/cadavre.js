@@ -41,6 +41,7 @@ function addCadavre(req, callback) {
         console.log('A:'+params.guid);
         if(!guids[params.guid]) {
             // not present
+            // TODO: fuite mémoire à colmater
             guids[params.guid] = new Date().getTime();
         } else {
             // check date
@@ -81,7 +82,7 @@ function addCadavre(req, callback) {
        params.level) {
         mongo.add(cadavreSchema, () => {
             console.log('cadavre added');
-            callback({message:'ok'});
+            callback(params.date);
         }, params);
     } else {
         callback({message:'error'});
