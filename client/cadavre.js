@@ -183,6 +183,7 @@ function gameFrame() {
         for(let z of zombies) {
             if(z.currentAnimationFrame >= z.path.length) {
                 // end of zombie
+                addSparkles(z.x, z.y, z.color, 30, 4);
             } else {
                 applyZombieControls(z, z.path[z.currentAnimationFrame]);
                 z.currentAnimationFrame++;
@@ -265,7 +266,7 @@ function beginLevel(level, callback) {
         offset.x = player.x - width/2;
         offset.y = player.y - height/2;
         levelName = data.title;
-        
+        editCss(map);
         callback();
     }, level);
     
@@ -570,6 +571,12 @@ function getMapObjects(jsonMap) {
         }
     }
     return objects;
+}
+
+function editCss(jsonMap) {
+    if(jsonMap.properties && jsonMap.properties.css) {
+        $('body').css('background', jsonMap.properties.css);
+    }
 }
 
 function guid() {

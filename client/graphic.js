@@ -67,6 +67,15 @@ function drawCharacter(obj) {
 function drawZombie(zombie) {
     ctx.fillStyle = zombie.color;
     ctx.fillRect(zombie.x-offset.x, zombie.y-offset.y, 6, 6);
+    if(currentFrame%3==0)
+    particles.push({
+        x: zombie.x+Math.random()*10-5,
+        y: zombie.y+Math.random()*10-5,
+        dirx: 0,
+        diry: 0,
+        color: zombie.color,
+        size: Math.random()+1.5,
+    });
 }
 
 function drawCadavre(cadavre) {
