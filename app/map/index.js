@@ -24,7 +24,10 @@ function addMap(req, callback) {
         if(err) {
             return callback(null, 500, err);
         }
-        return callback(result);
+        return callback({
+            message:result,
+            map: req.body.title
+                        });
     },
     {
         title: req.body.title

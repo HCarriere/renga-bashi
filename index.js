@@ -110,6 +110,7 @@ function mustBeAdmin() {
         
         if(req.body.password == process.env.API_PASSWORD) {
             // auth
+            delete req.body.password;
             return next();
         }
         res.status(403);
