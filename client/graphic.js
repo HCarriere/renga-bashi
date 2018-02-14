@@ -9,13 +9,16 @@ let charSpiningCurrentTick = 0;
 
 let graphic = (function(){
 	
+    let colorMapping = [];
+    
 	function setShadow(size, color) {
 		ctx.shadowBlur = size;
 		if(color) ctx.shadowColor = color;
 	}
-	
+    
+   
 	return {
-		setShadow
+		setShadow,
 	}
 })();
 
@@ -79,11 +82,12 @@ function drawCadavre(cadavre) {
     
 }
 
-function drawTile(x, y) {
+function drawTile(x, y, tileValue) {
 	//ctx.fillStyle = '#4444EE';
-    ctx.fillStyle = `rgb(${(30+x%200)%255},${(30+y%200)%255},${(230)%255})`;
+    //ctx.fillStyle = `rgb(${(30+x%200)%255},${(30+y%200)%255},${(230)%255})`;
     //ctx.fillStyle = `rgb(${(30+x%200+currentFrame)%255},${(30+y%200+currentFrame)%255},${(230+currentFrame)%255})`;
 	//ctx.fillStyle = getRandomColor();
+    ctx.fillStyle = tileValue;
     ctx.fillRect(x-offset.x, y-offset.y, tilesProperties.size, tilesProperties.size);
 }
 
@@ -103,8 +107,8 @@ function drawMap(){
 
         for(let j = max(0, startTileX) ; j < min(Math.floor(startTileX+width/tilesProperties.size)+2, map.width); j++){
 
-        	if(map.coord[i][j] == 1){
-                drawTile(j*tilesProperties.size, i*tilesProperties.size);
+        	if(map.coord.background[i][j] != 0){
+                drawTile(j*tilesProperties.size, i*tilesProperties.size, map.coord.background[i][j]);
 			}
 		}
 	}

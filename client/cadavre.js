@@ -183,7 +183,6 @@ function gameFrame() {
         for(let z of zombies) {
             if(z.currentAnimationFrame >= z.path.length) {
                 // end of zombie
-                console.log("end zombie"+z);// todo virer ca
             } else {
                 applyZombieControls(z, z.path[z.currentAnimationFrame]);
                 z.currentAnimationFrame++;
@@ -212,6 +211,11 @@ function onTouchGround(obj) {
     if(obj.isDead && deathCooldown<=0) { 
         // die
          deathCooldown = 3000;
+        // zone rouge
+        if(isCollidedWithTerrain(player.x, player.y, PHYSIC_BLOC_TYPES.NO_DEATH)) {
+            reinitPlayer();
+            return;
+        }
         $.ajax({
             type:'POST',
             url:server+'/api/cadavres/add', 
@@ -288,7 +292,7 @@ function getNewDeaths(date) {
 			// add to cluster
             addCadavreToCluster(c);
         }
-        // lastDeathUpdateDate = new Date();
+        lastDeathUpdateDate = new Date();
     });
 }
 
@@ -498,15 +502,51 @@ function getRandomVector(magMax) {
 
 function getMapCoordArray(jsonMap) {
 
-    let coordArray = [];
-
-    const jsonData = jsonMap.layers[0].data;
-
-    for (let i = 0; i < jsonData.length; i++){
-        if(i%jsonMap.width==0) {
-            coordArray[i/jsonMap.width] = [];
+    let coordArray = {
+        physic: [],
+        background: [],
+    };
+    
+    let tilesetMapping = {
+        0:0
+    };
+    
+    // tilesets
+    for(let tileset of jsonMap.tilesets) {
+        if(tileset.source.endsWith('tile_physic.tsx')) {
+            // physic zone
+            tilesetMapping[tileset.firstgid] = PHYSIC_BLOC_TYPES.PHYSIC;
+        } else if(tileset.source.endsWith('tile_zone.tsx')) {
+            // no dead zone
+            tilesetMapping[tileset.firstgid] = PHYSIC_BLOC_TYPES.NO_DEATH;
+        } else {
+            // hexa color
+            tilesetMapping[tileset.firstgid] = '#'+
+                tileset.source.substring(
+                tileset.source.lastIndexOf('/')+1
+            ).replace('.tsx','');
+            console.log(tilesetMapping[tileset.firstgid]);
         }
-        coordArray[(i - i % jsonMap.width) / jsonMap.width][i % jsonMap.width] = jsonData[i];
+    }
+    
+    //const jsonLayers = jsonMap.layers[0].data;
+    for(let layer of jsonMap.layers) {
+        if(layer.name=='physic') {
+            for (let i = 0; i < layer.data.length; i++){
+                if(i%layer.width==0) {
+                    coordArray.physic[i/layer.width] = [];
+                }
+                coordArray.physic[(i - i % layer.width) / layer.width][i % layer.width] = tilesetMapping[layer.data[i]];
+            }
+        }
+        if(layer.name=='graphic') {
+            for (let i = 0; i < layer.data.length; i++){
+                if(i%layer.width==0) {
+                    coordArray.background[i/layer.width] = [];
+                }
+                coordArray.background[(i - i % layer.width) / layer.width][i % layer.width] = tilesetMapping[layer.data[i]];
+            }
+        }
     }
 
     return coordArray;

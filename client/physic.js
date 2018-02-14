@@ -9,6 +9,11 @@ const ORI = {
 	LEFT: 2,
 };
 
+const PHYSIC_BLOC_TYPES = {
+    PHYSIC:1,
+    NO_DEATH:2,
+};
+
 function applyPhysic(obj){
 
     // gravity
@@ -118,7 +123,7 @@ return distance between collision point and point otherwise , as a vector (.x, .
 function getCollisionDistanceWithTerrain(point, orientation, obj){
 	if(orientation == ORI.BOTTOM) {
         let xModifier = point.dx>0?-1:1;
-		if(isCollidedWithTerrain(point.dx + obj.x + xModifier,(point.dy + obj.y)+obj.vector.y)) {
+		if(isCollidedWithTerrain(point.dx + obj.x + xModifier,(point.dy + obj.y)+obj.vector.y,PHYSIC_BLOC_TYPES.PHYSIC)) {
 			onTouchGround(obj);
 			return {
 				x: obj.vector.x,
@@ -127,7 +132,7 @@ function getCollisionDistanceWithTerrain(point, orientation, obj){
 		}
 	} else if(orientation == ORI.RIGHT) {
         let yModifier = point.dy>0?-1:1;
-		if(isCollidedWithTerrain(point.dx + obj.x+obj.vector.x,point.dy + obj.y+ yModifier)) {
+		if(isCollidedWithTerrain(point.dx + obj.x+obj.vector.x,point.dy + obj.y+ yModifier,PHYSIC_BLOC_TYPES.PHYSIC)) {
 			return {
 				x: Math.floor((point.dx + obj.x+obj.vector.x)/32) * 32 - (point.dx + obj.x),
 				y: obj.vector.y,
@@ -135,7 +140,7 @@ function getCollisionDistanceWithTerrain(point, orientation, obj){
 		}
 	} else if(orientation == ORI.TOP) {
         let xModifier = point.dx>0?-1:1;
-		if(isCollidedWithTerrain(point.dx + obj.x + xModifier,point.dy + obj.y+obj.vector.y)) {
+		if(isCollidedWithTerrain(point.dx + obj.x + xModifier,point.dy + obj.y+obj.vector.y,PHYSIC_BLOC_TYPES.PHYSIC)) {
 			return {
 				x: obj.vector.x,
 				y: Math.floor((point.dy + obj.y+obj.vector.y)/32) * 32 + 32 - point.dy + obj.y,
@@ -143,7 +148,7 @@ function getCollisionDistanceWithTerrain(point, orientation, obj){
 		}
 	} else if(orientation == ORI.LEFT) {
         let yModifier = point.dy>0?-1:1;
-		if(isCollidedWithTerrain(point.dx + obj.x+obj.vector.x,point.dy + obj.y+yModifier)) {
+		if(isCollidedWithTerrain(point.dx + obj.x+obj.vector.x,point.dy + obj.y+yModifier,PHYSIC_BLOC_TYPES.PHYSIC)) {
 			return {
 				x: Math.floor((point.dx + obj.x+obj.vector.x)/32) * 32 + 32- (point.dx + obj.x),
 				y: obj.vector.y,
@@ -153,13 +158,13 @@ function getCollisionDistanceWithTerrain(point, orientation, obj){
 	return false;
 }
 
-function isCollidedWithTerrain(x, y){
+function isCollidedWithTerrain(x, y, type){
 	// out of bound
 	if(x<0 || y<0 || x/tilesProperties.size>map.width || y/tilesProperties.size>map.height) {
 		return false;
 	}
 	// tiles
-    if(map.coord[Math.floor(y / tilesProperties.size)][Math.floor(x / tilesProperties.size)] === 1){
+    if(map.coord.physic[Math.floor(y / tilesProperties.size)][Math.floor(x / tilesProperties.size)] === type){
         return true;
     }
 
