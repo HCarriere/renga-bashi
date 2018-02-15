@@ -293,7 +293,7 @@ function getNewDeaths(date) {
     getDeaths(date, levelName, data=>{
         for(let c of data){
             // validate position
-            if(!isCollidedWithTerrain(player.x, player.y, PHYSIC_BLOC_TYPES.NO_DEATH)) {
+            if(!isCollidedWithTerrain(c.x, c.y, PHYSIC_BLOC_TYPES.NO_DEATH)) {
                 // try to create zombie
                 createZombie(c);
 

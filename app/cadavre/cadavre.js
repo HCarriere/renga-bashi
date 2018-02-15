@@ -18,7 +18,7 @@ function getCadavres(req, callback) {
     }
     let level = req.query.level;
     // schema,callback, jsonRequest, limit, sort, offset
-    /*mongo.findWithOptions(cadavreSchema, (err, data) => {
+    mongo.findWithOptions(cadavreSchema, (err, data) => {
         if(!err && data) {
             callback(data);
             return;
@@ -26,16 +26,7 @@ function getCadavres(req, callback) {
     }, {
         level: level,
         date: {'$gte': date}
-    },0,{date:-1}, 0);*/
-    mongo.find(cadavreSchema, (err, data) => {
-        if(!err && data) {
-            callback(data);
-            return;
-        }
-    }, {
-        level: level,
-        date: {'$gte': date}
-    });
+    },0,{date:-1}, 0);
 }
 
 function addCadavre(req, callback) {
