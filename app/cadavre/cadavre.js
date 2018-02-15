@@ -6,7 +6,7 @@ let utils = require('../utils');
 
 let guids = [];
 const maxGuidToKeep = 3;
-const cadavreMaxPathTick = 1000;
+const cadavreMaxPathTick = 800;
 let guidsCount = 0;
 
 function getCadavres(req, callback) {
@@ -50,7 +50,6 @@ function addCadavre(req, callback) {
         // check guid
         if(!guids[params.guid]) {
             // not present
-            // TODO: fuite mémoire à colmater
             guids[params.guid] = new Date().getTime();
             guidsCount++;
         } else {

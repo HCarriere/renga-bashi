@@ -80,6 +80,9 @@ function applyZombieControls(obj, objControls){
 
 
 let controls = (function(){
+    
+    const cadavreMaxPathTick = 800;
+    
     const CONTROLS = {
         JUMP: '1',
         RIGHT: '2',
@@ -121,7 +124,7 @@ let controls = (function(){
 
     // controls -> []
     function addControlsToCurrentRun(controls) {
-        if(runControls.length < 1000) {
+        if(runControls.length < cadavreMaxPathTick) {
             if(!controls || controls.length == 0) {
                 runControls.push(['0']);
             } else {
@@ -131,7 +134,7 @@ let controls = (function(){
     }
     
     function getCurrentRunControls() {
-        if(runControls.length >= 1000) {
+        if(runControls.length >= cadavreMaxPathTick) {
             runControls = [];
         }
         return runControls;

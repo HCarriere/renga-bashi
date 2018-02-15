@@ -108,6 +108,7 @@ function mustBeAdmin() {
             res.json('invalid parameters');
             return;
         }
+        // TODO require password
         
         if(req.body.password == process.env.API_PASSWORD) {
             // auth
