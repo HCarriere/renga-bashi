@@ -164,6 +164,7 @@ function mainLoop() {
     ctx.fillText(
         'zone cadavres: '+cadavres.length
         , 50, 50);
+    ctx.fillStyle = 'red';
     ctx.fillText(
         'message from admin: '+newPlayerMessage
         , 50, 75);
@@ -206,6 +207,13 @@ function gameFrame() {
         applyPhysic(o);
     }
 
+    // death zone
+    if(isCollidedWithTerrain(player.x, player.y, PHYSIC_BLOC_TYPES.DEATH)) {
+        deathCooldown = 3000;
+        addSparkles(player.x, player.y, playerColor, 60, 10);
+        reinitPlayer();
+    }
+    
     // camera
     setCameraOffset(player);
 
@@ -234,9 +242,6 @@ function onTouchGround(obj) {
                 color: playerColor,
             }, 
             success: data => {
-                // death date
-                lastDeathUpdateDate = data;
-                console.log('lastDeathUpdateDate:'+lastDeathUpdateDate);
                 reinitPlayer();
             },
             error: (msg) => {
@@ -309,6 +314,11 @@ function getNewDeaths(date) {
                 // add to cluster
                 addCadavreToCluster(c);
             }
+        }
+        if(data.length >= 1) {
+            // get last death time + 1 millis
+            lastDeathUpdateDate = data[0].date;
+            console.log(lastDeathUpdateDate);
         }
         canMove = true;
         //lastDeathUpdateDate = new Date();
@@ -545,6 +555,9 @@ function getMapCoordArray(jsonMap) {
         } else if(tileset.source.endsWith('tile_zone.tsx')) {
             // no dead zone
             tilesetMapping[tileset.firstgid] = PHYSIC_BLOC_TYPES.NO_DEATH;
+        } else if(tileset.source.endsWith('tile_death.tsx')) {
+            // killing zone
+            tilesetMapping[tileset.firstgid] = PHYSIC_BLOC_TYPES.DEATH;
         } else {
             // hexa color
             tilesetMapping[tileset.firstgid] = '#'+
@@ -613,3 +626,14 @@ function guid() {
         s4() + '-' + s4() + s4() + s4();
 }
 
+
+function playAudio() {
+    let sound = document.createElement('audio');
+    sound.src = '/music/Motörhead%20 - Enter Sandman.mp3';
+    sound.setAttribute('preload', 'auto');
+    sound.setAttribute('controls', 'none');
+    sound.setAttribute('loop', 'true');
+    sound.style.display = 'none';
+    document.body.appendChild(sound);
+    sound.play();
+}

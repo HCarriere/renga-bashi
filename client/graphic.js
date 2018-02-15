@@ -101,6 +101,11 @@ function drawTile(x, y, tileValue) {
     ctx.fillRect(x-offset.x+1, y-offset.y+1, tilesProperties.size-1, tilesProperties.size-1);
 }
 
+function drawDeathTile(x, y) {
+    ctx.fillStyle = `rgb(${(100+x*y*30+currentFrame)%255},${(x+y+currentFrame)%20},${(x*y*currentFrame)%20})`;
+    ctx.fillRect(x-offset.x, y-offset.y, tilesProperties.size, tilesProperties.size);
+}
+
 function drawEnd(end) {
 	ctx.fillStyle = 'white';
 	graphic.setShadow(10, ctx.fillStyle);
@@ -119,6 +124,9 @@ function drawMap(){
 
         	if(map.coord.background[i][j] != 0){
                 drawTile(j*tilesProperties.size, i*tilesProperties.size, map.coord.background[i][j]);
+			}
+            if(map.coord.physic[i][j] == PHYSIC_BLOC_TYPES.DEATH){
+                drawDeathTile(j*tilesProperties.size, i*tilesProperties.size);
 			}
 		}
 	}

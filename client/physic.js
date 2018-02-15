@@ -12,6 +12,7 @@ const ORI = {
 const PHYSIC_BLOC_TYPES = {
     PHYSIC:1,
     NO_DEATH:2,
+    DEATH:3,
 };
 
 function applyPhysic(obj){

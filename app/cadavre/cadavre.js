@@ -34,7 +34,7 @@ function getCadavres(req, callback) {
         }
     }, {
         level: level,
-        date: {'$gte': date}
+        date: {'$gt': date}
     },0,{date:-1}, 0);
 }
 
@@ -99,7 +99,7 @@ function addCadavre(req, callback) {
        params.level) {
         mongo.add(cadavreSchema, () => {
             console.log('cadavre added');
-            callback(params.date);
+            callback('ok');
         }, params);
     } else {
         callback({message:'error'});
