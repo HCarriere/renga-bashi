@@ -66,7 +66,7 @@ function getAddress(){
     address += process.env.DB_NAME || conf.database.defaultAddress.name;
     address+='/';
     address += process.env.DB_DATABASE || conf.database.defaultAddress.database;
-    console.log(address);
+    // console.log(address);
     return address;
 }
 

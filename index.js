@@ -49,6 +49,7 @@ app
 .post('/api/cadavres/remove',
      mustBeAdmin(),
      (req, res) => {
+    console.log('/api/cadavres/remove');
     cadavre.removeCadavres(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });

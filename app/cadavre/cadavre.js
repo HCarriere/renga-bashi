@@ -5,6 +5,9 @@ let cadavreSchema = require('./schema').Schema;
 let utils = require('../utils');
 
 let guids = [];
+const maxGuidToKeep = 3;
+const cadavreMaxPathTick = 1000;
+let guidsCount = 0;
 
 function getCadavres(req, callback) {
     let date;
@@ -14,7 +17,8 @@ function getCadavres(req, callback) {
         date = 0;
     }
     let level = req.query.level;
-    mongo.find(cadavreSchema, (err, data) => {
+    // schema,callback, jsonRequest, limit, sort, offset
+    mongo.findWithOptions(cadavreSchema, (err, data) => {
         if(!err && data) {
             callback(data);
             return;
@@ -22,10 +26,16 @@ function getCadavres(req, callback) {
     }, {
         level: level,
         date: {'$gte': date}
-    });
+    },0,{date:-1}, 0);
 }
 
 function addCadavre(req, callback) {
+    console.log('guids:'+guidsCount);
+    if(guidsCount > maxGuidToKeep) {
+        guids = [];
+        guidsCount = 0;
+        console.log('guid cleaned');
+    }
     let params = utils.getParamsFromRequest(req, {
         x:null,
         y:null,
@@ -38,20 +48,19 @@ function addCadavre(req, callback) {
     });
     if(params.guid && checkGuid(params.guid)) {
         // check guid
-        console.log('A:'+params.guid);
         if(!guids[params.guid]) {
             // not present
             // TODO: fuite mémoire à colmater
             guids[params.guid] = new Date().getTime();
+            guidsCount++;
         } else {
             // check date
-            console.log('A:checking dates...'+(new Date().getTime() - guids[params.guid]));
             if(new Date().getTime() - guids[params.guid] > 4500) {
                 // ok 
-                console.log('B:'+guids[params.guid]);
                 delete guids[params.guid];
             } else {
                 // nok
+                console.log('unauthorized guid : '+params.guid);
                 guids[params.guid] = new Date().getTime();
                 return;
             }
@@ -60,12 +69,12 @@ function addCadavre(req, callback) {
         return;
     }
     //check path
-    if(params.path && params.path.length > 500) {
+    if(params.path && (params.path.length > cadavreMaxPathTick || params.path.length == 0)) {
         params.path = null;
-    }else {
+    } else {
         // transform path
-        let newPath = [];
-        for(let i=0; i<500; i++) {
+        /*let newPath = [];
+        for(let i=0; i<cadavreMaxPathTick; i++) {
             if(params.path[i]) {
                 newPath.push(params.path[i]);
             }else {
@@ -73,8 +82,8 @@ function addCadavre(req, callback) {
             }
         }
         params.path = newPath;
+        console.log('new path:'+JSON.stringify(params.path));*/
     }
-    console.log('path::'+JSON.stringify(params.path));
     //console.log('params received : '+JSON.stringify(params));
     if(params && 
        params.x && 

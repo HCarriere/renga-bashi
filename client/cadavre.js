@@ -34,6 +34,7 @@ let offset = {
     y:0,
 };
 let map;
+let onTransition = false;
 
 const CST = {
     PARTICLES: {
@@ -128,17 +129,6 @@ function mainLoop() {
 		gameFrame();
 	}
     ctx.clearRect(0, 0, width, height);
-    //// debug
-    ctx.fillStyle = 'white';
-    ctx.fillText(
-        width+'x'+height+
-        ', fps:'+Math.floor(frameRate)+
-        ', cf:'+ currentFrame
-        , 50, 50);
-    ctx.fillText(
-        'offsetx :'+ offset.x +
-        ', offsety :'+ offset.y
-        , 50, 75);
 
     // graphics
     if(map) {
@@ -164,6 +154,15 @@ function mainLoop() {
 
     drawParticles();
 
+    //// debug
+    ctx.fillStyle = 'white';
+    ctx.fillText(
+        'fps: '+Math.floor(frameRate)
+        , 50, 25);
+    ctx.fillText(
+        'zone cadavres: '+cadavres.length
+        , 50, 50);
+    
     if(!stopDrawLoop) {
         requestAnimationFrame(mainLoop);
     }
@@ -181,7 +180,7 @@ function gameFrame() {
 	
     if(zombies) {
         for(let z of zombies) {
-            if(z.currentAnimationFrame >= z.path.length) {
+            if(z.currentAnimationFrame >= z.path.length-1) {
                 // end of zombie
                 addSparkles(z.x, z.y, z.color, 30, 4);
             } else {
@@ -191,7 +190,7 @@ function gameFrame() {
         }
         // remove zombies
         for(let i = 0; i<zombies.length; i++) {
-            if(zombies[i].currentAnimationFrame >= zombies[i].path.length) {
+            if(zombies[i].currentAnimationFrame >= zombies[i].path.length-1) {
                 zombies.splice(i, 1);
             }
         }
@@ -255,6 +254,10 @@ function onDeath() {
 }
 
 function beginLevel(level, callback) {
+    if(onTransition) {
+        return;
+    }
+    onTransition = true;
     cleanCadavres();
     controls.resetCurrentRunControlArray();
     getMap(function(data){
@@ -267,7 +270,10 @@ function beginLevel(level, callback) {
         offset.y = player.y - height/2;
         levelName = data.title;
         editCss(map);
+        delete map.layers;
+        delete map.tilesets;
         callback();
+        onTransition = false;
     }, level);
     
 }
@@ -286,12 +292,15 @@ function reinitPlayer() {
 function getNewDeaths(date) {
     getDeaths(date, levelName, data=>{
         for(let c of data){
-            // try to create zombie
-            createZombie(c);
-            
-			cadavres.push(c);
-			// add to cluster
-            addCadavreToCluster(c);
+            // validate position
+            if(!isCollidedWithTerrain(player.x, player.y, PHYSIC_BLOC_TYPES.NO_DEATH)) {
+                // try to create zombie
+                createZombie(c);
+
+                cadavres.push(c);
+                // add to cluster
+                addCadavreToCluster(c);
+            }
         }
         lastDeathUpdateDate = new Date();
     });
@@ -356,8 +365,14 @@ function setCameraOffset(obj) {
 	if(obj.y-offset.y<height*0.3) offset.y-=max(Math.abs(obj.vector.y),1);
 	if(obj.y-offset.y>height*0.7) offset.y+=max(Math.abs(obj.vector.y),1);
     
+    // right limit
+    offset.x = min(offset.x, map.width*tilesProperties.size-width);
+    
     // left limit
     offset.x = max(offset.x, 0);
+    
+    // top limit
+    offset.y = max(offset.y, 0);
     
     // bottom limit
     offset.y = min(offset.y, map.height*tilesProperties.size-height);

@@ -121,12 +121,19 @@ let controls = (function(){
 
     // controls -> []
     function addControlsToCurrentRun(controls) {
-        if(runControls.length < 500) {
-            runControls.push(controls);
+        if(runControls.length < 1000) {
+            if(!controls || controls.length == 0) {
+                runControls.push(['0']);
+            } else {
+                runControls.push(controls);
+            }
         }
     }
     
     function getCurrentRunControls() {
+        if(runControls.length >= 1000) {
+            runControls = [];
+        }
         return runControls;
     }
     

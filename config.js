@@ -10,7 +10,7 @@ module.exports = {
             cadavre:'cadavre',
             map:'map',
         },
-		verbose:true,
+		verbose:false,
 		mongooseDebug:false,
 		salt:'jfiou87E094Kdà0IDkdç8DJODI'
     },
