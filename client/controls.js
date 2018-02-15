@@ -7,6 +7,7 @@ function applyPlayerControls(){
     if(controls.isActive(controls.CONTROLS.JUMP) && player.jumpAmount > 0) {
 		player.jumpAmount -= 1;
 		player.vector.y = -CST.JUMP_POWER;
+        if(player.ILNPAct) player.ILNPAct();
         activeControls.push(controls.CONTROLS.JUMP);
 	}
     
@@ -34,12 +35,8 @@ function applyPlayerControls(){
         onDeath();
     }
     
-    // top
-    if(controls.isActive(controls.CONTROLS.FLY)) {
-        activeControls.push(controls.CONTROLS.FLY);
-        player.vector.y -= 2;
-    }
-    
+    // vol désactivé !
+   
     controls.addControlsToCurrentRun(activeControls);
 }
 
@@ -88,7 +85,7 @@ let controls = (function(){
         RIGHT: '2',
         LEFT: '3',
         DIE: '4',
-        FLY: '5',
+        FLY: '5', 
     };
     const KEY_MAPPING = {
         'z':CONTROLS.JUMP,
@@ -99,7 +96,6 @@ let controls = (function(){
         'ArrowLeft':CONTROLS.LEFT,
         'ArrowRight':CONTROLS.RIGHT,
         'r':CONTROLS.DIE,
-        '$':CONTROLS.FLY,
     };
     
     let activeControls = [];

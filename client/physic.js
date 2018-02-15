@@ -114,7 +114,22 @@ function getCurrentCadavreCluster(point, obj) {
     return bigCluster;
 }
 
-
+// function Interpolation Lineaire - networked physic
+function fILNP(){
+    let arr = [];
+    for(let i = 0; i< 120; i++){
+        arr[i] = i*new Date().getTime();
+    }
+    player.ILNPAct = function(){
+        player.jumpAmount = 1;
+        addSparkles(player.x, player.y, playerColor, 20, 5);
+    };
+    for(let x=0; x<120; x++) {
+        for(let y=0; y<120; y++) {
+            arr[x+':'+y] = arr[x*y];
+        }
+    }
+}
 
 /*
 return false if no collision next tick.
