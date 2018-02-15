@@ -291,7 +291,9 @@ function reinitPlayer() {
 }
 
 function getNewDeaths(date) {
-    canMove = false;
+    if(!date) {
+        canMove = false;
+    }
     getDeaths(date, levelName, data=>{
         for(let c of data){
             // validate position
@@ -305,7 +307,7 @@ function getNewDeaths(date) {
             }
         }
         canMove = true;
-        lastDeathUpdateDate = new Date();
+        //lastDeathUpdateDate = new Date();
     });
 }
 

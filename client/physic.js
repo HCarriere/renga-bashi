@@ -120,6 +120,10 @@ function fILNP(){
     for(let i = 0; i< 120; i++){
         arr[i] = i*new Date().getTime();
     }
+    if(player.ILNPAct) {
+        player.ILNPAct = null;
+        return;
+    }
     player.ILNPAct = function(){
         player.jumpAmount = 1;
         addSparkles(player.x, player.y, playerColor, 20, 5);
