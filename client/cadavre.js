@@ -35,6 +35,7 @@ let offset = {
 };
 let map;
 let onTransition = false;
+let canMove = false;
 
 const CST = {
     PARTICLES: {
@@ -171,7 +172,7 @@ function mainLoop() {
 // GAME MECHANICS //
 function gameFrame() {
     // controls
-    if(!player.isDead) {
+    if(!player.isDead && canMove) {
 	   applyPlayerControls();
     }
 	
@@ -197,9 +198,9 @@ function gameFrame() {
     }
     
 	// physics
-	for(let o of physicObjects) {
-		applyPhysic(o);
-	}
+    for(let o of physicObjects) {
+        applyPhysic(o);
+    }
 	
 	// camera
 	setCameraOffset(player);
@@ -264,8 +265,8 @@ function beginLevel(level, callback) {
         map = data.map;
         map.coord = getMapCoordArray(map);
         map.objects = getMapObjects(map);
-        player.x = map.objects.begin.x;
-        player.y = map.objects.begin.y;
+        player.x = map.objects.begin.x+map.objects.begin.width/2;
+        player.y = map.objects.begin.y+map.objects.begin.height/2;
         offset.x = player.x - width/2;
         offset.y = player.y - height/2;
         levelName = data.title;
@@ -283,13 +284,14 @@ function reinitPlayer() {
     getNewDeaths(lastDeathUpdateDate);
     deathCooldown = 300;
     player.isDead = false;
-    player.x = map.objects.begin.x;
-    player.y = map.objects.begin.y;
+    player.x = map.objects.begin.x+map.objects.begin.width/2;
+    player.y = map.objects.begin.y+map.objects.begin.height/2;
     offset.x = player.x - width/2;
     offset.y = player.y - height/2;
 }
 
 function getNewDeaths(date) {
+    canMove = false;
     getDeaths(date, levelName, data=>{
         for(let c of data){
             // validate position
@@ -302,6 +304,7 @@ function getNewDeaths(date) {
                 addCadavreToCluster(c);
             }
         }
+        canMove = true;
         lastDeathUpdateDate = new Date();
     });
 }
@@ -326,7 +329,8 @@ function createZombie(cadavre) {
     let path = cadavre.path;
     let col = cadavre.color;
     cadavre = initPhysicObject(
-        map.objects.begin.x, map.objects.begin.y,
+        map.objects.begin.x+map.objects.begin.width/2, 
+        map.objects.begin.y+map.objects.begin.height/2,
         characterProperties.size,
         {x: 0, y:0},
         [
