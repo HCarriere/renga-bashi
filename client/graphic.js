@@ -39,7 +39,7 @@ function drawCharacter(obj) {
 	ctx.fillStyle = playerColor;
 	graphic.setShadow(10, playerColor);
 	ctx.fillRect(-obj.size/2,
-				-obj.size/2, 
+				-obj.size/2,
 				obj.size,
 				obj.size);
 	graphic.setShadow(5, 'red');
@@ -49,10 +49,10 @@ function drawCharacter(obj) {
 	ctx.restore();
 	
 	// test: draw collision point
-	for(let p of obj.points) {
+	/*for(let p of obj.points) {
 		ctx.fillStyle = 'red';
 		ctx.fillRect(obj.x+p.dx-2-offset.x, obj.y+p.dy-2-offset.y, 4, 4);
-	}
+	}*/
 	
     particles.push({
         x: obj.x+Math.random()*10-5,
@@ -97,7 +97,8 @@ function drawTile(x, y, tileValue) {
     //ctx.fillStyle = `rgb(${(30+x%200+currentFrame)%255},${(30+y%200+currentFrame)%255},${(230+currentFrame)%255})`;
 	//ctx.fillStyle = getRandomColor();
     ctx.fillStyle = tileValue;
-    ctx.fillRect(x-offset.x, y-offset.y, tilesProperties.size, tilesProperties.size);
+    //ctx.fillRect(x-offset.x, y-offset.y, tilesProperties.size, tilesProperties.size);
+    ctx.fillRect(x-offset.x+1, y-offset.y+1, tilesProperties.size-1, tilesProperties.size-1);
 }
 
 function drawEnd(end) {

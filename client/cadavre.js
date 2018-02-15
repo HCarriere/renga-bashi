@@ -526,7 +526,6 @@ function getMapCoordArray(jsonMap) {
                 tileset.source.substring(
                 tileset.source.lastIndexOf('/')+1
             ).replace('.tsx','');
-            console.log(tilesetMapping[tileset.firstgid]);
         }
     }
     
