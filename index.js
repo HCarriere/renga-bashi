@@ -29,6 +29,8 @@ app.use((req, res, next) => {
     next();
 });
 
+keepAwake();
+
 app
 .get('/', (req, res) => {
     res.sendFile(__dirname + '/client/cadavre.html');
@@ -68,6 +70,10 @@ app
     map.addMap(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
+})
+
+.get('/wus', (req, res) => {
+    res.json();
 })
 
 .get('*', (req, res) => {
@@ -118,5 +124,18 @@ function mustBeAdmin() {
         res.status(403);
         res.json('invalid credentials');
         // not auth
+    }
+}
+
+// sorry rku.
+function keepAwake() {
+    if(process.env.KEEP_ALIVE) {
+        const http = require('http');
+        setInterval(() => {
+            setTimeout(()=>{
+                console.log('sending W.U.S to /wus');
+                http.get('http://cadavres-api.herokuapp.com/wus');
+            }, Math.floor(Math.random()*60000));
+        }, 326472);
     }
 }
