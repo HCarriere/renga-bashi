@@ -7,6 +7,7 @@ let utils = require('../utils');
 let guids = [];
 const maxGuidToKeep = 3;
 const cadavreMaxPathTick = 800;
+const cadavreMaxPathNumber = 10;
 let guidsCount = 0;
 
 function getCadavres(req, callback) {
@@ -20,6 +21,14 @@ function getCadavres(req, callback) {
     // schema,callback, jsonRequest, limit, sort, offset
     mongo.findWithOptions(cadavreSchema, (err, data) => {
         if(!err && data) {
+            // only keep the nth first path
+            
+            for(let i=0; i<data.length; i++) {
+                if(i>cadavreMaxPathNumber) {
+                    data[i].path = [];
+                }
+            }
+            
             callback(data);
             return;
         }

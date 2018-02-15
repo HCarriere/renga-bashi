@@ -49,8 +49,8 @@ const CST = {
         X:4,
         Y:8,
     },
-	JUMP_POWER: 16, 
-	AUTOMATIC_RUN_ACC: 1,
+    JUMP_POWER: 16, 
+    AUTOMATIC_RUN_ACC: 1,
 };
 
 
@@ -63,7 +63,7 @@ function launch() {
     particles = [];
     obsoleteParticles = [];
 
-	cadavres = [];
+    cadavres = [];
     // launch
     stopDrawLoop = false;
 
@@ -98,7 +98,7 @@ function launch() {
     beginLevel(null, ()=>{
         getNewDeaths();
     });
-    
+
 
     mainLoop();
 }
@@ -122,13 +122,13 @@ function initCanvas() {
 // MAIN LOOP //
 
 function mainLoop() {
-	// fps
+    // fps
     currentFrame++;
     getFPS();
-	
-	if(map && player) {
-		gameFrame();
-	}
+
+    if(map && player) {
+        gameFrame();
+    }
     ctx.clearRect(0, 0, width, height);
 
     // graphics
@@ -137,9 +137,9 @@ function mainLoop() {
         for(let end of map.objects.ends) {
             drawEnd(end);
         }
-        
+
         drawCharacter(player);
-        
+
         //zombies
         if(zombies) {
             for(let z of zombies) {
@@ -163,7 +163,7 @@ function mainLoop() {
     ctx.fillText(
         'zone cadavres: '+cadavres.length
         , 50, 50);
-    
+
     if(!stopDrawLoop) {
         requestAnimationFrame(mainLoop);
     }
@@ -173,12 +173,12 @@ function mainLoop() {
 function gameFrame() {
     // controls
     if(!player.isDead && canMove) {
-	   applyPlayerControls();
+       applyPlayerControls();
     }
-	
+
     // end collision
     checkCollisionWithEnds(player);
-	
+
     if(zombies) {
         for(let z of zombies) {
             if(z.currentAnimationFrame >= z.path.length-1) {
@@ -196,15 +196,15 @@ function gameFrame() {
             }
         }
     }
-    
-	// physics
+
+    // physics
     for(let o of physicObjects) {
         applyPhysic(o);
     }
-	
-	// camera
-	setCameraOffset(player);
-    
+
+    // camera
+    setCameraOffset(player);
+
     deathCooldown--;
 }
 
@@ -250,7 +250,7 @@ function onDeath() {
     if(deathCooldown>0) {
         return; // can't die now
     }
-    
+
     player.isDead = true; // will realy die when the ground is touched
 }
 
@@ -276,7 +276,7 @@ function beginLevel(level, callback) {
         callback();
         onTransition = false;
     }, level);
-    
+
 }
 
 function reinitPlayer() {
@@ -366,23 +366,23 @@ function createZombie(cadavre) {
 
 function setCameraOffset(obj) {
     // general following
-	if(obj.x-offset.x>width*0.7) offset.x+=max(Math.abs(obj.vector.x), 1);
-	if(obj.x-offset.x<width*0.3) offset.x-=max(Math.abs(obj.vector.x), 1);
-	if(obj.y-offset.y<height*0.3) offset.y-=max(Math.abs(obj.vector.y),1);
-	if(obj.y-offset.y>height*0.7) offset.y+=max(Math.abs(obj.vector.y),1);
-    
+    if(obj.x-offset.x>width*0.7) offset.x+=max(Math.abs(obj.vector.x), 1);
+    if(obj.x-offset.x<width*0.3) offset.x-=max(Math.abs(obj.vector.x), 1);
+    if(obj.y-offset.y<height*0.3) offset.y-=max(Math.abs(obj.vector.y),1);
+    if(obj.y-offset.y>height*0.7) offset.y+=max(Math.abs(obj.vector.y),1);
+
     // right limit
     offset.x = min(offset.x, map.width*tilesProperties.size-width);
-    
+
     // left limit
     offset.x = max(offset.x, 0);
-    
+
     // top limit
     offset.y = max(offset.y, 0);
-    
+
     // bottom limit
     offset.y = min(offset.y, map.height*tilesProperties.size-height);
-    
+
 }
 
 function checkCollisionWithEnds(obj) {
@@ -426,9 +426,9 @@ function max(a1, a2) {
 }
 
 function constrain(a, min, max) {
-	if(a<min) return min;
-	if(a>max) return max;
-	return a;
+    if(a<min) return min;
+    if(a>max) return max;
+    return a;
 }
 
 function inbound(x1, y1, x2, y2, size) {
@@ -528,11 +528,11 @@ function getMapCoordArray(jsonMap) {
         physic: [],
         background: [],
     };
-    
+
     let tilesetMapping = {
         0:0
     };
-    
+
     // tilesets
     for(let tileset of jsonMap.tilesets) {
         if(tileset.source.endsWith('tile_physic.tsx')) {
@@ -549,7 +549,7 @@ function getMapCoordArray(jsonMap) {
             ).replace('.tsx','');
         }
     }
-    
+
     //const jsonLayers = jsonMap.layers[0].data;
     for(let layer of jsonMap.layers) {
         if(layer.name=='physic') {
@@ -608,3 +608,4 @@ function guid() {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
         s4() + '-' + s4() + s4() + s4();
 }
+
