@@ -16,6 +16,9 @@ const cadavre = require('./app/cadavre');
 const map = require('./app/map');
 
 const CORS = process.env.CORS || '*';
+
+let newPlayerMessage;
+
 mongo.initMongo();
 
 server.timeout = 0;
@@ -39,7 +42,10 @@ app
 .get('/api/cadavres', (req, res) => {
     console.log('/api/cadavres : '+JSON.stringify(req.query));
     cadavre.getCadavres(req, (data) => {
-        res.json(data);
+        res.json({
+            message:newPlayerMessage,
+            cadavres:data,
+        });
     })
 })
 .post('/api/cadavres/add', (req, res) => {
@@ -71,10 +77,26 @@ app
         handleAPIResponse(res, result, status, err);
     });
 })
+.post('/api/message', 
+      mustBeAdmin(),
+      (req, res) => {
+    console.log('/api/message:'+JSON.stringify(req.body));
+    if(req.body && req.body.message){
+        newPlayerMessage = req.body.message;
+        res.json({
+            message: req.body.message
+        });
+    } else {
+        res.json({
+            error:'need a messsage'
+        });
+    }
+})
 
 .get('/wus', (req, res) => {
     res.json();
 })
+
 
 .get('*', (req, res) => {
     res.status(404);

@@ -16,8 +16,11 @@ function getDeaths(date, level, callback) {
 			level: level,
 		}, 
 		success: data => {
-			console.log(data);
-			callback(data);
+			console.log(data.cadavres);
+			callback(data.cadavres);
+            if(data.message) {
+                newPlayerMessage = data.message;
+            }
 		},
 		error: (msg) => {
 			console.log('error:'+JSON.stringify(msg));

@@ -36,6 +36,7 @@ let offset = {
 let map;
 let onTransition = false;
 let canMove = false;
+let newPlayerMessage = '';
 
 const CST = {
     PARTICLES: {
@@ -163,6 +164,9 @@ function mainLoop() {
     ctx.fillText(
         'zone cadavres: '+cadavres.length
         , 50, 50);
+    ctx.fillText(
+        'message from admin: '+newPlayerMessage
+        , 50, 75);
 
     if(!stopDrawLoop) {
         requestAnimationFrame(mainLoop);
