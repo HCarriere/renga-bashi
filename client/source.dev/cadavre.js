@@ -639,6 +639,7 @@ function getMapObjects(jsonMap) {
                 } 
                 else if(obj.type == 'cadavre') {
                     obj.color = getRandomColor();
+                    obj.rot = Math.random()*6;
                     cadavres.push(obj);
                     // add to cluster
                     addCadavreToCluster(obj);
