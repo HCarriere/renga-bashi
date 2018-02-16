@@ -438,7 +438,7 @@ function checkCollisionWithEventZones(obj) {
         if(obj.x > z.x && obj.x < z.x+z.width &&
           obj.y > z.y && obj.y < z.y+z.height) {
             // collision
-            textEvent.set(z.properties.text);
+            textEvent.set(z.properties.text, 300);
         }
     }
     
