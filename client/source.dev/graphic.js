@@ -42,8 +42,24 @@ function drawCharacter(obj) {
 				-obj.size/2,
 				obj.size,
 				obj.size);
-	graphic.setShadow(5, 'red');
-	ctx.fillStyle = 'red',
+    let coreColor;
+    if(deathCooldown>0) {
+        coreColor = '#663333';
+    } else {
+        graphic.setShadow(5, coreColor);
+        coreColor = 'red';
+        if(currentFrame%2 == 0) {
+            particles.push({
+                x: obj.x+Math.random()*2-1,
+                y: obj.y+Math.random()*2-1,
+                dirx: 0,
+                diry: 0,
+                color: coreColor,
+                size: Math.random()+1.5,
+            });
+        }
+    }
+	ctx.fillStyle = coreColor;
 	ctx.fillRect(-3, -3, 6, 6);
 	graphic.setShadow(0);
 	ctx.restore();

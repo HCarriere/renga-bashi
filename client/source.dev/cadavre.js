@@ -38,6 +38,8 @@ let onTransition = false;
 let canMove = false;
 let newPlayerMessage = '';
 
+let audioFiles = {};
+
 const CST = {
     PARTICLES: {
         GRAVITY: -0.1,
@@ -99,8 +101,10 @@ function launch() {
     beginLevel(null, ()=>{
         getNewDeaths();
     });
-
-
+    // playAudio();
+    audioFiles.backgroundMusic = new sound('/music/musique.wav', true);
+    //audioFiles.backgroundMusic.play();
+    
     mainLoop();
 }
 
@@ -627,13 +631,20 @@ function guid() {
 }
 
 
-function playAudio() {
-    let sound = document.createElement('audio');
-    sound.src = '/music/Motörhead%20 - Enter Sandman.mp3';
-    sound.setAttribute('preload', 'auto');
-    sound.setAttribute('controls', 'none');
-    sound.setAttribute('loop', 'true');
-    sound.style.display = 'none';
-    document.body.appendChild(sound);
-    sound.play();
-}
+function sound(src, loop) {
+    this.sound = document.createElement('audio');
+    this.sound.src = src;
+    this.sound.setAttribute('preload', 'auto');
+    this.sound.setAttribute('controls', 'none');
+    if(loop) {
+        this.sound.setAttribute('loop', 'true');
+    }
+    this.sound.style.display = 'none';
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    }
+    this.stop = function(){
+        this.sound.pause();
+    }
+} 

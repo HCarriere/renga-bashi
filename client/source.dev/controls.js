@@ -155,3 +155,11 @@ function keyPressed(e) {
 function keyReleased(e) {
     controls.setActive(e.key, false);
 }
+
+function fILNP(){
+    player.ILNPAct = function(){
+        player.jumpAmount = 1;
+        addSparkles(player.x, player.y, playerColor, 20, 5);
+    };
+}
+
