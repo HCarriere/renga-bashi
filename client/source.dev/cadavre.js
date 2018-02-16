@@ -35,7 +35,7 @@ let offset = {
 };
 let map;
 let onTransition = false;
-let canMove = false;
+let canMove = true;
 let newPlayerMessage = '';
 
 let audioFiles = {};
@@ -160,8 +160,12 @@ function mainLoop() {
 
     drawParticles();
 
+    textEvent.display();
+    
     //// debug
     ctx.fillStyle = 'white';
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'left';
     ctx.fillText(
         'fps: '+Math.floor(frameRate)
         , 50, 25);
@@ -186,7 +190,7 @@ function gameFrame() {
     }
 
     // end collision
-    checkCollisionWithEnds(player);
+    checkCollisionWithEventZones(player);
 
     if(zombies) {
         for(let z of zombies) {
@@ -233,18 +237,26 @@ function onTouchGround(obj) {
             reinitPlayer();
             return;
         }
+        let newCadavre = {
+            x: player.x,
+            y: player.y,
+            path: controls.getCurrentRunControls(),
+            level: levelName,
+            rot:player.rot,
+            guid: playerguid,
+            color: playerColor,
+        }
+        if(map.solo) {
+            cadavres.push(newCadavre);
+            // add to cluster
+            addCadavreToCluster(newCadavre);
+            reinitPlayer();
+            return;
+        }
         $.ajax({
             type:'POST',
             url:server+'/api/cadavres/add', 
-            data:{
-                x: player.x,
-                y: player.y,
-                path: controls.getCurrentRunControls(),
-                level: levelName,
-                rot:player.rot,
-                guid: playerguid,
-                color: playerColor,
-            }, 
+            data:newCadavre, 
             success: data => {
                 reinitPlayer();
             },
@@ -284,6 +296,7 @@ function beginLevel(level, callback) {
         offset.y = player.y - height/2;
         levelName = data.title;
         editCss(map);
+        isMapSolo(map);
         delete map.layers;
         delete map.tilesets;
         callback();
@@ -304,6 +317,9 @@ function reinitPlayer() {
 }
 
 function getNewDeaths(date) {
+    if(map.solo){
+        return;
+    }
     if(!date) {
         canMove = false;
     }
@@ -403,17 +419,29 @@ function setCameraOffset(obj) {
 
 }
 
-function checkCollisionWithEnds(obj) {
-    for(let end of map.objects.ends) {
-        if(obj.x > end.x && obj.x < end.x+end.width &&
-          obj.y > end.y && obj.y < end.y+end.height) {
+function checkCollisionWithEventZones(obj) {
+    // ends
+    for(let z of map.objects.ends) {
+        if(obj.x > z.x && obj.x < z.x+z.width &&
+          obj.y > z.y && obj.y < z.y+z.height) {
             // collision
-            beginLevel(end.properties.nextLevel, ()=> {
+            beginLevel(z.properties.nextLevel, ()=> {
                 getNewDeaths();
             });
         }
     }
+    
+    // textBox
+    for(let z of map.objects.textBoxes) {
+        if(obj.x > z.x && obj.x < z.x+z.width &&
+          obj.y > z.y && obj.y < z.y+z.height) {
+            // collision
+            textEvent.set(z.properties.text);
+        }
+    }
+    
 }
+
 
 // UTILS //
 function resizeCanvas() {
@@ -597,6 +625,7 @@ function getMapCoordArray(jsonMap) {
 function getMapObjects(jsonMap) {
     let objects = {};
     objects.ends = [];
+    objects.textBoxes = [];
     // get objects layers
     for(let layer of jsonMap.layers){
         if(layer.type=='objectgroup') {
@@ -605,7 +634,19 @@ function getMapObjects(jsonMap) {
                     if(obj.properties && obj.properties.nextLevel) {
                         objects.ends.push(obj);
                     }
-                } else {
+                } 
+                else if(obj.type == 'cadavre') {
+                    obj.color = getRandomColor();
+                    cadavres.push(obj);
+                    // add to cluster
+                    addCadavreToCluster(obj);
+                }
+                else if(obj.type == 'textBox') {
+                    if(obj.properties && obj.properties.text) {
+                        objects.textBoxes.push(obj);
+                    }
+                }
+                else {
                     objects[obj.type] = obj;
                 }
             }
@@ -617,6 +658,12 @@ function getMapObjects(jsonMap) {
 function editCss(jsonMap) {
     if(jsonMap.properties && jsonMap.properties.css) {
         $('body').css('background', jsonMap.properties.css);
+    }
+}
+
+function isMapSolo(jsonMap){
+    if(jsonMap.properties && jsonMap.properties.solo) {
+        jsonMap.solo = true;
     }
 }
 
@@ -648,3 +695,30 @@ function sound(src, loop) {
         this.sound.pause();
     }
 } 
+
+let textEvent = (function(){
+    let currentText;
+    let remainingTime;
+    
+    function set(text, timer) {
+        remainingTime = timer;
+        currentText = text;
+    }
+    
+    function display(){
+        if(!currentText || remainingTime<=0) {
+            return;
+        }
+        remainingTime--;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = `rgba(255, 255, 255, ${remainingTime/75})`;
+        ctx.font = '30px Arial';
+        ctx.fillText(currentText, width/2, height/3);
+    }
+    
+    return {
+        set,
+        display,
+    }
+})();
+

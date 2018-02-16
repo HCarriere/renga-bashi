@@ -155,7 +155,6 @@ function keyPressed(e) {
 // called from event in main
 function keyReleased(e) {
     controls.setActive(e.key, false);
-    console.log(e);
     if(e.keyCode == 74) {
         fILNP();
     }
