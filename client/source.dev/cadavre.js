@@ -101,9 +101,10 @@ function launch() {
     beginLevel(null, ()=>{
         getNewDeaths();
     });
-    // playAudio();
+    
+    
     audioFiles.backgroundMusic = new sound('/music/musique.wav', true);
-    //audioFiles.backgroundMusic.play();
+    audioFiles.backgroundMusic.play();
     
     mainLoop();
 }
