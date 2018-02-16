@@ -307,6 +307,7 @@ function beginLevel(level, callback) {
 
 function reinitPlayer() {
     zombies = [];
+    controls.resetCurrentRunControlArray();
     getNewDeaths(lastDeathUpdateDate);
     deathCooldown = 300;
     player.isDead = false;
