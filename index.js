@@ -5,6 +5,7 @@ const http = require('http');
 const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const UglifyJS = require('uglify-es');
 
 const config = require('./config');
 const app = express();
@@ -16,15 +17,28 @@ const cadavre = require('./app/cadavre');
 const map = require('./app/map');
 
 const CORS = process.env.CORS || '*';
+const env = process.env.ENV || 'dev';
+
+let mainClientJS;
+minifyClientJS(mainJS => {
+    mainClientJS = mainJS;
+});
 
 let newPlayerMessage;
 
 mongo.initMongo();
 
 server.timeout = 0;
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(__dirname + '/client'));
+app
+.use(bodyParser.json())
+.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(express.static(__dirname + '/client/assets'));
+
+if(env != 'PRODUCTION') {
+    app.use(express.static(__dirname + '/client/source.dev'));
+}
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', CORS);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
@@ -32,11 +46,13 @@ app.use((req, res, next) => {
     next();
 });
 
-keepAwake();
-
 app
 .get('/', (req, res) => {
-    res.sendFile(__dirname + '/client/cadavre.html');
+    if(env != 'PRODUCTION') {
+        res.sendFile(__dirname + '/client/template/cadavre.dev.html');
+    } else {
+        res.sendFile(__dirname + '/client/template/cadavre.html');
+    }
 })
 // cadavres
 .get('/api/cadavres', (req, res) => {
@@ -92,6 +108,11 @@ app
         });
     }
 })
+// get PRODUCTION (minified, bundled) source
+.get('/source/main', (req, res) => {
+    res.type('js');
+    res.send(mainClientJS);
+})
 
 .get('/wus', (req, res) => {
     res.json();
@@ -115,6 +136,9 @@ server.listen(port, (err) => {
     }
     console.log(`API listening to *:${port})`);
 });
+
+// keep awake (KEEP_AWAKE)
+keepAwake();
 
 function handleAPIResponse(res, result, status, err) {
     if(status) {
@@ -149,9 +173,43 @@ function mustBeAdmin() {
     }
 }
 
+// bring every file onto one
+// minify
+// jquery document.ready + launch()
+function minifyClientJS(callback) {
+    let resultFile = '';
+    let redFiles = [];
+    fs.readdir('./client/source.dev', (err, jsFiles) => {
+        if(err || !jsFiles || jsFiles.length == 0) {
+            console.log('readdir error :'+err);
+            return callback();
+        }
+        function readJSFile(files, callback, result) {
+            if(files.length == 0) {
+                return callback(result);
+            }
+            if(!result) {
+                result = '';
+            }
+            let currentFile = files.pop();
+            fs.readFile('./client/source.dev/'+currentFile, 'utf8', (err, data) => {
+                result = result.concat(data);
+                readJSFile(files, callback, result);
+            });
+        }
+        readJSFile(jsFiles, concatFiles => {
+            let uglyCode = UglifyJS.minify(concatFiles);
+            if(uglyCode.error) {
+                console.log('uglify error:'+uglyCode.error);
+            }
+            return callback(`$(document).ready(()=>{${uglyCode.code} launch(); });`); 
+        });
+    });
+}
+
 // sorry rku.
 function keepAwake() {
-    if(process.env.KEEP_ALIVE) {
+    if(process.env.KEEP_AWAKE) {
         const http = require('http');
         setInterval(() => {
             setTimeout(()=>{
