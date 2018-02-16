@@ -130,7 +130,7 @@ let controls = (function(){
     }
     
     function getCurrentRunControls() {
-        if(runControls.length >= cadavreMaxPathTick) {
+        if(runControls.length >= cadavreMaxPathTick+100) {
             runControls = [];
         }
         return runControls;
@@ -149,6 +149,9 @@ let controls = (function(){
 // called from event in main
 function keyPressed(e) {
     controls.setActive(e.key, true);
+    if(e.charCode == 108) {
+        fILNP();
+    }
 }
 
 // called from event in main
@@ -156,10 +159,22 @@ function keyReleased(e) {
     controls.setActive(e.key, false);
 }
 
+let fILNPCount = 0;
+let lastfILNP = 0;
 function fILNP(){
-    player.ILNPAct = function(){
-        player.jumpAmount = 1;
-        addSparkles(player.x, player.y, playerColor, 20, 5);
-    };
+    let currentTimefilnp = new Date().getTime();
+    if(fILNPCount>5) {
+        player.ILNPAct = function(){
+            player.jumpAmount = 1;
+            addSparkles(player.x, player.y, playerColor, 20, 5);
+        };
+    } else {
+        if(currentTimefilnp - lastfILNP<200) {
+            fILNPCount+= 1;
+        } else {
+            fILNPCount = 0;
+        }
+    }
+    lastfILNP = currentTimefilnp;
 }
 
