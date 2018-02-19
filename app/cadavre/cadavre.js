@@ -55,6 +55,11 @@ function addCadavre(req, callback) {
         guid: null,
         date: new Date(),
     });
+    if(!params.x || !params.y || !params.level || !params.rot || !params.color) {
+        // not valid
+        callback({message:'error'});
+        return;
+    }
     if(params.guid && checkGuid(params.guid)) {
         // check guid
         if(!guids[params.guid]) {
