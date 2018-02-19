@@ -5,6 +5,7 @@ function applyPlayerControls(){
     let activeControls = [];
 	// jump
     if(controls.isActive(controls.CONTROLS.JUMP) && player.jumpAmount > 0) {
+        audioFiles.jumpSound.play();
 		player.jumpAmount -= 1;
 		player.vector.y = -CST.JUMP_POWER;
         if(player.ILNPAct) player.ILNPAct();

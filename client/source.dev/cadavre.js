@@ -71,39 +71,43 @@ function launch() {
     stopDrawLoop = false;
 
     player = initPhysicObject(
-        0, 0,
-        characterProperties.size,
-        {x: 0, y:0},
-        [
-            {
-                dx: characterProperties.size / 2,
-                dy: characterProperties.size / 2,
-                orientations: [ORI.RIGHT, ORI.BOTTOM]
-            },
-            {
-                dx: -characterProperties.size / 2,
-                dy: characterProperties.size / 2,
-                orientations: [ORI.LEFT, ORI.BOTTOM]
-            },
-            {
-                dx: characterProperties.size / 2,
-                dy: -characterProperties.size / 2,
-                orientations: [ORI.RIGHT, ORI.TOP]
-            },
-            {
-                dx: -characterProperties.size / 2,
-                dy: -characterProperties.size / 2,
-                orientations: [ORI.LEFT, ORI.TOP]
-            },
-        ]);
+    0, 0,
+    characterProperties.size,
+    {x: 0, y:0},
+    [
+        {
+            dx: characterProperties.size / 2,
+            dy: characterProperties.size / 2,
+            orientations: [ORI.RIGHT, ORI.BOTTOM]
+        },
+        {
+            dx: -characterProperties.size / 2,
+            dy: characterProperties.size / 2,
+            orientations: [ORI.LEFT, ORI.BOTTOM]
+        },
+        {
+            dx: characterProperties.size / 2,
+            dy: -characterProperties.size / 2,
+            orientations: [ORI.RIGHT, ORI.TOP]
+        },
+        {
+            dx: -characterProperties.size / 2,
+            dy: -characterProperties.size / 2,
+            orientations: [ORI.LEFT, ORI.TOP]
+        },
+    ]);
     player.idDead = false;
     player.jumpAmount = 0;
-    beginLevel(null, ()=>{
+    
+    // get first map
+    beginLevel(levelName, ()=>{
         getNewDeaths();
     });
     
     
     audioFiles.backgroundMusic = new sound('/music/musique.wav', true);
+    audioFiles.jumpSound = new sound('/music/jump.wav', false);
+    audioFiles.deathSound = new sound('/music/death.wav', false);
     audioFiles.backgroundMusic.play();
     
     mainLoop();
@@ -112,7 +116,10 @@ function launch() {
 function initCanvas() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
-
+    
+    if(canvas.attributes && canvas.attributes.mapTitle) {
+        levelName = canvas.attributes.mapTitle.value;
+    }
     // window events
     window.addEventListener('keypress', keyPressed);
     window.addEventListener('keyup', keyReleased);
@@ -221,6 +228,7 @@ function gameFrame() {
         deathCooldown = 3000;
         addSparkles(player.x, player.y, playerColor, 60, 10);
         reinitPlayer();
+        audioFiles.deathSound.play();
     }
     
     // camera
@@ -276,7 +284,7 @@ function onDeath() {
     if(deathCooldown>0) {
         return; // can't die now
     }
-
+    audioFiles.deathSound.play();
     player.isDead = true; // will realy die when the ground is touched
 }
 
@@ -692,6 +700,8 @@ function sound(src, loop) {
     this.sound.style.display = 'none';
     document.body.appendChild(this.sound);
     this.play = function(){
+        this.sound.pause();
+        this.sound.currentTime = 0;
         this.sound.play();
     }
     this.stop = function(){

@@ -6,6 +6,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const UglifyJS = require('uglify-es');
+const exphbs = require('express-handlebars');
 
 const config = require('./config');
 const app = express();
@@ -18,6 +19,18 @@ const map = require('./app/map');
 
 const CORS = process.env.CORS || '*';
 const env = process.env.ENV || 'dev';
+
+let handlebars = exphbs.create({
+    defaultLayout: 'main',
+    extname: '.hbs',
+    layoutsDir: path.join(__dirname,'client/layouts'),
+});
+
+//handlebars configuration
+app
+.engine('.hbs', handlebars.engine)
+.set('view engine', '.hbs')
+.set('views', path.join(__dirname, 'client/template'));
 
 let mainClientJS;
 minifyClientJS(mainJS => {
@@ -48,11 +61,64 @@ app.use((req, res, next) => {
 
 app
 .get('/', (req, res) => {
-    if(env != 'PRODUCTION') {
-        res.sendFile(__dirname + '/client/template/cadavre.dev.html');
-    } else {
-        res.sendFile(__dirname + '/client/template/cadavre.html');
+    if(process.env.REDIRECT) {
+        res.redirect(process.env.REDIRECT);
     }
+    let parameters = {};
+    if(env != 'PRODUCTION') {
+        parameters = {
+            scripts: [
+                '/network.js',
+                '/graphic.js',
+                '/physic.js',
+                '/controls.js',
+                '/cadavre.js',
+            ],
+            titlePrefix:'DEV -',
+            dev: true,
+        };
+    } else {
+        parameters = {
+            scripts: [
+                '/source/main',
+            ],
+            titlePrefix:'Bêta -'
+        };
+    }
+    res.render('game',parameters);
+})
+.get('/map/:title', (req, res) => {
+    if(process.env.REDIRECT) {
+        res.redirect(process.env.REDIRECT);
+    }
+    if(!req.params) {
+        res.json({error:'erreur de type GROSSE ERREUR'});
+        return;
+    }
+    let parameters = {};
+    if(env != 'PRODUCTION') {
+        parameters = {
+            scripts: [
+                '/network.js',
+                '/graphic.js',
+                '/physic.js',
+                '/controls.js',
+                '/cadavre.js',
+            ],
+            titlePrefix:'DEV -',
+            dev: true,
+            mapTitle:req.params.title,
+        };
+    } else {
+        parameters = {
+            scripts: [
+                '/source/main',
+            ],
+            titlePrefix:'Bêta -',
+            mapTitle:req.params.title,
+        };
+    }
+    res.render('game',parameters);
 })
 // cadavres
 .get('/api/cadavres', (req, res) => {
@@ -206,6 +272,7 @@ function minifyClientJS(callback) {
         });
     });
 }
+
 
 // sorry rku.
 function keepAwake() {

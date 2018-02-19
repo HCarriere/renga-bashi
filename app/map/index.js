@@ -56,6 +56,11 @@ function getMap(req, callback) {
     } else {
         title = req.query.level;
     }
+    
+    if(req.query.title) {
+        title = req.query.title;
+    }
+    
     // check if cached
     if(cachedMaps[title]) {
         return callback(cachedMaps[title]);
@@ -69,8 +74,10 @@ function getMap(req, callback) {
             if(err) {
                 return callback(null, 500, err);
             }
+            
             // cache it
             cachedMaps[title] = data;
+            
             return callback(data);
         }, 
         {title: title}
