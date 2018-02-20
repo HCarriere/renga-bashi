@@ -284,6 +284,9 @@ function onDeath() {
     if(deathCooldown>0) {
         return; // can't die now
     }
+    if(isCollidedWithTerrain(player.x, player.y, PHYSIC_BLOC_TYPES.NO_DEATH)) {
+        return; // can't die on no_death zone
+    }
     audioFiles.deathSound.play();
     player.isDead = true; // will realy die when the ground is touched
 }
