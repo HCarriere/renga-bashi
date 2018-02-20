@@ -150,7 +150,6 @@ let controls = (function(){
 // called from event in main
 function keyPressed(e) {
     controls.setActive(e.key, true);
-    
 }
 
 // called from event in main

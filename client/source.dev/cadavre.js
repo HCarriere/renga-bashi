@@ -122,6 +122,7 @@ function initCanvas() {
     }
     // window events
     window.addEventListener('keypress', keyPressed);
+    document.onkeydown = keyPressed;
     window.addEventListener('keyup', keyReleased);
     window.onresize = resizeCanvas;
 
