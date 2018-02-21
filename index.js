@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const UglifyJS = require('uglify-es');
 const exphbs = require('express-handlebars');
+const md5 = require('md5');
 
 const config = require('./config');
 const app = express();
@@ -228,7 +229,7 @@ function mustBeAdmin() {
         }
         // TODO require password
         
-        if(req.body.password == process.env.API_PASSWORD) {
+        if(md5(req.body.password) == process.env.API_PASSWORD) {
             // auth
             delete req.body.password;
             return next();
