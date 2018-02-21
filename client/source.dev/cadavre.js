@@ -27,7 +27,7 @@ let tilesProperties = {
 let characterProperties = {
     size: 20
 }
-let deathCooldown = 300; // TODO real death system
+let deathCooldown = 150; // TODO real death system
 let levelName;
 let offset = {
     x:0,
@@ -322,7 +322,7 @@ function reinitPlayer() {
     zombies = [];
     controls.resetCurrentRunControlArray();
     getNewDeaths(lastDeathUpdateDate);
-    deathCooldown = 300;
+    deathCooldown = 150;
     player.isDead = false;
     player.x = map.objects.begin.x+map.objects.begin.width/2;
     player.y = map.objects.begin.y+map.objects.begin.height/2;

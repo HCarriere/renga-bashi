@@ -68,7 +68,7 @@ function addCadavre(req, callback) {
             guidsCount++;
         } else {
             // check date
-            if(new Date().getTime() - guids[params.guid] > 4500) {
+            if(new Date().getTime() - guids[params.guid] > 2300) {
                 // ok 
                 delete guids[params.guid];
             } else {
