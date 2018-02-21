@@ -32,7 +32,7 @@ app
 .set('view engine', '.hbs')
 .set('views', path.join(__dirname, 'client/template'));
 
-let mainClientJS;
+let mainClientJS = '';
 minifyClientJS(mainJS => {
     mainClientJS = mainJS;
 });
@@ -245,6 +245,7 @@ function mustBeAdmin() {
 function minifyClientJS(callback) {
     let resultFile = '';
     let redFiles = [];
+    console.log('minifying client code...');
     fs.readdir('./client/source.dev', (err, jsFiles) => {
         if(err || !jsFiles || jsFiles.length == 0) {
             console.log('readdir error :'+err);
@@ -264,11 +265,17 @@ function minifyClientJS(callback) {
             });
         }
         readJSFile(jsFiles, concatFiles => {
-            let uglyCode = UglifyJS.minify(concatFiles);
+            let topCode = `$(document).ready(()=>{${concatFiles} launch(); });`; 
+            let uglyCode = UglifyJS.minify(topCode, {
+                mangle: {
+                    toplevel: true,
+                },
+                nameCache: {}
+            });
             if(uglyCode.error) {
                 console.log('uglify error:'+uglyCode.error);
             }
-            return callback(`$(document).ready(()=>{${uglyCode.code} launch(); });`); 
+            return callback(uglyCode.code);
         });
     });
 }
