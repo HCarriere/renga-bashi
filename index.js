@@ -7,19 +7,25 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const UglifyJS = require('uglify-es');
 const exphbs = require('express-handlebars');
-const md5 = require('md5');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const crypto = require('crypto');
 
 const config = require('./config');
 const app = express();
-const port = process.env.PORT || config.server.port;
 const server = http.createServer(app);
 
-const mongo = require('./app/mongo');
-const cadavre = require('./app/cadavre');
-const map = require('./app/map');
+const cadavre = require('./app/cadavre/cadavre');
+const map = require('./app/map/map');
 
+const port = process.env.PORT || config.server.port;
 const CORS = process.env.CORS || '*';
 const env = process.env.ENV || 'dev';
+const DB_URI = process.env.DB_URI || 'mongodb://localhost/rengabashi'
+const KEEP_AWAKE_URL = process.env.KEEP_AWAKE_URL;
+const COOKIE_SECURE_KEY = process.env.COOKIE_SECURE_KEY || 'COOKIE_SECURE_KEY';
+const API_PASSWORD = process.env.API_PASSWORD || '25xrwVZOHOY6l0CwJdE93svifcFQwFmDASQGQZpqT8Q=';
+const COOKIE_SECRET = process.env.COOKIE_SECRET || 'cookieSecret!'
 
 let handlebars = exphbs.create({
     defaultLayout: 'main',
@@ -33,6 +39,23 @@ app
 .set('view engine', '.hbs')
 .set('views', path.join(__dirname, 'client/template'));
 
+mongoose.connect(DB_URI);
+mongoose.connection.on('error', (err) => {
+    console.log('mongoose default connection error: '+err);
+});
+mongoose.connection.on('connected', () => {
+    console.log('mongoose connected');
+});
+mongoose.connection.on('disconnected', () => {
+    console.log('mongoose disconnected');
+});
+process.on('SIGINT', function() {  
+    mongoose.connection.close(function () { 
+        console.log('Mongoose default connection disconnected through app termination'); 
+        process.exit(0); 
+    }); 
+}); 
+
 let mainClientJS = '';
 minifyClientJS(mainJS => {
     mainClientJS = mainJS;
@@ -40,14 +63,13 @@ minifyClientJS(mainJS => {
 
 let newPlayerMessage;
 
-mongo.initMongo();
-
 server.timeout = 0;
 app
 .use(bodyParser.json())
 .use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static(__dirname + '/client/assets'));
+app.use('/', express.static(__dirname + '/front/dist'));
 
 if(env != 'PRODUCTION') {
     app.use(express.static(__dirname + '/client/source.dev'));
@@ -60,8 +82,10 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use(cookieParser(COOKIE_SECRET));
+
 app
-.get('/', (req, res) => {
+/*.get('/', (req, res) => {
     if(process.env.REDIRECT) {
         res.redirect(process.env.REDIRECT);
     }
@@ -87,40 +111,7 @@ app
         };
     }
     res.render('game',parameters);
-})
-.get('/map/:title', (req, res) => {
-    if(process.env.REDIRECT) {
-        res.redirect(process.env.REDIRECT);
-    }
-    if(!req.params) {
-        res.json({error:'erreur de type GROSSE ERREUR'});
-        return;
-    }
-    let parameters = {};
-    if(env != 'PRODUCTION') {
-        parameters = {
-            scripts: [
-                '/network.js',
-                '/graphic.js',
-                '/physic.js',
-                '/controls.js',
-                '/cadavre.js',
-            ],
-            titlePrefix:'DEV -',
-            dev: true,
-            mapTitle:req.params.title,
-        };
-    } else {
-        parameters = {
-            scripts: [
-                '/source/main',
-            ],
-            titlePrefix:'Bêta -',
-            mapTitle:req.params.title,
-        };
-    }
-    res.render('game',parameters);
-})
+})*/
 // cadavres
 .get('/api/cadavres', (req, res) => {
     console.log('/api/cadavres : '+JSON.stringify(req.query));
@@ -152,6 +143,11 @@ app
         handleAPIResponse(res, result, status, err);
     });
 })
+.get('/api/maps', (req, res) => {
+    map.getAllMaps((result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    });
+})
 .post('/api/map/add', 
       mustBeAdmin(), 
       (req, res) => {
@@ -175,6 +171,28 @@ app
         });
     }
 })
+
+.get('/editor', mustBeAdmin(), (req, res) => {
+    res.render('editor');
+})
+
+.get('/login', (req, res) => {
+    res.render('login');
+})
+.post('/auth', (req, res) => {
+    if (!req.body.password) return res.status(403);
+
+    const hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
+    console.log(hash)
+    if (hash == API_PASSWORD) {
+        // set auth cookie
+        console.log('access granted');
+        res.cookie('token', COOKIE_SECURE_KEY,{signed: true, httpOnly: true, maxAge: 155520000000});
+        return res.redirect('/editor');
+    }
+    return res.redirect('/login');
+})
+
 // get PRODUCTION (minified, bundled) source
 .get('/source/main', (req, res) => {
     res.type('js');
@@ -222,21 +240,26 @@ function handleAPIResponse(res, result, status, err) {
 // middleware
 function mustBeAdmin() {
     return function (req, res, next) {
-        if(!req.body) {
-            res.status(400);
-            res.json('invalid parameters');
-            return;
+        // check body
+        if (req.body && req.body.password) {
+            const hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
+            if (hash == API_PASSWORD) {
+                delete req.body.password;
+                return next();
+            }
         }
-        // TODO require password
-        
-        if(md5(req.body.password) == process.env.API_PASSWORD) {
-            // auth
-            delete req.body.password;
-            return next();
+
+        // check cookie
+        if (req.signedCookies && req.signedCookies['token']) {
+            //const hash = crypto.createHash('sha256').update(req.signedCookies['token']).digest('base64');
+            if (req.signedCookies['token'] == COOKIE_SECURE_KEY) {
+                return next();
+            }
         }
+
         res.status(403);
-        res.json('invalid credentials');
-        // not auth
+        res.redirect('/login')
+        return;
     }
 }
 
@@ -284,12 +307,12 @@ function minifyClientJS(callback) {
 
 // sorry rku.
 function keepAwake() {
-    if(process.env.KEEP_AWAKE) {
+    if(KEEP_AWAKE_URL) {
         const http = require('http');
         setInterval(() => {
             setTimeout(()=>{
                 console.log('sending W.U.S to /wus');
-                http.get('http://cadavres-api.herokuapp.com/wus');
+                http.get(KEEP_AWAKE_URL);
             }, Math.floor(Math.random()*60000));
         }, 326472);
     }

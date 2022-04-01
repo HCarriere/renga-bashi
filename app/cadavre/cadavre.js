@@ -1,14 +1,25 @@
 'use strict';
 
-let mongo = require('../mongo');
-let cadavreSchema = require('./schema').Schema;
+const mongoose = require('mongoose');
 let utils = require('../utils');
+
 
 let guids = [];
 const maxGuidToKeep = 3;
 const cadavreMaxPathTick = 800;
 const cadavreMaxPathNumber = 10;
 let guidsCount = 0;
+
+const cadavreSchema = mongoose.Schema({
+    x: Number,
+    y: Number,
+    date: Date,
+    path: [[String]],
+    level: String,
+    rot: Number,
+    color: String,
+});
+const CadavreModel = mongoose.model('Cadavre', cadavreSchema);
 
 function getCadavres(req, callback) {
     let date;
@@ -17,25 +28,20 @@ function getCadavres(req, callback) {
     } else {
         date = 0;
     }
-    let level = req.query.level;
-    // schema,callback, jsonRequest, limit, sort, offset
-    mongo.findWithOptions(cadavreSchema, (err, data) => {
-        if(!err && data) {
+    const level = req.query.level;
+    if (!level) return callback(null, 400, 'missing parameters');
+
+    CadavreModel.find(
+        {
+            level, 
+            date: {'$gt': date},
+        },
+        (err, data) => {
+            if (err) return callback(null, 500, err);
             // only keep the nth first path
-            
-            for(let i=0; i<data.length; i++) {
-                if(i>cadavreMaxPathNumber) {
-                    data[i].path = [];
-                }
-            }
-            
-            callback(data);
-            return;
+            return callback(data.slice(0, cadavreMaxPathNumber));
         }
-    }, {
-        level: level,
-        date: {'$gt': date}
-    },0,{date:-1}, 0);
+    ).sort({date: -1});
 }
 
 function addCadavre(req, callback) {
@@ -102,25 +108,34 @@ function addCadavre(req, callback) {
        params.x && 
        params.y && 
        params.level) {
-        mongo.add(cadavreSchema, () => {
+        /*mongo.add(cadavreSchema, () => {
             console.log('cadavre added');
             callback('ok');
-        }, params);
+        }, params);*/
+        const obj = new CadavreModel(params);
+        obj.save(err => {
+            if (err) return callback(null, 500, err);
+            return callback('ok');
+        });
     } else {
         callback({message:'error'});
     }
 }
 
-
 function removeCadavres(req, callback) {
-    if(req.body.title) {
-        mongo.remove(cadavreSchema, (err, result) => {
-            if(err) {
-                return callback(null, 500, err);
-            }
-            return callback(result);
-        }, {level: req.body.title});
-    } 
+    if(!req.body.title) return callback(null, 400, 'missing parameters');
+    CadavreModel.deleteMany({level: req.body.title}, (err) => {
+        if (err) return callback(null, 500, err);
+        return callback('ok');
+    });
+
+    /*mongo.remove(cadavreSchema, (err, result) => {
+        if(err) {
+            return callback(null, 500, err);
+        }
+        return callback(result);
+    }, {level: req.body.title});*/
+    
 }
 
 function checkGuid(guid) {

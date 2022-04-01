@@ -1,5 +1,5 @@
 {
-  "name": "cadavre-back-bouchon",
+  "name": "cadavre-back",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,10 +11,11 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.17.2",
+    "cookie-parser": "^1.4.6",
     "express": "^4.15.3",
-    "express-handlebars": "^3.0.0",
+    "express-handlebars": "^6.0.3",
     "md5": "^2.2.1",
-    "mongoose": "^4.11.4",
+    "mongoose": "^6.2.7",
     "uglify-es": "^3.3.9"
   }
 }
