@@ -1,0 +1,57 @@
+.editor {
+    display: flex;
+    height: 100%;
+}
+
+app-editor-canvas {
+    flex-grow: 1;
+    padding: 5px;
+}
+
+.editor-options {
+    width: 250px;
+    padding: 5px;
+}
+
+.editor-section {
+    padding: 3px;
+    margin-bottom: 3px;
+    border: solid 1px grey;
+}
+.editor-section.disabled {
+    opacity: 50%;
+}
+
+.editor-section-title {
+    font-weight: bold;
+}
+.editor-section.disabled .editor-section-title {
+    color: rgb(69, 69, 69);
+}
+
+.color-from-map {
+    display: inline-block;
+    width: 75px;
+    height: 30px;
+    text-align: center;
+    padding: 5px;
+    margin: 1px;
+    color: black;
+    cursor:pointer;
+}
+
+.tile-type {
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+.tile-type:hover, .tile-type.selected {
+    font-weight: bold;
+    border-color: white;
+}
+
+.brush-size {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border: 1px solid white;
+}

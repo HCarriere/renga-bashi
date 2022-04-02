@@ -1,0 +1,51 @@
+<div class="editor">
+    <app-editor-canvas [map]="map"></app-editor-canvas>
+    
+    <div class="editor-options">
+        <div class="editor-section">
+            <div class="editor-section-title">Map informations</div>
+            <br>title : {{map.title}}
+            <br>width : {{map.map.width}} tiles
+            <br>height : {{map.map.height}} tiles
+            <br>links : {{map.links | json}}
+        </div>
+        <div class="editor-section" [ngClass]="{'disabled':editorService.mode == 'physic'}">
+            <div class="editor-section-title">Tile color</div>
+            <ngx-colors ngx-colors-trigger [(ngModel)]="editorService.selectedColor"></ngx-colors>
+            <button (click)="editorService.computeMapColors(map.map)">Refresh map colors</button> <br>
+            <div *ngFor="let color of editorService.mapColors" 
+                 [ngStyle]="{'background-color': color}" 
+                 class="color-from-map"
+                 (click)="editorService.setColor(color)">
+                {{color}}
+            </div>
+        </div>
+        <div class="editor-section">
+            <div class="editor-section-title">Paint mode</div>
+            <div class="cursor-pointer" *ngIf="editorService.mode == 'graphic'" (click)="editorService.setMode('physic')">>Graphic mode enabled</div>
+            <div class="cursor-pointer" *ngIf="editorService.mode == 'physic'" (click)="editorService.setMode('graphic')">>Physic mode enabled</div>
+        </div>
+        <div class="editor-section" [ngClass]="{'disabled':editorService.mode == 'graphic'}">
+            <div class="editor-section-title">Physic tile type</div>
+            <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 1}" (click)="editorService.setPhysicType(1)">Collision</div>
+            <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 2}" (click)="editorService.setPhysicType(2)">Death</div>
+            <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 3}" (click)="editorService.setPhysicType(3)">No Death</div>
+        </div>
+        <div class="editor-section">
+            <div class="editor-section-title">Brush size</div>
+                <div *ngFor="let cx of editorService.brushSize; let x = index">
+                    <div class="brush-size" 
+                         *ngFor="let cy of cx; let y = index" 
+                         (mousedown)="editorService.toggleBrushSizePixel(x,y)"
+                         [ngClass]="{'full':editorService.brushSize[x][y]}"
+                         [ngStyle]="{'background-color': editorService.brushSize[x][y] ? editorService.selectedColor: 'transparent'}"
+                         ></div>
+            </div>
+        </div>
+        <div class="editor-section">
+            <div class="editor-section-title">Debug</div>
+            <div class="cursor-pointer" *ngIf="editorService.enableDebug" (click)="editorService.toggleDebug()">>Debug enabled</div>
+            <div class="cursor-pointer" *ngIf="!editorService.enableDebug" (click)="editorService.toggleDebug()">>Debug disabled</div>
+        </div>
+    </div>
+</div>

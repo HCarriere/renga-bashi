@@ -39,7 +39,7 @@ app
 .set('view engine', '.hbs')
 .set('views', path.join(__dirname, 'client/template'));
 
-mongoose.connect(DB_URI);
+mongoose.connect(DB_URI, { useMongoClient: true });
 mongoose.connection.on('error', (err) => {
     console.log('mongoose default connection error: '+err);
 });
