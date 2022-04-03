@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, Input, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Map, MapProcessor, VisibleBox } from 'src/app/engine/map';
+import { MapEditorProcessor } from 'src/app/engine/mapEditor';
 import { EditorService } from 'src/app/services/editor.service';
 
 export interface MouseStatus {
@@ -69,14 +70,13 @@ export class EditorCanvasComponent implements OnInit {
     }
 
     // editor
-    MapProcessor.updateMap(this.map.map, this.mouseStatus, this.visibleBox, 
-                           this.editorService.selectedColor, this.editorService.selectedPhysicType, this.editorService.brushSize, this.editorService.mode);
+    MapEditorProcessor.updateMap(this.map.map, this.mouseStatus, this.visibleBox, this.editorService);
 
     // graphics
     this.context.clearRect(0, 0, this.width, this.height);
 
     MapProcessor.draw(this.map.map, this.context, this.width, this.height, this.visibleBox, this.editorService.enableDebug);
-    MapProcessor.displayBrush(this.map.map, this.context, this.mouseStatus, this.visibleBox, this.editorService.selectedColor, this.editorService.brushSize)
+    MapEditorProcessor.displayBrush(this.map.map, this.context, this.mouseStatus, this.visibleBox, this.editorService)
 
     // tests
     this.getFPS();

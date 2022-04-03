@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { Map, MapProcessor } from 'src/app/engine/map';
+import { Map } from 'src/app/engine/map';
+import { MapEditorProcessor } from 'src/app/engine/mapEditor';
 import { EditorService } from 'src/app/services/editor.service';
 
 @Component({
@@ -14,7 +15,7 @@ export class EditorComponent implements OnInit {
   constructor(
     public editorService: EditorService,
   ) {
-    this.map = MapProcessor.initNewMap();
+    this.map = MapEditorProcessor.initNewMap();
   }
 
   ngOnInit(): void {

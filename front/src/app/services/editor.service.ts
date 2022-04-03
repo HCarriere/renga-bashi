@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MapData, PhysicType } from '../engine/map';
+import { EditorMode, MapData, PhysicType } from '../engine/map';
 
 @Injectable({
   providedIn: 'root'
@@ -16,17 +16,12 @@ export class EditorService {
 
   public brushSize: boolean[][];
 
-  public mode: 'graphic' | 'physic' = 'graphic';
+  public mode: EditorMode = EditorMode.GRAPHIC;
+
 
   constructor() {
     this.brushSize = [];
-    for (let x = 0; x<9; x++) {
-      this.brushSize[x] = [];
-      for (let y = 0; y<9; y++) {
-        this.brushSize[x][y] = false;
-      }
-    }
-    this.brushSize[4][4] = true;
+    this.setBrushSizeStandard();
   }
 
   /**
@@ -58,7 +53,29 @@ export class EditorService {
     this.brushSize[x][y] = !this.brushSize[x][y];
   }
 
-  public setMode(mode: 'graphic' | 'physic') {
+  /**
+   * Set brush to nxn
+   * @param n 
+   */
+  public setBrushSizeStandard(n = 1) {
+    for (let x = 0; x<9; x++) {
+      this.brushSize[x] = [];
+      for (let y = 0; y<9; y++) {
+        this.brushSize[x][y] = false;
+      }
+    }
+    if (n <= 1) {
+      this.brushSize[4][4] = true;
+    } else {
+      for (let x = 4 - Math.floor(n/2); x <= 4 + Math.floor(n/2); x++) {
+        for (let y = 4 - Math.floor(n/2); y <= 4 + Math.floor(n/2); y++) {
+          this.brushSize[x][y] = true;
+        }
+      }
+    }
+  }
+
+  public setMode(mode: EditorMode) {
     this.mode = mode;
   }
 }

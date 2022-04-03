@@ -55,3 +55,9 @@ app-editor-canvas {
     height: 25px;
     border: 1px solid white;
 }
+.brush-size.full {
+    background-color:rgb(218, 218, 218);
+}
+.brush-size:hover {
+    background-color:grey;
+}
