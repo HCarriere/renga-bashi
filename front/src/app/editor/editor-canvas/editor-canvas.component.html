@@ -2,6 +2,7 @@
     <canvas #canvas 
             (mouseup)="onMouseUp($event)" 
             (mousedown)="onMouseDown($event)" 
-            (mousemove)="onMouseMove($event)">
+            (mousemove)="onMouseMove($event)"
+            [ngStyle]="{'background-color': map.map.backgroundColor}">
     </canvas>
 </div>

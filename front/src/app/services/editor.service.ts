@@ -137,7 +137,7 @@ export class EditorService {
     }
   }
 
-  public editMapInfos(map:Map, title: string, width: number, height: number) {
+  public editMapInfos(map:Map, title: string, width: number, height: number, backgroundColor: string) {
     // title
     if (title) {
       const newTitle = title.trim();
@@ -152,6 +152,11 @@ export class EditorService {
       map.map.height = height;
     }
     MapEditorProcessor.resizeMapLayers(map.map);
+
+    // color
+    if (backgroundColor) {
+      map.map.backgroundColor = backgroundColor;
+    }
   }
 
 

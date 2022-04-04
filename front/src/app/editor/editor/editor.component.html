@@ -9,13 +9,15 @@
                 <br>Title : {{map.title}}
                 <br>Width : {{map.map.width}} tiles
                 <br>Height : {{map.map.height}} tiles
+                <br>Color : {{map.map.backgroundColor}}
             </ng-container>
             <ng-container *ngIf="detailsEdit">
                 <br>Title : <input type="text" [value]="map.title" #titleEdit>
                 <br>Width : <input type="number" [value]="map.map.width" #widthEdit> tiles
                 <br>Height : <input type="number" [value]="map.map.height" #heightEdit> tiles
+                <br>Color : <input type="color" [value]="map.map.backgroundColor" #backgroundColor>
                 <div class="simple-button" 
-                    (click)="detailsEdit = false; editorService.editMapInfos(map, titleEdit.value, +widthEdit.value, +heightEdit.value)"><b>Save</b></div>
+                    (click)="detailsEdit = false; editorService.editMapInfos(map, titleEdit.value, +widthEdit.value, +heightEdit.value, backgroundColor.value)"><b>Save</b></div>
             </ng-container>
         </div>
         <div class="editor-section" [ngClass]="{'disabled':editorService.mode == 1}">

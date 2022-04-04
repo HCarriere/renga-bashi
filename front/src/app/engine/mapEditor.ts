@@ -119,6 +119,7 @@ export class MapEditorProcessor extends MapProcessor {
                 physicLayer: [],
                 starts: [],
                 ends: [],
+                backgroundColor: '#000055',
             },
             links: [],
         };

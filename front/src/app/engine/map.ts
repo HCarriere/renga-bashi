@@ -11,6 +11,7 @@ export interface MapData {
     graphicLayer: string[][];
     starts: {x:number, y:number, alias: string}[];
     ends: {x:number, y:number, alias: string}[];
+    backgroundColor: string;
 }
 
 export interface Link {
@@ -18,6 +19,7 @@ export interface Link {
     destinationMap: string;
     destinationAlias: string;
 }
+
 
 export interface VisibleBox {
     x: number;
