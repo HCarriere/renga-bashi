@@ -94,15 +94,18 @@ export class MapEditorProcessor extends MapProcessor {
         }
     }
 
-    static resizeMapLayers(map: MapData, newWidth: number, newHeight: number): void {
-        for (let x = 0; x < newWidth; x++) {
+    static resizeMapLayers(map: MapData): void {
+        // downsize x
+        map.graphicLayer.splice(map.width);
+        map.physicLayer.splice(map.width);
+        
+        for (let x = 0; x < map.width; x++) {
             if (!map.graphicLayer[x]) map.graphicLayer[x] = [];
             if (!map.physicLayer[x]) map.physicLayer[x] = [];
 
-            for (let y = 0; y < newHeight; y++) {
-                if (!map.graphicLayer[x][y]) map.graphicLayer[x][y] = '';
-                if (!map.physicLayer[x][y]) map.physicLayer[x][y] = 0;
-            }
+            // downsize y
+            map.graphicLayer[x].splice(map.height);
+            map.physicLayer[x].splice(map.height);
         }
     }
 
@@ -119,7 +122,7 @@ export class MapEditorProcessor extends MapProcessor {
             },
             links: [],
         };
-        MapEditorProcessor.resizeMapLayers(map.map, map.map.width, map.map.height);
+        MapEditorProcessor.resizeMapLayers(map.map);
         return map;
     }
 }

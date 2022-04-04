@@ -1,6 +1,14 @@
-<div class="panel" #panel>
-    <div *ngFor="let map of maps" class="map" (click)="selectMap(map)">
-        <div class="map-title">{{map.title}}</div>
-        {{map.map.width}} x {{map.map.height}}
+<div class="panel">
+    <div *ngFor="let map of maps" class="map-wrapper">
+        <div class="map" [ngClass]="endAlias ? 'select-alias': ''" (click)="selectMap(map)">
+            <div class="map-title">{{map.title}}</div>
+            {{map.map.width}} x {{map.map.height}}
+            <div *ngIf="endAlias">
+                <div class="map-start" *ngFor="let start of map.map.starts" (click)="selectStartAlias(map.title, start.alias)">{{start.alias}}</div>
+            </div>
+        </div>
+        <div class="simple-button danger" *ngIf="!endAlias" (click)="deleteMap(map)">Delete map</div>
     </div>
+
+    <div class="exit" (click)="exit()">x</div>
 </div>

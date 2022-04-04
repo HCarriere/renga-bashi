@@ -15,6 +15,7 @@ export class EditorComponent implements OnInit {
   public detailsEdit = false;
 
   public mapSelectorDisplay = false;
+  public endAlias!: string;
 
   constructor(
     public editorService: EditorService,
@@ -32,6 +33,17 @@ export class EditorComponent implements OnInit {
 
   public selectMap(map: Map) {
     this.map = map;
+    this.mapSelectorDisplay = false;
+  }
+
+  public promptAddLinkToEnd(alias: string) {
+    this.endAlias = alias;
+    this.mapSelectorDisplay = true;
+  }
+
+  public addLinkToEnd(event: {mapTitle: string, startAlias: string, endAlias: string}) {
+    this.editorService.addLinkToMap(this.map, event.mapTitle, event.startAlias, event.endAlias);
+    this.endAlias = '';
     this.mapSelectorDisplay = false;
   }
 

@@ -68,10 +68,14 @@
             <span class="simple-button" (click)="editorService.setObjectToAdd(1)">Add start</span>
             <div>Ends :</div>
             <div class="waypoint" *ngFor="let wp of map.map.ends">
-                <span class="simple-button" (click)="editorService.removeObjectFromMap(map.map, wp.alias, 2)">X</span>
+                <span class="simple-button danger" (click)="editorService.removeObjectFromMap(map.map, wp.alias, 2)">X</span>
+                <span class="simple-button" (click)="promptAddLinkToEnd(wp.alias)">Link</span>
                 {{wp.alias}}
             </div>
             <span class="simple-button" (click)="editorService.setObjectToAdd(2)">Add end</span>
+            <hr>
+            <div class="editor-section-title">Links</div>
+            {{map.links | json}}
         </div>
         <div class="editor-section">
             <div class="editor-section-title">Debug</div>
@@ -79,7 +83,6 @@
             <div class="cursor-pointer" *ngIf="!editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug disabled</div>
         </div>
         <div class="editor-section">
-
             <div class="editor-section-title">Maps</div>
             <div class="simple-button" (click)="mapSelectorDisplay = !mapSelectorDisplay">Open map ...</div>
             <div class="simple-button" (click)="saveMap()">Save map</div>
@@ -88,4 +91,9 @@
     </div>
 </div>
 
-<app-map-selector *ngIf="mapSelectorDisplay" (mapSelected)="selectMap($event)" (closed)="mapSelectorDisplay = false"></app-map-selector>
+<app-map-selector *ngIf="mapSelectorDisplay" 
+    [endAlias]="endAlias" 
+    (mapSelected)="selectMap($event)"
+    (closed)="mapSelectorDisplay = false; endAlias = ''"
+    (endAliasSelected)="addLinkToEnd($event)"
+    ></app-map-selector>

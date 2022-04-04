@@ -115,6 +115,10 @@ span.simple-button {
 .simple-button:hover {
   border-color: white;
 }
+.simple-button.danger:hover {
+  border-color: red;
+  color: red;
+}
 
 /* Components */
 app-editor {

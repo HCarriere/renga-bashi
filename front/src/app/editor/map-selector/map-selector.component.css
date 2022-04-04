@@ -20,14 +20,38 @@
     box-shadow: 0 0px 3px black;
     overflow-y: auto;
 }
-
-.map {
+.map-wrapper {
     display: inline-block;
-    border: 1px solid white;
     padding: 10px;
     margin: 10px;
+    border: 1px solid white;
+}
+.map {
+    display: inline-block;
+    
     cursor: pointer;
 }
 .map:hover {
     background-color: #212121;
+}
+.map.select-alias {
+    cursor: initial;
+}
+.map.select-alias:hover {
+    border: 1px solid white;
+}
+
+.map-start {
+    cursor: pointer;
+    color: yellow;
+}
+.map-start:hover {
+    text-decoration: underline;
+}
+
+.exit {
+    float: right;
+    z-index: 2;
+    position: relative;
+    cursor: pointer;
 }

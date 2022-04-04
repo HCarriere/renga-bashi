@@ -37,12 +37,12 @@ export class EditorService {
     return this.httpClient.post<Map>('/api/map', map);
   }
 
-  public deleteMap(title: string) {
-    this.httpClient.delete(`/api/map/${title}`);
+  public deleteMap(title: string): Observable<string> {
+    return this.httpClient.delete<string>(`/api/map/${title}`);
   }
 
   public titleExists(title: string): Observable<boolean> {
-    return this.httpClient.get<boolean>('/api/map/titleexists/' + title);
+    return this.httpClient.get<boolean>(`/api/map/titleexists/${title}`);
   }
 
   public login(password: string): Observable<any> {
@@ -151,6 +151,21 @@ export class EditorService {
     if (height && Number.isInteger(height)) {
       map.map.height = height;
     }
-    MapEditorProcessor.resizeMapLayers(map.map, width, height);
+    MapEditorProcessor.resizeMapLayers(map.map);
+  }
+
+
+  public addLinkToMap(map: Map, destMapTitle: string, startAlias: string, endAlias: string) {
+    const index = map.links.findIndex(o => o.endAlias == endAlias);
+    if (index >= 0) {
+      // delete it
+      map.links.slice(index, 1);
+    }
+    // add link
+    map.links.push({
+      endAlias: endAlias,
+      destinationMap: destMapTitle,
+      destinationAlias: startAlias,
+    });
   }
 }

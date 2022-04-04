@@ -100,7 +100,7 @@ app
         handleAPIResponse(res, result, status, err);
     });
 })
-.delete('/api/map:title', mustBeAdmin, (req, res) => {
+.delete('/api/map/:title', mustBeAdmin, (req, res) => {
     console.log('delete map');
     map.deleteMap(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);

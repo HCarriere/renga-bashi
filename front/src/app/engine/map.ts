@@ -14,8 +14,9 @@ export interface MapData {
 }
 
 export interface Link {
-    alias: string;
+    endAlias: string;
     destinationMap: string;
+    destinationAlias: string;
 }
 
 export interface VisibleBox {
@@ -46,16 +47,20 @@ export class MapProcessor {
 
         for (let x = startTileX; x < Math.min(Math.floor(startTileX + width/MapProcessor.tileSize)+2, map.width); x++) {
             for (let y = startTileY; y < Math.min(Math.floor(startTileY + height/MapProcessor.tileSize)+2, map.height); y++) {
+                
+                // debug map size
+                if (debug) {
+                    context.fillStyle = '#11111150';
+                    context.fillRect(x * MapProcessor.tileSize - visibleBox.x+1, y * MapProcessor.tileSize - visibleBox.y+1, MapProcessor.tileSize-2, MapProcessor.tileSize-2);
+                }
+
                 if (map.graphicLayer[x] && map.graphicLayer[x][y]) {
                     context.fillStyle = map.graphicLayer[x][y];
                     context.fillRect(x * MapProcessor.tileSize - visibleBox.x, y * MapProcessor.tileSize - visibleBox.y, MapProcessor.tileSize, MapProcessor.tileSize);
                 }
 
+                // debug map collisions
                 if (debug) {
-                    // debug map size
-                    context.fillStyle = '#11111150';
-                    context.fillRect(x * MapProcessor.tileSize - visibleBox.x+1, y * MapProcessor.tileSize - visibleBox.y+1, MapProcessor.tileSize-2, MapProcessor.tileSize-2);
-                    // debug map collisions
                     if (map.physicLayer[x] && map.physicLayer[x][y]) {
                         if (map.physicLayer[x][y] == PhysicType.COLLISION) context.fillStyle = '#00500090';
                         if (map.physicLayer[x][y] == PhysicType.DEATH) context.fillStyle = '#50000090';
@@ -70,12 +75,12 @@ export class MapProcessor {
         if (debug) {
             for (let start of map.starts) {
                 context.fillStyle = '#FFFF00';
-                context.fillRect(start.x * MapProcessor.tileSize - visibleBox.x+2, start.y * MapProcessor.tileSize - visibleBox.y+2, MapProcessor.tileSize-4, MapProcessor.tileSize-4);
+                context.fillRect(start.x * MapProcessor.tileSize - visibleBox.x+4, start.y * MapProcessor.tileSize - visibleBox.y+4, MapProcessor.tileSize-8, MapProcessor.tileSize-8);
                 context.fillText(start.alias, start.x * MapProcessor.tileSize - visibleBox.x+2, start.y * MapProcessor.tileSize - visibleBox.y-2);
             }
             for (let end of map.ends) {
                 context.fillStyle = '#FF00FF';
-                context.fillRect(end.x * MapProcessor.tileSize - visibleBox.x+2, end.y * MapProcessor.tileSize - visibleBox.y+2, MapProcessor.tileSize-4, MapProcessor.tileSize-4);
+                context.fillRect(end.x * MapProcessor.tileSize - visibleBox.x+4, end.y * MapProcessor.tileSize - visibleBox.y+4, MapProcessor.tileSize-8, MapProcessor.tileSize-8);
                 context.fillText(end.alias, end.x * MapProcessor.tileSize - visibleBox.x+2, end.y * MapProcessor.tileSize - visibleBox.y-2);
             }
         }
