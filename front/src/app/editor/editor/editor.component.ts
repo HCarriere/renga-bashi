@@ -12,6 +12,10 @@ export class EditorComponent implements OnInit {
 
   public map: Map;
 
+  public detailsEdit = false;
+
+  public mapSelectorDisplay = false;
+
   constructor(
     public editorService: EditorService,
   ) {
@@ -25,4 +29,31 @@ export class EditorComponent implements OnInit {
   keyEvent(event: KeyboardEvent) {
     if (event.key === 'a') {}
   }
+
+  public selectMap(map: Map) {
+    this.map = map;
+    this.mapSelectorDisplay = false;
+  }
+
+  public saveMap() {
+    this.editorService.titleExists(this.map.title).subscribe(
+      exists => {
+        if (exists) {
+           if (confirm(`[${this.map.title}] already exists ! Save anyway ?`)) {
+            this.editorService.saveMap(this.map).subscribe({
+              next: result => console.log(result),
+              error: error => console.log(error),
+            });
+           }
+        } else {
+          this.editorService.saveMap(this.map).subscribe({
+            next: result => console.log(result),
+            error: error => console.log(error),
+          });
+        }
+      }
+    );
+  }
+
+  
 }

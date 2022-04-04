@@ -36,19 +36,12 @@ function addMap(req, callback) {
 
 // callback(result, status, err)
 function getMap(req, callback) {
-    if(!req.query) {
-        return callback(null, 400, 'invalid parameters');
-    }
     let title;
     
-    if(req.query.level=='START') {
-        title = process.env.START_LEVEL || '0';
+    if(req.params.title) {
+        title = req.params.title;
     } else {
-        title = req.query.level;
-    }
-    
-    if(req.query.title) {
-        title = req.query.title;
+        title = process.env.START_LEVEL || '0';
     }
     
     // check if cached
@@ -76,9 +69,9 @@ function getAllMaps(callback) {
 
 
 function deleteMap(req, callback) {
-    if (!req.body.title) return callback(null, 400, 'missing parameters');
+    if (!req.params.title) return callback(null, 400, 'missing parameters');
 
-    MapModel.deleteOne({title: req.body.title}, (err) => {
+    MapModel.deleteOne({title: req.params.title}, (err) => {
         if (err) return callback(null, 500, err);
         return callback('ok');
     });

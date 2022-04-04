@@ -3,16 +3,25 @@
     
     <div class="editor-options">
         <div class="editor-section">
-            <div class="editor-section-title">Map informations</div>
-            <br>title : {{map.title}}
-            <br>width : {{map.map.width}} tiles
-            <br>height : {{map.map.height}} tiles
-            <br>links : {{map.links | json}}
+            <div class="editor-section-title">Map parameters</div>
+            <ng-container *ngIf="!detailsEdit">
+                <div class="simple-button"  (click)="detailsEdit = true">Edit</div>
+                <br>Title : {{map.title}}
+                <br>Width : {{map.map.width}} tiles
+                <br>Height : {{map.map.height}} tiles
+            </ng-container>
+            <ng-container *ngIf="detailsEdit">
+                <br>Title : <input type="text" [value]="map.title" #titleEdit>
+                <br>Width : <input type="number" [value]="map.map.width" #widthEdit> tiles
+                <br>Height : <input type="number" [value]="map.map.height" #heightEdit> tiles
+                <div class="simple-button" 
+                    (click)="detailsEdit = false; editorService.editMapInfos(map, titleEdit.value, +widthEdit.value, +heightEdit.value)"><b>Save</b></div>
+            </ng-container>
         </div>
         <div class="editor-section" [ngClass]="{'disabled':editorService.mode == 1}">
             <div class="editor-section-title">Tile color</div>
             <ngx-colors ngx-colors-trigger [(ngModel)]="editorService.selectedColor"></ngx-colors>
-            <button (click)="editorService.computeMapColors(map.map)">Refresh map colors</button> <br>
+            <span class="simple-button" (click)="editorService.computeMapColors(map.map)">Refresh map colors</span> <br>
             <div *ngFor="let color of editorService.mapColors" 
                  [ngStyle]="{'background-color': color}" 
                  class="color-from-map"
@@ -50,9 +59,33 @@
             <span class="simple-button" (click)="editorService.setBrushSizeStandard(9)">9x9</span>
         </div>
         <div class="editor-section">
+            <div class="editor-section-title">Objects</div>
+            <div>Starts :</div>
+            <div class="waypoint" *ngFor="let wp of map.map.starts">
+                <span class="simple-button" (click)="editorService.removeObjectFromMap(map.map, wp.alias, 1)">X</span>
+                {{wp.alias}}
+            </div>
+            <span class="simple-button" (click)="editorService.setObjectToAdd(1)">Add start</span>
+            <div>Ends :</div>
+            <div class="waypoint" *ngFor="let wp of map.map.ends">
+                <span class="simple-button" (click)="editorService.removeObjectFromMap(map.map, wp.alias, 2)">X</span>
+                {{wp.alias}}
+            </div>
+            <span class="simple-button" (click)="editorService.setObjectToAdd(2)">Add end</span>
+        </div>
+        <div class="editor-section">
             <div class="editor-section-title">Debug</div>
             <div class="cursor-pointer" *ngIf="editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug enabled</div>
             <div class="cursor-pointer" *ngIf="!editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug disabled</div>
         </div>
+        <div class="editor-section">
+
+            <div class="editor-section-title">Maps</div>
+            <div class="simple-button" (click)="mapSelectorDisplay = !mapSelectorDisplay">Open map ...</div>
+            <div class="simple-button" (click)="saveMap()">Save map</div>
+            <!--<div class="simple-button">Save map & download JSON</div>-->
+        </div>
     </div>
 </div>
+
+<app-map-selector *ngIf="mapSelectorDisplay" (mapSelected)="selectMap($event)" (closed)="mapSelectorDisplay = false"></app-map-selector>

@@ -1,27 +1,70 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EditorMode, MapData, PhysicType } from '../engine/map';
+import { Router } from '@angular/router';
+import { catchError, map, Observable } from 'rxjs';
+import { Map, MapData, ObjectType, PhysicType } from '../engine/map';
+import { EditorMode, MapEditorProcessor } from '../engine/mapEditor';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EditorService {
 
-  public selectedColor: string = 'cyan';
-
+  public selectedColor: string = '#607d8b';
   public selectedPhysicType: PhysicType = PhysicType.COLLISION;
-
   public mapColors: string[] = [];
-
   public enableDebug = true;
-
-  public brushSize: boolean[][];
-
+  public brushSize: boolean[][] = [];
   public mode: EditorMode = EditorMode.GRAPHIC;
+  public addingObject!: ObjectType;
 
+  public isAuthentified = false;
 
-  constructor() {
-    this.brushSize = [];
+  constructor(
+    private httpClient: HttpClient,
+    private router: Router,
+    private jwtHelper: JwtHelperService,
+  ) {
     this.setBrushSizeStandard();
+  }
+
+  public getMaps(): Observable<Array<Map>> {
+    return this.httpClient.get<Array<Map>>('/api/maps');
+  }
+
+  public saveMap(map: Map): Observable<Map> {
+    return this.httpClient.post<Map>('/api/map', map);
+  }
+
+  public deleteMap(title: string) {
+    this.httpClient.delete(`/api/map/${title}`);
+  }
+
+  public titleExists(title: string): Observable<boolean> {
+    return this.httpClient.get<boolean>('/api/map/titleexists/' + title);
+  }
+
+  public login(password: string): Observable<any> {
+    return this.httpClient.post<any>('/api/auth', {password}).pipe(
+      map(data => {
+        this.setSession(data.accessToken);
+        return data;
+      }),
+      catchError((err, caught) => {
+        this.router.navigateByUrl('/login');
+        throw err;
+      })
+    );
+  }
+
+  public isLoggedIn(): boolean {
+    const token = localStorage.getItem('token') || '';
+    return !this.jwtHelper.isTokenExpired(token);
+  }
+
+  private setSession(token: string) {
+    localStorage.setItem('token', token);
   }
 
   /**
@@ -77,5 +120,37 @@ export class EditorService {
 
   public setMode(mode: EditorMode) {
     this.mode = mode;
+  }
+
+  public setObjectToAdd(type: ObjectType) {
+    this.addingObject = type;
+  }
+
+  public removeObjectFromMap(map: MapData, alias: string, type: ObjectType) {
+    if (type == ObjectType.START) {
+      const i = map.starts.findIndex(o => o.alias == alias);
+      if (i>=0) map.starts.splice(i, 1);
+    }
+    if (type == ObjectType.END) {
+      const i = map.ends.findIndex(o => o.alias == alias);
+      if (i>=0) map.ends.splice(i, 1);
+    }
+  }
+
+  public editMapInfos(map:Map, title: string, width: number, height: number) {
+    // title
+    if (title) {
+      const newTitle = title.trim();
+      map.title = newTitle;
+    }
+
+    // size
+    if (width && Number.isInteger(width)) {
+      map.map.width = width;
+    }
+    if (height && Number.isInteger(height)) {
+      map.map.height = height;
+    }
+    MapEditorProcessor.resizeMapLayers(map.map, width, height);
   }
 }

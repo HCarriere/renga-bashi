@@ -6,10 +6,9 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const UglifyJS = require('uglify-es');
-const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
-const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 const config = require('./config');
 const app = express();
@@ -19,25 +18,10 @@ const cadavre = require('./app/cadavre/cadavre');
 const map = require('./app/map/map');
 
 const port = process.env.PORT || config.server.port;
-const CORS = process.env.CORS || '*';
-const env = process.env.ENV || 'dev';
 const DB_URI = process.env.DB_URI || 'mongodb://localhost/rengabashi'
-const KEEP_AWAKE_URL = process.env.KEEP_AWAKE_URL;
-const COOKIE_SECURE_KEY = process.env.COOKIE_SECURE_KEY || 'COOKIE_SECURE_KEY';
 const API_PASSWORD = process.env.API_PASSWORD || '25xrwVZOHOY6l0CwJdE93svifcFQwFmDASQGQZpqT8Q=';
-const COOKIE_SECRET = process.env.COOKIE_SECRET || 'cookieSecret!'
+const JWT_SECRET = process.env.JWT_SECRET || 'jwtSecret!'
 
-let handlebars = exphbs.create({
-    defaultLayout: 'main',
-    extname: '.hbs',
-    layoutsDir: path.join(__dirname,'client/layouts'),
-});
-
-//handlebars configuration
-app
-.engine('.hbs', handlebars.engine)
-.set('view engine', '.hbs')
-.set('views', path.join(__dirname, 'client/template'));
 
 mongoose.connect(DB_URI, { useMongoClient: true });
 mongoose.connection.on('error', (err) => {
@@ -64,54 +48,14 @@ minifyClientJS(mainJS => {
 let newPlayerMessage;
 
 server.timeout = 0;
-app
-.use(bodyParser.json())
-.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(express.static(__dirname + '/client/assets'));
-app.use('/', express.static(__dirname + '/front/dist'));
-
-if(env != 'PRODUCTION') {
-    app.use(express.static(__dirname + '/client/source.dev'));
-}
-
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', CORS);
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    next();
-});
-
-app.use(cookieParser(COOKIE_SECRET));
+app.use(express.static(__dirname + '/front/dist'));
 
 app
-/*.get('/', (req, res) => {
-    if(process.env.REDIRECT) {
-        res.redirect(process.env.REDIRECT);
-    }
-    let parameters = {};
-    if(env != 'PRODUCTION') {
-        parameters = {
-            scripts: [
-                '/network.js',
-                '/graphic.js',
-                '/physic.js',
-                '/controls.js',
-                '/cadavre.js',
-            ],
-            titlePrefix:'DEV -',
-            dev: true,
-        };
-    } else {
-        parameters = {
-            scripts: [
-                '/source/main',
-            ],
-            titlePrefix:'Bêta -'
-        };
-    }
-    res.render('game',parameters);
-})*/
+.use(bodyParser.json({limit: '100mb', extended: true})) // to support JSON-encoded bodies
+.use(bodyParser.urlencoded({limit: '100mb', extended: true})) // to support URL-encoded bodies
+
+app
 // cadavres
 .get('/api/cadavres', (req, res) => {
     console.log('/api/cadavres : '+JSON.stringify(req.query));
@@ -129,7 +73,7 @@ app
     })
 })
 .post('/api/cadavres/remove',
-     mustBeAdmin(),
+     mustBeAdmin,
      (req, res) => {
     console.log('/api/cadavres/remove');
     cadavre.removeCadavres(req, (result, status, err) => {
@@ -137,75 +81,57 @@ app
     });
 })
 // maps
-.get('/api/map', (req, res) => {
-    console.log('/api/map : '+JSON.stringify(req.query));
+.get('/api/map/:title', (req, res) => {
+    console.log('getting map '+ req.query.title)
     map.getMap(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
 })
-.get('/api/maps', (req, res) => {
+.get('/api/maps', mustBeAdmin, (req, res) => {
+    console.log('get all maps');
     map.getAllMaps((result, status, err) => {
+        res.set('Cache-Control', 'no-store');
         handleAPIResponse(res, result, status, err);
     });
 })
-.post('/api/map/add', 
-      mustBeAdmin(), 
-      (req, res) => {
-    console.log('/api/map/add');
+.post('/api/map', mustBeAdmin, (req, res) => {
+    console.log('save map');
     map.addMap(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
 })
-.post('/api/message', 
-      mustBeAdmin(),
-      (req, res) => {
-    console.log('/api/message:'+JSON.stringify(req.body));
-    if(req.body && req.body.message){
-        newPlayerMessage = req.body.message;
+.delete('/api/map:title', mustBeAdmin, (req, res) => {
+    console.log('delete map');
+    map.deleteMap(req, (result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    });
+})
+.get('/api/map/titleexists/:title', mustBeAdmin, (req, res) => {
+    map.getMap(req, (result, status, err) => {
+        if (result) {
+            handleAPIResponse(res, true, 200);
+        } else {
+            handleAPIResponse(res, false, 200);
+        }
+    });
+})
+
+// auth
+.post('/api/auth', (req, res) => {
+    const { password } = req.body;
+    const hash = crypto.createHash('sha256').update(password).digest('base64');
+    if (hash == API_PASSWORD) {
+        const accessToken = jwt.sign({ login: 'admin' }, JWT_SECRET, {expiresIn: '10d'});
         res.json({
-            message: req.body.message
+            accessToken,
         });
     } else {
-        res.json({
-            error:'need a messsage'
-        });
+        res.sendStatus(401);
     }
 })
-
-.get('/editor', mustBeAdmin(), (req, res) => {
-    res.render('editor');
-})
-
-.get('/login', (req, res) => {
-    res.render('login');
-})
-.post('/auth', (req, res) => {
-    if (!req.body.password) return res.status(403);
-
-    const hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
-    console.log(hash)
-    if (hash == API_PASSWORD) {
-        // set auth cookie
-        console.log('access granted');
-        res.cookie('token', COOKIE_SECURE_KEY,{signed: true, httpOnly: true, maxAge: 155520000000});
-        return res.redirect('/editor');
-    }
-    return res.redirect('/login');
-})
-
-// get PRODUCTION (minified, bundled) source
-.get('/source/main', (req, res) => {
-    res.type('js');
-    res.send(mainClientJS);
-})
-
-.get('/wus', (req, res) => {
-    res.json();
-})
-
 
 .get('*', (req, res) => {
-    res.status(404);
+    res.sendFile(__dirname + '/front/dist/index.html');
 })
 
 // Error handler //////////
@@ -222,9 +148,6 @@ server.listen(port, (err) => {
     console.log(`API listening to *:${port})`);
 });
 
-// keep awake (KEEP_AWAKE)
-keepAwake();
-
 function handleAPIResponse(res, result, status, err) {
     if(status) {
         res.status(status);
@@ -237,29 +160,30 @@ function handleAPIResponse(res, result, status, err) {
     }
 }
 
-// middleware
-function mustBeAdmin() {
-    return function (req, res, next) {
-        // check body
-        if (req.body && req.body.password) {
-            const hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
-            if (hash == API_PASSWORD) {
-                delete req.body.password;
-                return next();
-            }
-        }
 
-        // check cookie
-        if (req.signedCookies && req.signedCookies['token']) {
-            //const hash = crypto.createHash('sha256').update(req.signedCookies['token']).digest('base64');
-            if (req.signedCookies['token'] == COOKIE_SECURE_KEY) {
-                return next();
-            }
-        }
+// middlewares
 
-        res.status(403);
-        res.redirect('/login')
-        return;
+function mustBeAdmin(req, res, next) {
+    const authHeader = req.headers.authorization;
+    let token;
+    if(authHeader) {
+        token = authHeader.split(' ')[1];
+    } else {
+        // fallback to url
+        token = req.query.authorization;
+    }
+
+    if (token) {
+        jwt.verify(token, JWT_SECRET, (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+
+            req.user = user;
+            next();
+        });
+    } else {
+        res.sendStatus(401);
     }
 }
 
@@ -302,18 +226,4 @@ function minifyClientJS(callback) {
             return callback(uglyCode.code);
         });
     });
-}
-
-
-// sorry rku.
-function keepAwake() {
-    if(KEEP_AWAKE_URL) {
-        const http = require('http');
-        setInterval(() => {
-            setTimeout(()=>{
-                console.log('sending W.U.S to /wus');
-                http.get(KEEP_AWAKE_URL);
-            }, Math.floor(Math.random()*60000));
-        }, 326472);
-    }
 }

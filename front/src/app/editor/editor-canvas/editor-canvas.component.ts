@@ -80,16 +80,10 @@ export class EditorCanvasComponent implements OnInit {
 
     // tests
     this.getFPS();
-    this.context.fillStyle = 'red';
-    this.context.fillRect(5, 5, 10, 10);
-    this.context.fillRect(this.width - 15, this.height - 15, 10, 10);
     this.context.font = '10px Arial';
     this.context.textAlign = 'left';
     this.context.fillStyle = 'white';
-    this.context.fillText('fps: '+Math.floor(this.frameRate), 50, 20);
-    this.context.fillText('mouseTickX: '+this.mouseTickX, 50, 30);
-    this.context.fillText('mouseTickY: '+this.mouseTickY, 50, 40);
-    this.context.fillText('visibleBox: '+JSON.stringify(this.visibleBox), 50, 50);
+    this.context.fillText('fps: '+Math.floor(this.frameRate), 20, 20);
 
     // update mouse move ticks
     this.mouseTickX = this.mouseTickY = 0;

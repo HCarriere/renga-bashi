@@ -11,9 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.17.2",
-    "cookie-parser": "^1.4.6",
     "express": "^4.15.3",
     "express-handlebars": "^6.0.3",
+    "jsonwebtoken": "^8.5.1",
     "md5": "^2.2.1",
     "mongoose": "4.13.21",
     "uglify-es": "^3.3.9"

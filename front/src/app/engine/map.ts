@@ -31,9 +31,9 @@ export enum PhysicType {
     NO_DEATH = 3,
 }
 
-export enum EditorMode {
-    GRAPHIC = 0,
-    PHYSIC = 1,
+export enum ObjectType {
+    START = 1,
+    END = 2,
 }
 
 export class MapProcessor {
@@ -63,6 +63,20 @@ export class MapProcessor {
                         context.fillRect(x * MapProcessor.tileSize - visibleBox.x+1, y * MapProcessor.tileSize - visibleBox.y+1, MapProcessor.tileSize-2, MapProcessor.tileSize-2);
                     }
                 }
+            }
+        }
+
+        // debug waypoints
+        if (debug) {
+            for (let start of map.starts) {
+                context.fillStyle = '#FFFF00';
+                context.fillRect(start.x * MapProcessor.tileSize - visibleBox.x+2, start.y * MapProcessor.tileSize - visibleBox.y+2, MapProcessor.tileSize-4, MapProcessor.tileSize-4);
+                context.fillText(start.alias, start.x * MapProcessor.tileSize - visibleBox.x+2, start.y * MapProcessor.tileSize - visibleBox.y-2);
+            }
+            for (let end of map.ends) {
+                context.fillStyle = '#FF00FF';
+                context.fillRect(end.x * MapProcessor.tileSize - visibleBox.x+2, end.y * MapProcessor.tileSize - visibleBox.y+2, MapProcessor.tileSize-4, MapProcessor.tileSize-4);
+                context.fillText(end.alias, end.x * MapProcessor.tileSize - visibleBox.x+2, end.y * MapProcessor.tileSize - visibleBox.y-2);
             }
         }
     }
