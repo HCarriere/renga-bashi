@@ -2,8 +2,7 @@
     <app-editor-canvas [map]="map"></app-editor-canvas>
     
     <div class="editor-options">
-        <div class="editor-section">
-            <div class="editor-section-title">Map parameters</div>
+        <app-editor-section [title]="'Map parameters'" class="editor-section">
             <ng-container *ngIf="!detailsEdit">
                 <div class="simple-button"  (click)="detailsEdit = true">Edit</div>
                 <br>Title : {{map.title}}
@@ -19,9 +18,8 @@
                 <div class="simple-button" 
                     (click)="detailsEdit = false; editorService.editMapInfos(map, titleEdit.value, +widthEdit.value, +heightEdit.value, backgroundColor.value)"><b>Save</b></div>
             </ng-container>
-        </div>
-        <div class="editor-section" [ngClass]="{'disabled':editorService.mode == 1}">
-            <div class="editor-section-title">Tile color</div>
+        </app-editor-section>
+        <app-editor-section [title]="'Tile color'" class="editor-section" [ngClass]="{'disabled':editorService.mode == 1}">
             <ngx-colors ngx-colors-trigger [(ngModel)]="editorService.selectedColor"></ngx-colors>
             <span class="simple-button" (click)="editorService.computeMapColors(map.map)">Refresh map colors</span> <br>
             <div *ngFor="let color of editorService.mapColors" 
@@ -30,20 +28,17 @@
                  (click)="editorService.setColor(color)">
                 {{color}}
             </div>
-        </div>
-        <div class="editor-section">
-            <div class="editor-section-title">Paint mode</div>
+        </app-editor-section>
+        <app-editor-section [title]="'Paint mode'" class="editor-section">
             <div class="cursor-pointer" *ngIf="editorService.mode == 0" (click)="editorService.setMode(1)">> Graphic mode enabled</div>
             <div class="cursor-pointer" *ngIf="editorService.mode == 1" (click)="editorService.setMode(0)">> Physic mode enabled</div>
-        </div>
-        <div class="editor-section" [ngClass]="{'disabled':editorService.mode == 0}">
-            <div class="editor-section-title">Physic tile type</div>
+        </app-editor-section>
+        <app-editor-section [title]="'Physic tile type'" class="editor-section" [ngClass]="{'disabled':editorService.mode == 0}">
             <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 1}" (click)="editorService.setPhysicType(1)">Collision</div>
             <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 2}" (click)="editorService.setPhysicType(2)">Death</div>
             <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 3}" (click)="editorService.setPhysicType(3)">No Death</div>
-        </div>
-        <div class="editor-section">
-            <div class="editor-section-title">Brush size</div>
+        </app-editor-section>
+        <app-editor-section [title]="'Brush size'" class="editor-section">
             <div *ngFor="let cx of editorService.brushSize; let x = index">
                 <div class="brush-size" 
                         *ngFor="let cy of cx; let y = index" 
@@ -59,9 +54,8 @@
             <span class="simple-button" (click)="editorService.setBrushSizeStandard(5)">5x5</span>
             <span class="simple-button" (click)="editorService.setBrushSizeStandard(7)">7x7</span>
             <span class="simple-button" (click)="editorService.setBrushSizeStandard(9)">9x9</span>
-        </div>
-        <div class="editor-section">
-            <div class="editor-section-title">Objects</div>
+        </app-editor-section>
+        <app-editor-section [title]="'Objects'" class="editor-section">
             <div>Starts :</div>
             <div class="waypoint" *ngFor="let wp of map.map.starts">
                 <span class="simple-button" (click)="editorService.removeObjectFromMap(map.map, wp.alias, 1)">X</span>
@@ -75,21 +69,19 @@
                 {{wp.alias}}
             </div>
             <span class="simple-button" (click)="editorService.setObjectToAdd(2)">Add end</span>
-            <hr>
-            <div class="editor-section-title">Links</div>
-            {{map.links | json}}
-        </div>
-        <div class="editor-section">
-            <div class="editor-section-title">Debug</div>
+        </app-editor-section>
+        <app-editor-section [title]="'Links'" class="editor-section">
+            
+        </app-editor-section>
+        <app-editor-section [title]="'Debug'" class="editor-section">
             <div class="cursor-pointer" *ngIf="editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug enabled</div>
             <div class="cursor-pointer" *ngIf="!editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug disabled</div>
-        </div>
-        <div class="editor-section">
-            <div class="editor-section-title">Maps</div>
+        </app-editor-section>
+        <app-editor-section [title]="'Maps'" class="editor-section">
             <div class="simple-button" (click)="mapSelectorDisplay = !mapSelectorDisplay">Open map ...</div>
             <div class="simple-button" (click)="saveMap()">Save map</div>
             <!--<div class="simple-button">Save map & download JSON</div>-->
-        </div>
+        </app-editor-section>
     </div>
 </div>
 

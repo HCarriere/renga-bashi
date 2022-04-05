@@ -65,8 +65,8 @@ export class EditorCanvasComponent implements OnInit {
   private mainLoop() {
     // scroll view
     if (this.mouseStatus.clicked && this.mouseStatus.modifiers.rightclick) {
-      this.visibleBox.x = Math.max(this.visibleBox.x - this.mouseTickX, 0);
-      this.visibleBox.y = Math.max(this.visibleBox.y - this.mouseTickY, 0);
+      this.visibleBox.x = this.visibleBox.x - this.mouseTickX;
+      this.visibleBox.y = this.visibleBox.y - this.mouseTickY;
     }
 
     // editor

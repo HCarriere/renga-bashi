@@ -9,8 +9,7 @@ export enum EditorMode {
 
 export class MapEditorProcessor extends MapProcessor {
 
-    static RandomWPNameList = ['Les_Copains_du_dimanche','À_pied,_à_cheval_et_en_voiture','Sois_belle_et_tais-toi','Les_Tricheurs','Un_drôle','Mademoiselle_Ange','À_double_tour','À_bout','Classe_tous_risques','Moderato_cantabile','La_Française_et_lAmour',
-    'Les_Distractions','La_ciociara','La_Novice',
+    static RandomWPNameList = ['Les_Copains_du_dimanche','À_pied,_à_cheval_et_en_voiture','Sois_belle_et_tais-toi','Les_Tricheurs','Un_drôle','Mademoiselle_Ange','À_double_tour','À_bout','Classe_tous_risques','Moderato_cantabile','La_Française_et_lAmour','Les_Distractions','La_ciociara','La_Novice',
     'Le_Mauvais_Chemin','Léon_Morin,_prêtre','Une_femme_est_une_femme','Les_Amours_célèbres','Scandale_sur_la_Riviera','Un_nommé_La_Rocca','Le_Doulos','Cartouche','Un_singe_en_hiver',
     'Le_Jour_le_plus_court','La_Mer_à_boire','Peau','Dragées_au_poivre','LAîné_des_Ferchaux','Les_Don_Juan','LHomme','Cent_Mille_Dollars_au_soleil',
     'Échappement_libre','La_Chasse_à_lhomme','Week-end_à_Zuydcoote','Par_un_beau_matin','Pierrot_le_Fou','Les_Tribulations','Tendre_Voyou','Paris_brûle-t-il_?','Casino_Royale','Le_Voleur','Le_Démoniaque','Ho_!','Le_Cerveau','La_Sirène_du_Mississipi','Un_homme_qui_me_plaît','Borsalino','Les_Mariés','Le_Casse','Docteur_Popaul','La_Scoumoune','LHéritier','Le_Magnifique','Stavisky...','Peur_sur_la_ville','LIncorrigible','LAlpagueur','Le_Corps','LAnimal','Flic_ou_Voyou','Le_Guignolo','Le_Professionnel','LAs_des_as','Le_Marginal','Les_Morfalous','Joyeuses_Pâques','Hold-up','Le_Solitaire','Itinéraire','LInconnu_dans_la_maison','Les_Cent_et_Une_Nuits','Les_Misérables','Désiré','Une_chance_sur_deux','Peut-être','Les_Acteurs','Amazone','Un_homme_et_son_chien'];
@@ -119,7 +118,7 @@ export class MapEditorProcessor extends MapProcessor {
                 physicLayer: [],
                 starts: [],
                 ends: [],
-                backgroundColor: '#000055',
+                backgroundColor: '#04274a',
             },
             links: [],
         };

@@ -19,6 +19,7 @@ app-editor-canvas {
     padding: 5px;
     margin-bottom: 6px;
     border: solid 1px grey;
+    display: block;
 }
 .editor-section.disabled {
     opacity: 50%;

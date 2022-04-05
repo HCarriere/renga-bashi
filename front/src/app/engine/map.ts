@@ -32,6 +32,12 @@ export enum PhysicType {
     COLLISION = 1,
     DEATH = 2,
     NO_DEATH = 3,
+    ZOOM_IN_X_2 = 4,
+    ZOOM_OUT_X_2 = 5,
+    ZOOM_IN_X_3 = 6,
+    ZOOM_OUT_X_3 = 7,
+    ZOOM_IN_X_4 = 8,
+    ZOOM_OUT_X_4 = 9,
 }
 
 export enum ObjectType {

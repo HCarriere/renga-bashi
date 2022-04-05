@@ -15,6 +15,7 @@ import { LoginComponent } from './editor/login/login.component';
 import { AuthGuard } from './editor/auth.guard';
 import { JwtModule } from '@auth0/angular-jwt';
 import { interceptorProviders } from './interceptors';
+import { EditorSectionComponent } from './editor/editor/editor-section/editor-section.component';
 
 @NgModule({
   imports: [
@@ -43,6 +44,7 @@ import { interceptorProviders } from './interceptors';
     EditorCanvasComponent,
     MapSelectorComponent,
     LoginComponent,
+    EditorSectionComponent,
   ],
   providers: [
     interceptorProviders,
