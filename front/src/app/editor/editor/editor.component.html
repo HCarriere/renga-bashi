@@ -71,7 +71,14 @@
             <span class="simple-button" (click)="editorService.setObjectToAdd(2)">Add end</span>
         </app-editor-section>
         <app-editor-section [title]="'Links'" class="editor-section">
-            
+            <div *ngFor="let link of map.links;let i = index">
+                <span class="simple-button danger" (click)="editorService.removeLinkFromMap(map, i)">X</span>
+                <div>
+                    end : {{link.endAlias}}
+                    <br>to map: {{link.destinationMap}}
+                    <br>start : {{link.destinationAlias}}
+                </div>
+            </div>
         </app-editor-section>
         <app-editor-section [title]="'Debug'" class="editor-section">
             <div class="cursor-pointer" *ngIf="editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug enabled</div>

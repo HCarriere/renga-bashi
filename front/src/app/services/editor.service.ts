@@ -164,7 +164,7 @@ export class EditorService {
     const index = map.links.findIndex(o => o.endAlias == endAlias);
     if (index >= 0) {
       // delete it
-      map.links.slice(index, 1);
+      map.links.splice(index, 1);
     }
     // add link
     map.links.push({
@@ -172,5 +172,9 @@ export class EditorService {
       destinationMap: destMapTitle,
       destinationAlias: startAlias,
     });
+  }
+
+  public removeLinkFromMap(map: Map, index: number) {
+    map.links.splice(index, 1);
   }
 }

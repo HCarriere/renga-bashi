@@ -37,9 +37,6 @@
 .map.select-alias {
     cursor: initial;
 }
-.map.select-alias:hover {
-    border: 1px solid white;
-}
 
 .map-start {
     cursor: pointer;
