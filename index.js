@@ -45,8 +45,6 @@ minifyClientJS(mainJS => {
     mainClientJS = mainJS;
 });
 
-let newPlayerMessage;
-
 server.timeout = 0;
 
 app.use(express.static(__dirname + '/front/dist'));
@@ -58,23 +56,22 @@ app
 app
 // cadavres
 .get('/api/cadavres', (req, res) => {
-    console.log('/api/cadavres : '+JSON.stringify(req.query));
-    cadavre.getCadavres(req, (data) => {
-        res.json({
-            message:newPlayerMessage,
-            cadavres:data,
-        });
-    })
+    cadavre.getCadavres(req, (result, status, err) => {
+        res.set('Cache-Control', 'no-store');
+        handleAPIResponse(res, result, status, err);
+    });
 })
 .post('/api/cadavres/add', (req, res) => {
-    //console.log('/api/cadavres/add : '+JSON.stringify(req.body));
-    cadavre.addCadavre(req, (data) => {
-        res.json(data);
-    })
+    cadavre.addCadavre(req, (result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    });
 })
-.post('/api/cadavres/remove',
-     mustBeAdmin,
-     (req, res) => {
+.post('/api/cadavres/adminadd', mustBeAdmin, (req, res) => {
+    cadavre.addCadavre(req, (result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    }, true);
+})
+.post('/api/cadavres/remove', mustBeAdmin, (req, res) => {
     console.log('/api/cadavres/remove');
     cadavre.removeCadavres(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
@@ -82,26 +79,22 @@ app
 })
 // maps
 .get('/api/map/:title', (req, res) => {
-    console.log('getting map '+ req.query.title)
     map.getMap(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
 })
 .get('/api/maps', mustBeAdmin, (req, res) => {
-    console.log('get all maps');
     map.getAllMaps((result, status, err) => {
         res.set('Cache-Control', 'no-store');
         handleAPIResponse(res, result, status, err);
     });
 })
 .post('/api/map', mustBeAdmin, (req, res) => {
-    console.log('save map');
     map.addMap(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
 })
 .delete('/api/map/:title', mustBeAdmin, (req, res) => {
-    console.log('delete map');
     map.deleteMap(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });

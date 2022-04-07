@@ -15,13 +15,13 @@ app-editor-canvas {
     overflow-y: auto;
 }
 
-.editor-section {
+app-editor-section {
     padding: 5px;
     margin-bottom: 6px;
     border: solid 1px grey;
     display: block;
 }
-.editor-section.disabled {
+app-editor-section.disabled {
     opacity: 50%;
 }
 

@@ -13,7 +13,7 @@ function getParamsFromRequest(req, params) {
 	}
 	for(let key in params) {
 		if(params.hasOwnProperty(key)) {
-			if(req.body[key]) {
+			if(req.body[key] != null || req.body[key] != undefined) {
 				// set on request
 				params[key] = req.body[key];
 			}

@@ -5,6 +5,7 @@ import { catchError, map, Observable } from 'rxjs';
 import { Map, MapData, ObjectType, PhysicType } from '../engine/map';
 import { EditorMode, MapEditorProcessor } from '../engine/mapEditor';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { Cadavre } from '../engine/cadavres';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +44,13 @@ export class EditorService {
 
   public titleExists(title: string): Observable<boolean> {
     return this.httpClient.get<boolean>(`/api/map/titleexists/${title}`);
+  }
+
+  public addCadavre(cadavre: Cadavre) {
+    this.httpClient.post('/api/cadavres/adminadd', cadavre).subscribe({
+      next: data => console.log(data),
+      error: err => console.log(err)
+    });
   }
 
   public login(password: string): Observable<any> {

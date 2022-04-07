@@ -1,7 +1,9 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { Cadavre } from 'src/app/engine/cadavres';
 import { Map } from 'src/app/engine/map';
 import { MapEditorProcessor } from 'src/app/engine/mapEditor';
 import { EditorService } from 'src/app/services/editor.service';
+import { PlayerService } from 'src/app/services/player.service';
 
 @Component({
   selector: 'app-editor',
@@ -11,6 +13,7 @@ import { EditorService } from 'src/app/services/editor.service';
 export class EditorComponent implements OnInit {
 
   public map: Map;
+  public cadavres: Cadavre[] = [];
 
   public detailsEdit = false;
 
@@ -19,6 +22,7 @@ export class EditorComponent implements OnInit {
 
   constructor(
     public editorService: EditorService,
+    private playerService: PlayerService,
   ) {
     this.map = MapEditorProcessor.initNewMap();
   }
@@ -33,7 +37,14 @@ export class EditorComponent implements OnInit {
 
   public selectMap(map: Map) {
     this.map = map;
+    this.updateCadavres();
     this.mapSelectorDisplay = false;
+  }
+
+  public updateCadavres() {
+    this.playerService.getMapCadavres(this.map.title).subscribe({
+      next: cad => this.cadavres = cad,
+    });
   }
 
   public promptAddLinkToEnd(alias: string) {

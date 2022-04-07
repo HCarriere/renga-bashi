@@ -5,6 +5,7 @@ import { Map, MapData, MapProcessor, ObjectType, PhysicType, VisibleBox } from "
 export enum EditorMode {
     GRAPHIC = 0,
     PHYSIC = 1,
+    CADAVRES = 2,
 }
 
 export class MapEditorProcessor extends MapProcessor {
@@ -36,11 +37,11 @@ export class MapEditorProcessor extends MapProcessor {
                         if (mouseStatus.modifiers.shift) {
                             // erase
                             if (editorService.mode == EditorMode.GRAPHIC) {map.graphicLayer[x][y] = '';}
-                            else map.physicLayer[x][y] = PhysicType.VOID;
+                            else if (editorService.mode == EditorMode.PHYSIC) {map.physicLayer[x][y] = PhysicType.VOID;}
                         } else {
                             // paint
                             if (editorService.mode == EditorMode.GRAPHIC) {map.graphicLayer[x][y] = editorService.selectedColor;}
-                            else map.physicLayer[x][y] = editorService.selectedPhysicType;
+                            else if (editorService.mode == EditorMode.PHYSIC) {map.physicLayer[x][y] = editorService.selectedPhysicType;}
                         }
                     }
                 }
@@ -81,7 +82,7 @@ export class MapEditorProcessor extends MapProcessor {
                     const y = cy + (i - Math.floor(editorService.brushSize.length / 2));
                     if (x < map.width && y < map.height && x >= 0 && y >= 0) {
                         if (editorService.mode == EditorMode.GRAPHIC) context.fillStyle = editorService.selectedColor;
-                        else {
+                        else if (editorService.mode == EditorMode.PHYSIC) {
                             if (editorService.selectedPhysicType == PhysicType.COLLISION) context.fillStyle = '#00500090';
                             if (editorService.selectedPhysicType == PhysicType.DEATH) context.fillStyle = '#50000090';
                             if (editorService.selectedPhysicType == PhysicType.NO_DEATH) context.fillStyle = '#50500090';

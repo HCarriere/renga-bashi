@@ -1,4 +1,6 @@
 import { Component, ElementRef, HostListener, Input, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Cadavre } from 'src/app/engine/cadavres';
+import { CadavreEditorProcessor } from 'src/app/engine/cadavresEditor';
 import { Map, MapProcessor, VisibleBox } from 'src/app/engine/map';
 import { MapEditorProcessor } from 'src/app/engine/mapEditor';
 import { EditorService } from 'src/app/services/editor.service';
@@ -26,6 +28,9 @@ export class EditorCanvasComponent implements OnInit {
 
   @Input()
   public map!: Map;
+
+  @Input()
+  public cadavres: Cadavre[] = [];
 
   @ViewChild('canvas', { static: true}) 
   private canvas: ElementRef = {} as ElementRef;
@@ -71,12 +76,15 @@ export class EditorCanvasComponent implements OnInit {
 
     // editor
     MapEditorProcessor.updateMap(this.map.map, this.mouseStatus, this.visibleBox, this.editorService);
+    CadavreEditorProcessor.updateMap(this.cadavres, this.map, this.mouseStatus, this.visibleBox, this.editorService);
+
 
     // graphics
     this.context.clearRect(0, 0, this.width, this.height);
 
     MapProcessor.draw(this.map.map, this.context, this.width, this.height, this.visibleBox, this.editorService.enableDebug);
-    MapEditorProcessor.displayBrush(this.map.map, this.context, this.mouseStatus, this.visibleBox, this.editorService)
+    MapEditorProcessor.displayBrush(this.map.map, this.context, this.mouseStatus, this.visibleBox, this.editorService);
+    CadavreEditorProcessor.draw(this.cadavres, this.context, this.width, this.height, this.visibleBox, this.editorService.enableDebug);
 
     // tests
     this.getFPS();
