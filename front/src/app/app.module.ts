@@ -16,6 +16,7 @@ import { AuthGuard } from './editor/auth.guard';
 import { JwtModule } from '@auth0/angular-jwt';
 import { interceptorProviders } from './interceptors';
 import { EditorSectionComponent } from './editor/editor/editor-section/editor-section.component';
+import { GameCanvasComponent } from './game/game-canvas/game-canvas.component';
 
 @NgModule({
   imports: [
@@ -45,6 +46,7 @@ import { EditorSectionComponent } from './editor/editor/editor-section/editor-se
     MapSelectorComponent,
     LoginComponent,
     EditorSectionComponent,
+    GameCanvasComponent,
   ],
   providers: [
     interceptorProviders,

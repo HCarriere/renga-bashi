@@ -1,1 +1,9 @@
-<p>game works!</p>
+<div *ngIf="!gameOn">
+    <h1>Renga-bashi</h1>
+    <p>lorem ipsum</p>
+
+    <button (click)="gameOn = true">PLAY</button>
+</div>
+<div class="game">
+    <app-game-canvas *ngIf="gameOn"></app-game-canvas>
+</div>

@@ -31,6 +31,14 @@ export class MapSelectorComponent implements OnInit {
     this.editorService.getMaps().subscribe({
       next: result => {
         this.maps = result;
+        for (let map of this.maps) {
+          // complete options if it didnt existed
+          if (!map.map.options) {
+            map.map.options = {
+              disablePersistentCadavres: false,
+            }
+          }
+        }
       },
       error: error => console.log(error),
     });

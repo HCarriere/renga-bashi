@@ -47,6 +47,13 @@ export class EditorComponent implements OnInit {
     });
   }
 
+  public removeCadavres() {
+    if (confirm('You are about to delete all the '+this.cadavres.length+' cadavres from this map. Continue ?')) {
+      this.editorService.removeAllCadavres(this.map.title); 
+      this.cadavres = [];
+    }
+  }
+
   public promptAddLinkToEnd(alias: string) {
     this.endAlias = alias;
     this.mapSelectorDisplay = true;

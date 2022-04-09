@@ -2,7 +2,6 @@
 
 const express = require('express');
 const http = require('http');
-const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const UglifyJS = require('uglify-es');
@@ -10,14 +9,13 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const config = require('./config');
 const app = express();
 const server = http.createServer(app);
 
 const cadavre = require('./app/cadavre/cadavre');
 const map = require('./app/map/map');
 
-const port = process.env.PORT || config.server.port;
+const port = process.env.PORT || '3001';
 const DB_URI = process.env.DB_URI || 'mongodb://localhost/rengabashi'
 const API_PASSWORD = process.env.API_PASSWORD || '25xrwVZOHOY6l0CwJdE93svifcFQwFmDASQGQZpqT8Q=';
 const JWT_SECRET = process.env.JWT_SECRET || 'jwtSecret!'
@@ -72,7 +70,6 @@ app
     }, true);
 })
 .post('/api/cadavres/remove', mustBeAdmin, (req, res) => {
-    console.log('/api/cadavres/remove');
     cadavre.removeCadavres(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
@@ -80,6 +77,13 @@ app
 // maps
 .get('/api/map/:title', (req, res) => {
     map.getMap(req, (result, status, err) => {
+        res.set('Cache-Control', 'no-store');
+        handleAPIResponse(res, result, status, err);
+    });
+})
+.get('/api/map/next', (req, res) => {
+    map.getNextMap(req, (result, status, err) => {
+        res.set('Cache-Control', 'no-store');
         handleAPIResponse(res, result, status, err);
     });
 })

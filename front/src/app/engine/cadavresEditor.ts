@@ -20,16 +20,24 @@ export class CadavreEditorProcessor extends CadavreProcessor {
         } else if (this.cooldownCadavre <= 0) {
             // place new cadavre
             const newCadavre = {
-                color: 'white',
+                color: CadavreEditorProcessor.getRandomColor(),
                 level: map.title,
-                rot: 0,
+                rot: Math.random() * 3.14,
                 x: mouseStatus.position.x + visibleBox.x,
                 y: mouseStatus.position.y + visibleBox.y,
             };
             cadavres.push(newCadavre);
             editorService.addCadavre(newCadavre);
             this.cooldownCadavre = this.maxCooldownCadavre;
+        } 
+    }
+
+    static getRandomColor() {
+        let letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
         }
-        
+        return color;
     }
 }

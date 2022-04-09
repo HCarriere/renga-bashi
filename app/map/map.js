@@ -44,13 +44,43 @@ function getMap(req, callback) {
         title = process.env.START_LEVEL || '0';
     }
     
+    
+    _getMap(title, map => {
+        return callback(map.map);
+    });
+}
+
+/**
+ * Get next map data 
+ * @param {*} req req.params.from, req.params.endAlias
+ * @param {*} callback {map: MapData, alias: string}
+ */
+function getNextMap(req, callback) {
+    const title = req.params.from;
+    const endAlias = req.params.endAlias;
+    let toTitle;
+    let toAlias;
+    if (!title || !end) return callback(null, 400, 'missing arguments');
+
+    _getMap(title, map => {
+        if (!map.links || map.links.length == 0) return callback(null, 400, 'map links missing');
+        const link = map.links.find(l => l.endAlias == endAlias);
+        if (link) {
+            toTitle = link.destinationMap;
+            toAlias = link.destinationAlias;
+        }
+        if (!toTitle || !toAlias) return callback(null, 400, 'map leeds nowhere');
+        _getMap(toTitle, m => {
+            return callback({map: m.map, alias: toAlias});
+        });
+    });
+}
+
+function _getMap(title, callback) {
     // check if cached
     if(cachedMaps[title]) {
         return callback(cachedMaps[title]);
     }
-    
-    // if not cached, query it
-    console.log('requested map:'+title);
     MapModel.findOne({title}, (err, data) => {
         if (err) return callback(null, 500, err);
         if (!data) return callback(null, 404, 'not found');
@@ -83,4 +113,6 @@ module.exports = {
     getMap,
     getAllMaps,
     deleteMap,
+    getNextMap,
+    cachedMaps,
 }

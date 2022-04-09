@@ -53,6 +53,13 @@ export class EditorService {
     });
   }
 
+  public removeAllCadavres(title: string) {
+    this.httpClient.post('/api/cadavres/remove', {title}).subscribe({
+      next: data => console.log(data),
+      error: err => console.log(err)
+    });
+  }
+
   public login(password: string): Observable<any> {
     return this.httpClient.post<any>('/api/auth', {password}).pipe(
       map(data => {
@@ -145,7 +152,7 @@ export class EditorService {
     }
   }
 
-  public editMapInfos(map:Map, title: string, width: number, height: number, backgroundColor: string) {
+  public editMapInfos(map:Map, title: string, width: number, height: number) {
     // title
     if (title) {
       const newTitle = title.trim();
@@ -160,11 +167,6 @@ export class EditorService {
       map.map.height = height;
     }
     MapEditorProcessor.resizeMapLayers(map.map);
-
-    // color
-    if (backgroundColor) {
-      map.map.backgroundColor = backgroundColor;
-    }
   }
 
 

@@ -9,21 +9,28 @@
                 <br>Width : {{map.map.width}} tiles
                 <br>Height : {{map.map.height}} tiles
                 <br>Color : {{map.map.backgroundColor}}
+                <br>disablePersistentCadavres: {{map.map.options.disablePersistentCadavres ? 'true': 'false'}}
             </ng-container>
             <ng-container *ngIf="detailsEdit">
                 <br>Title : <input type="text" [value]="map.title" #titleEdit>
                 <br>Width : <input type="number" [value]="map.map.width" #widthEdit> tiles
                 <br>Height : <input type="number" [value]="map.map.height" #heightEdit> tiles
-                <br>Color : <input type="color" [value]="map.map.backgroundColor" #backgroundColor>
+                <br>Color : <input type="color" [(ngModel)]="map.map.backgroundColor">
+                <br>disablePersistentCadavres : <input type="checkbox" [(ngModel)]="map.map.options.disablePersistentCadavres">
                 <div class="simple-button" 
-                    (click)="detailsEdit = false; editorService.editMapInfos(map, titleEdit.value, +widthEdit.value, +heightEdit.value, backgroundColor.value)"><b>Save</b></div>
+                    (click)="detailsEdit = false; 
+                    editorService.editMapInfos(map, titleEdit.value, +widthEdit.value, +heightEdit.value)">
+                    <b>Save</b>
+                </div>
             </ng-container>
         </app-editor-section>
+
         <app-editor-section [title]="'Paint mode'">
             <div class="tile-type" (click)="editorService.setMode(0)" [ngClass]="{'selected':editorService.mode == 0}">> Graphic mode</div>
             <div class="tile-type" (click)="editorService.setMode(1)" [ngClass]="{'selected':editorService.mode == 1}">> Physic mode</div>
             <div class="tile-type" (click)="editorService.setMode(2)" [ngClass]="{'selected':editorService.mode == 2}">> Cadavre mode</div>
         </app-editor-section>
+
         <app-editor-section [title]="'Tile color'" [ngClass]="{'disabled':editorService.mode != 0}">
             <ngx-colors ngx-colors-trigger [(ngModel)]="editorService.selectedColor"></ngx-colors>
             <span class="simple-button" (click)="editorService.computeMapColors(map.map)">Refresh map colors</span> <br>
@@ -34,14 +41,18 @@
                 {{color}}
             </div>
         </app-editor-section>
+
         <app-editor-section [title]="'Physic tile type'" [ngClass]="{'disabled':editorService.mode != 1}">
             <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 1}" (click)="editorService.setPhysicType(1)">Collision</div>
             <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 2}" (click)="editorService.setPhysicType(2)">Death</div>
             <div class="tile-type" [ngClass]="{'selected':editorService.selectedPhysicType == 3}" (click)="editorService.setPhysicType(3)">No Death</div>
         </app-editor-section>
+
         <app-editor-section [title]="'Cadavres'" [ngClass]="{'disabled':editorService.mode != 2}">
             <div class="simple-button" (click)="updateCadavres()">Update cadavres</div>
+            <div class="simple-button danger" (click)="removeCadavres()">Remove all cadavres</div>
         </app-editor-section>
+
         <app-editor-section [title]="'Brush size'">
             <div *ngFor="let cx of editorService.brushSize; let x = index">
                 <div class="brush-size" 
@@ -59,6 +70,7 @@
             <span class="simple-button" (click)="editorService.setBrushSizeStandard(7)">7x7</span>
             <span class="simple-button" (click)="editorService.setBrushSizeStandard(9)">9x9</span>
         </app-editor-section>
+
         <app-editor-section [title]="'Waypoints'">
             <div>Starts :</div>
             <div class="waypoint" *ngFor="let wp of map.map.starts">
@@ -74,6 +86,7 @@
             </div>
             <span class="simple-button" (click)="editorService.setObjectToAdd(2)">Add end</span>
         </app-editor-section>
+
         <app-editor-section [title]="'Links'">
             <div *ngFor="let link of map.links;let i = index">
                 <span class="simple-button danger" (click)="editorService.removeLinkFromMap(map, i)">X</span>
@@ -84,10 +97,12 @@
                 </div>
             </div>
         </app-editor-section>
+
         <app-editor-section [title]="'Debug'">
             <div class="cursor-pointer" *ngIf="editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug enabled</div>
             <div class="cursor-pointer" *ngIf="!editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug disabled</div>
         </app-editor-section>
+
         <app-editor-section [title]="'Maps'">
             <div class="simple-button" (click)="mapSelectorDisplay = !mapSelectorDisplay">Open map ...</div>
             <div class="simple-button" (click)="saveMap()">Save map</div>

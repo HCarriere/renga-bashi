@@ -121,6 +121,6 @@ span.simple-button {
 }
 
 /* Components */
-app-editor {
+app-editor, app-game {
   width: 100%;
 }

@@ -12,6 +12,11 @@ export interface MapData {
     starts: {x:number, y:number, alias: string}[];
     ends: {x:number, y:number, alias: string}[];
     backgroundColor: string;
+    options: MapOptions;
+}
+
+export interface MapOptions {
+    disablePersistentCadavres?: boolean;
 }
 
 export interface Link {

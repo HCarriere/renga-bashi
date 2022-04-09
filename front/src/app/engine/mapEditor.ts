@@ -120,6 +120,9 @@ export class MapEditorProcessor extends MapProcessor {
                 starts: [],
                 ends: [],
                 backgroundColor: '#04274a',
+                options: {
+                    disablePersistentCadavres: false,
+                }
             },
             links: [],
         };

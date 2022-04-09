@@ -1,13 +1,13 @@
 'use strict';
 
 const mongoose = require('mongoose');
-let utils = require('../utils');
+const utils = require('../utils');
+const maps = require('../map/map')
 
 
 let guids = [];
 const maxGuidToKeep = 3;
 const cadavreMaxPathTick = 800;
-const cadavreMaxPathNumber = 10;
 const cadavreCooldown = 2000;
 let guidsCount = 0;
 
@@ -23,16 +23,13 @@ const cadavreSchema = mongoose.Schema({
 const CadavreModel = mongoose.model('Cadavre', cadavreSchema);
 
 function getCadavres(req, callback) {
-    let date = req.query.date || 0;
-
     const level = req.query.title;
 
     if (!level) return callback(null, 400, 'missing parameters');
 
     CadavreModel.find(
         {
-            level, 
-            date: {'$gt': date},
+            level,
         },
         (err, data) => {
             if (err) return callback(null, 500, err);
@@ -52,12 +49,17 @@ function addCadavre(req, callback, admin = false) {
         guid: null,
         date: new Date(),
     });
-    console.log(JSON.stringify(params))
     if(!params.x || !params.y || !params.level || !params.color) {
         return callback(null, 400, 'missing parameters');
     }
     if (!admin) {
-        if(guidsCount > maxGuidToKeep) {
+        // check is allowed by map (only check cached map for now)
+        if (maps.cachedMaps[params.level] && maps.cachedMaps[params.level].map.options) {
+            if (maps.cachedMaps[params.level].map.options.disablePersistentCadavres) {
+                return callback(null, 400, 'not allowed by map');
+            }
+        }
+        if (guidsCount > maxGuidToKeep) {
             // reset guids
             guids = [];
             guidsCount = 0;
