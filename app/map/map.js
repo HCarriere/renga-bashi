@@ -105,6 +105,7 @@ function deleteMap(req, callback) {
         if (err) return callback(null, 500, err);
         return callback('ok');
     });
+
 }
 
 

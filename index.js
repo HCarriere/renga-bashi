@@ -70,7 +70,7 @@ app
     }, true);
 })
 .post('/api/cadavres/remove', mustBeAdmin, (req, res) => {
-    cadavre.removeCadavres(req, (result, status, err) => {
+    cadavre.removeCadavres(req.body.title, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
 })
@@ -100,6 +100,8 @@ app
 })
 .delete('/api/map/:title', mustBeAdmin, (req, res) => {
     map.deleteMap(req, (result, status, err) => {
+        // delete cadavres from this map
+        cadavre.removeCadavres(req.params.title, () => {});
         handleAPIResponse(res, result, status, err);
     });
 })

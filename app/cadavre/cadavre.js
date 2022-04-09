@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 const utils = require('../utils');
-const maps = require('../map/map')
+const maps = require('../map/map');
 
 
 let guids = [];
@@ -96,9 +96,9 @@ function addCadavre(req, callback, admin = false) {
     });
 }
 
-function removeCadavres(req, callback) {
-    if(!req.body.title) return callback(null, 400, 'missing parameters');
-    CadavreModel.deleteMany({level: req.body.title}, (err) => {
+function removeCadavres(title, callback) {
+    if(!title) return callback(null, 400, 'missing parameters');
+    CadavreModel.deleteMany({level: title}, (err) => {
         if (err) return callback(null, 500, err);
         return callback('ok');
     });

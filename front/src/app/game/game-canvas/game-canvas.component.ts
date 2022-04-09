@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
-import { Cadavre, CadavreProcessor } from 'src/app/engine/cadavres';
+import { CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
 import { MapData, MapProcessor, VisibleBox } from 'src/app/engine/map';
 import { Player, PlayerController } from 'src/app/engine/player';
 import { PlayerService } from 'src/app/services/player.service';
@@ -12,7 +12,7 @@ import { PlayerService } from 'src/app/services/player.service';
 export class GameCanvasComponent implements OnInit {
 
   public map!: MapData;
-  public cadavres: Cadavre[] = [];
+  public cadavres!: CadavreChunks;
   public player!: Player;
   public mapTitle = 'START';
 

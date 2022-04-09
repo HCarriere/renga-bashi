@@ -1,4 +1,4 @@
-import { Cadavre, CadavreProcessor } from "./cadavres";
+import { Cadavre, CadavreChunks, CadavreProcessor } from "./cadavres";
 import { MapData, MapProcessor, PhysicType, VisibleBox } from "./map";
 
 export interface PlayerController {
@@ -46,7 +46,7 @@ export class Player {
         context.restore();
     }
 
-    public update(map: MapData, cadavres: Cadavre[], playerController: PlayerController) {
+    public update(map: MapData, cadavres: CadavreChunks, playerController: PlayerController) {
         // gravity
         this.vy += 0.6;
 
@@ -86,7 +86,7 @@ export class Player {
         this.y += this.vy;
     }
 
-    private applyCollision(map: MapData, cadavres: Cadavre[]) {
+    private applyCollision(map: MapData, cadavres: CadavreChunks) {
         // terrain
         const collisions = this.getPhysicTypeCollision(map);
         const cadavreCollisions = this.getCadavreCollision(cadavres);
@@ -137,15 +137,15 @@ export class Player {
         }
     }
 
-    private getCadavreCollision(cadavres: Cadavre[]): {up: boolean, right: boolean, down: boolean, left: boolean} {
+    private getCadavreCollision(cadavres: CadavreChunks): {up: boolean, right: boolean, down: boolean, left: boolean} {
         const collisions = {up: false, right: false, down: false, left: false};
-        for (let cadavre of cadavres) {
+        for (let cadavre of CadavreProcessor.getNearCadavres(this.x, this.y, cadavres)) {
             collisions.down = collisions.down || 
                 this.pointIntersectCadavre(this.x - this.size / 2 + 1, this.y + this.vy + this.size / 2, cadavre) || 
                 this.pointIntersectCadavre(this.x + this.size / 2 - 1, this.y + this.vy + this.size / 2, cadavre);
             collisions.right = collisions.right || 
-                this.pointIntersectCadavre(this.x + this.vx + this.size / 2 - 1, this.y + this.size / 2 - 1, cadavre) || 
-                this.pointIntersectCadavre(this.x + this.vx + this.size / 2 - 1, this.y - this.size / 2 + 1, cadavre);
+                this.pointIntersectCadavre(this.x + this.vx + this.size / 2, this.y + this.size / 2 - 1, cadavre) || 
+                this.pointIntersectCadavre(this.x + this.vx + this.size / 2, this.y - this.size / 2 + 1, cadavre);
             collisions.left = collisions.left || 
                 this.pointIntersectCadavre(this.x + this.vx - this.size / 2, this.y + this.size / 2 - 1, cadavre) ||
                 this.pointIntersectCadavre(this.x + this.vx - this.size / 2, this.y - this.size / 2 + 1, cadavre);
@@ -181,7 +181,7 @@ export class Player {
         return collisions;
     }
 
-    private pointIntersectCadavre(x: number, y: number, cadavre:Cadavre): boolean {
+    private pointIntersectCadavre(x: number, y: number, cadavre: Cadavre): boolean {
         if (x > cadavre.x - CadavreProcessor.size / 2 && x < cadavre.x + CadavreProcessor.size / 2 &&
             y > cadavre.y - CadavreProcessor.size / 2 && y < cadavre.y + CadavreProcessor.size / 2) {
             return true;

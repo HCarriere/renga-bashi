@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable, zip } from 'rxjs';
-import { Cadavre } from '../engine/cadavres';
+import { Cadavre, CadavreChunks, CadavreProcessor } from '../engine/cadavres';
 import { MapData } from '../engine/map';
 
 @Injectable({
@@ -18,15 +18,15 @@ export class PlayerService {
    * @param title map title
    * @returns 
    */
-  public getMapAndCadavres(title: string): Observable<{map: MapData, cadavres: Cadavre[]}> {
+  public getMapAndCadavres(title: string): Observable<{map: MapData, cadavres: CadavreChunks}> {
     return zip(this.getMap(title), this.getMapCadavres(title)).pipe(
-      map(([mapData, cadavres]) => ({map: mapData, cadavres: cadavres}))
+      map(([mapData, cadavres]) => ({map: mapData, cadavres: CadavreProcessor.getCadavreAsChunks(cadavres)}))
     );
   }
 
-  public getNextMapAndCadavres(title: string, endAlias: string): Observable<{map: MapData, alias: string, cadavres: Cadavre[]}> {
+  public getNextMapAndCadavres(title: string, endAlias: string): Observable<{map: MapData, alias: string, cadavres: CadavreChunks}> {
     return zip(this.getNextMap(title, endAlias), this.getMapCadavres(title)).pipe(
-      map(([map, cadavres]) => ({map: map.map, alias:map.alias, cadavres: cadavres}))
+      map(([map, cadavres]) => ({map: map.map, alias:map.alias, cadavres: CadavreProcessor.getCadavreAsChunks(cadavres)}))
     );
   }
 

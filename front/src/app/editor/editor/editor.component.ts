@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { Cadavre } from 'src/app/engine/cadavres';
+import { CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
 import { Map } from 'src/app/engine/map';
 import { MapEditorProcessor } from 'src/app/engine/mapEditor';
 import { EditorService } from 'src/app/services/editor.service';
@@ -13,7 +13,7 @@ import { PlayerService } from 'src/app/services/player.service';
 export class EditorComponent implements OnInit {
 
   public map: Map;
-  public cadavres: Cadavre[] = [];
+  public cadavres: CadavreChunks;
 
   public detailsEdit = false;
 
@@ -25,6 +25,7 @@ export class EditorComponent implements OnInit {
     private playerService: PlayerService,
   ) {
     this.map = MapEditorProcessor.initNewMap();
+    this.cadavres = CadavreProcessor.getCadavreAsChunks([]);
   }
 
   ngOnInit(): void {
@@ -43,14 +44,14 @@ export class EditorComponent implements OnInit {
 
   public updateCadavres() {
     this.playerService.getMapCadavres(this.map.title).subscribe({
-      next: cad => this.cadavres = cad,
+      next: cad => this.cadavres = CadavreProcessor.getCadavreAsChunks(cad),
     });
   }
 
   public removeCadavres() {
-    if (confirm('You are about to delete all the '+this.cadavres.length+' cadavres from this map. Continue ?')) {
+    if (confirm('You are about to delete all the cadavres from this map. Continue ?')) {
       this.editorService.removeAllCadavres(this.map.title); 
-      this.cadavres = [];
+      this.cadavres = CadavreProcessor.getCadavreAsChunks([]);
     }
   }
 
