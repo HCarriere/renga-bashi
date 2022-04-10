@@ -45,7 +45,8 @@ function getMap(req, callback) {
     }
     
     
-    _getMap(title, map => {
+    _getMap(title, (map, error, msg) => {
+        if (error) return callback(null, error, msg);
         return callback(map.map);
     });
 }
@@ -53,16 +54,18 @@ function getMap(req, callback) {
 /**
  * Get next map data 
  * @param {*} req req.params.from, req.params.endAlias
- * @param {*} callback {map: MapData, alias: string}
+ * @param {*} callback {map: MapData, title:string, alias: string}
  */
 function getNextMap(req, callback) {
-    const title = req.params.from;
-    const endAlias = req.params.endAlias;
+    const title = req.query.title;
+    const endAlias = req.query.endAlias;
     let toTitle;
     let toAlias;
-    if (!title || !end) return callback(null, 400, 'missing arguments');
+    if (!title || !endAlias) return callback(null, 400, 'missing arguments');
 
-    _getMap(title, map => {
+    // get current map to get links
+    _getMap(title, (map, error, msg) => {
+        if (error) return callback(null, error, msg);
         if (!map.links || map.links.length == 0) return callback(null, 400, 'map links missing');
         const link = map.links.find(l => l.endAlias == endAlias);
         if (link) {
@@ -70,8 +73,10 @@ function getNextMap(req, callback) {
             toAlias = link.destinationAlias;
         }
         if (!toTitle || !toAlias) return callback(null, 400, 'map leeds nowhere');
-        _getMap(toTitle, m => {
-            return callback({map: m.map, alias: toAlias});
+        // get new map
+        _getMap(toTitle, (m, error, msg) => {
+            if (error) return callback(null, error, msg);
+            return callback({map: m.map, title: m.title, alias: toAlias});
         });
     });
 }
@@ -83,7 +88,7 @@ function _getMap(title, callback) {
     }
     MapModel.findOne({title}, (err, data) => {
         if (err) return callback(null, 500, err);
-        if (!data) return callback(null, 404, 'not found');
+        if (!data) return callback(null, 404, title + ' not found');
         cachedMaps[title] = data;
         return callback(data);
     });

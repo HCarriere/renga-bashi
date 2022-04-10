@@ -8,6 +8,7 @@ export interface Cadavre {
     rot?: number;
     date?: Date;
     path?: string[][];
+    guid?: string;
 }
 
 /**

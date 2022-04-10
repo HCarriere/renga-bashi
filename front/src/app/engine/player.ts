@@ -22,6 +22,7 @@ export class Player {
     maxJumpFrames = 10;
     jumpFrames = 0;
     groundTouched = false;
+    endTouchedAlias: string = '';
 
     public isDead = false;
     public canCreateCadavre = false;
@@ -56,7 +57,7 @@ export class Player {
     }
 
     public update(map: MapData, cadavres: CadavreChunks, playerController: PlayerController) {
-        if (this.isDead) return;
+        if (this.isDead || this.endTouchedAlias) return;
 
         // gravity
         this.vy += 0.6;
@@ -85,7 +86,7 @@ export class Player {
                 if (this.groundTouched) this.vx = this.vx < 1 ? this.vx + 1 : 0;
                 else this.vx += 0.1;
         }
-
+        
         // collisions
         this.applyCollision(map, cadavres);
 
@@ -99,6 +100,9 @@ export class Player {
         // apply velocity
         this.x += this.vx;
         this.y += this.vy;
+
+        // end
+        this.processEnds(map);
     }
 
     private applyCollision(map: MapData, cadavres: CadavreChunks) {
@@ -228,6 +232,15 @@ export class Player {
         return map.physicLayer[px][py];
     }
 
+    private processEnds(map: MapData) {
+        for (const end of map.ends) {
+            if (this.x > end.x * MapProcessor.tileSize && this.x < end.x * MapProcessor.tileSize + MapProcessor.tileSize &&
+                this.y > end.y * MapProcessor.tileSize && this.y < end.y * MapProcessor.tileSize + MapProcessor.tileSize) {
+                this.endTouchedAlias = end.alias;
+            }
+        }
+    }
+
     private onTouchGround() {
         
         console.log('ground')
@@ -246,7 +259,7 @@ export class Player {
             // bottom
             visibleBox.y += this.vy;
         }
-        if (this.vy < 0 && this.y - visibleBox.y > 4 * screenHeight / 9) {
+        if (this.vy < 0 && this.y - visibleBox.y < 4 * screenHeight / 9) {
             // top
             visibleBox.y += this.vy;
         }

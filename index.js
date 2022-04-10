@@ -81,7 +81,7 @@ app
         handleAPIResponse(res, result, status, err);
     });
 })
-.get('/api/map/next', (req, res) => {
+.get('/api/nextmap', (req, res) => {
     map.getNextMap(req, (result, status, err) => {
         res.set('Cache-Control', 'no-store');
         handleAPIResponse(res, result, status, err);

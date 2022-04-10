@@ -14,7 +14,7 @@ export class GameCanvasComponent implements OnInit {
   public map!: MapData;
   public cadavres!: CadavreChunks;
   public player!: Player;
-  public mapTitle = 'START';
+  public mapTitle = 'map2';
   private startPoint!: {x:number, y:number, alias: string};
 
   private playerColor: string;
@@ -29,6 +29,7 @@ export class GameCanvasComponent implements OnInit {
 
   private playerController: PlayerController = {UP: false, LEFT: false, RIGHT: false, DOWN: false, RESPAWN: false};
   private respawnInitiated = false;
+  private teleportInitiated = false;
 
   private lastTick = 0;
   private frameRate = 0;
@@ -80,6 +81,7 @@ export class GameCanvasComponent implements OnInit {
       // physic
       this.player.update(this.map, this.cadavres, this.playerController);
       if (this.player.isDead && !this.respawnInitiated) this.respawn();
+      if (this.player.endTouchedAlias && !this.teleportInitiated) this.endTouched(this.player.endTouchedAlias);
     }
     
     // tests
@@ -115,6 +117,37 @@ export class GameCanvasComponent implements OnInit {
 
     this.player = new Player(this.startPoint.x, this.startPoint.y, this.playerColor);
     this.respawnInitiated = false;
+  }
+
+  private endTouched(alias: string) {
+    this.teleportInitiated = true;
+    const currentMap = this.mapTitle;
+    this.playerService.getNextMapAndCadavres(this.mapTitle, alias).subscribe({
+      next: ({map, title, alias, cadavres}) => {
+        this.cadavres = cadavres;
+        this.map = map;
+        this.mapTitle = title;
+        this.startPoint = map.starts.find(o => o.alias == alias) || {x:0,y:0,alias:''}; 
+
+        if (currentMap == title) {
+          // same map
+          this.player.x = this.startPoint.x * MapProcessor.tileSize;
+          this.player.y = this.startPoint.y * MapProcessor.tileSize;
+          this.player.endTouchedAlias = '';
+        } else {
+          // new map
+          this.player = new Player(this.startPoint.x || 2, this.startPoint.y || 2, this.playerColor);
+        }
+        this.teleportInitiated = false;
+        
+      },
+      error: (err) => {
+        this.player.x = this.startPoint.x * MapProcessor.tileSize;
+        this.player.y = this.startPoint.y * MapProcessor.tileSize;
+        this.player.endTouchedAlias = '';
+        this.teleportInitiated = false;
+      }
+    });
   }
 
   private getFPS() {
