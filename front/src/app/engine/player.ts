@@ -27,6 +27,19 @@ export class Player {
     public isDead = false;
     public canCreateCadavre = false;
 
+    static physicSettings = {
+        gravity: 0.6,
+        jumpSpeed: 4,
+        runSpeed: 0.5,
+        airControl: 0.3,
+        frictionGround: 1, 
+        frictionAir: 0.1,
+        limit: {
+            x: 4,
+            y: 8,
+        }
+    }
+
     constructor(x: number, y: number, color: string) {
         this.x = x * MapProcessor.tileSize - MapProcessor.tileSize/2;
         this.y = y * MapProcessor.tileSize - MapProcessor.tileSize/2;
@@ -60,12 +73,12 @@ export class Player {
         if (this.isDead || this.endTouchedAlias) return;
 
         // gravity
-        this.vy += 0.6;
+        this.vy += Player.physicSettings.gravity;
 
         if (playerController.UP) {
             if (this.jumpFrames < this.maxJumpFrames) {
                 this.jumpFrames ++;
-                this.vy -= 4;
+                this.vy -= Player.physicSettings.jumpSpeed;
                 this.groundTouched = false;
             }
         } else if (!this.groundTouched) {
@@ -73,29 +86,33 @@ export class Player {
         }
 
         if (playerController.RIGHT) {
-            this.vx += 0.5;
+            if (this.groundTouched) this.vx += Player.physicSettings.runSpeed;
+            else this.vx += Player.physicSettings.airControl;
         } else {
             if (this.vx > 0) 
-                if (this.groundTouched) this.vx = this.vx > 1 ? this.vx - 1 : 0;
-                else this.vx -= 0.1;
+                if (this.groundTouched) this.vx = this.vx > Player.physicSettings.frictionGround ? this.vx - Player.physicSettings.frictionGround : 0;
+                else this.vx -= Player.physicSettings.frictionAir;
         }
         if (playerController.LEFT) {
-            this.vx -= 0.5;
+            if (this.groundTouched) this.vx -= Player.physicSettings.runSpeed;
+            else this.vx -= Player.physicSettings.airControl;
         } else {
             if (this.vx < 0)
-                if (this.groundTouched) this.vx = this.vx < 1 ? this.vx + 1 : 0;
-                else this.vx += 0.1;
+                if (this.groundTouched) this.vx = this.vx < Player.physicSettings.frictionGround ? this.vx + Player.physicSettings.frictionGround : 0;
+                else this.vx += Player.physicSettings.frictionAir;
         }
         
         // collisions
         this.applyCollision(map, cadavres);
 
         // stop slow momentum
-        if (Math.abs(this.vx) < 0.5) this.vx = 0;
+        if (Math.abs(this.vx) < Player.physicSettings.airControl) this.vx = 0;
 
         // limit velocity
-        this.vx = this.vx > 4 ? this.vx = 4 : this.vx < -4 ? -4 : this.vx;
-        this.vy = this.vy > 8 ? this.vy = 8 : this.vy < -8 ? -8 : this.vy;
+        this.vx = this.vx > Player.physicSettings.limit.x ? this.vx = 
+            Player.physicSettings.limit.x : this.vx < -Player.physicSettings.limit.x ? -Player.physicSettings.limit.x : this.vx;
+        this.vy = this.vy > Player.physicSettings.limit.y ? this.vy = 
+            Player.physicSettings.limit.y : this.vy < -Player.physicSettings.limit.y ? -Player.physicSettings.limit.y : this.vy;
         
         // apply velocity
         this.x += this.vx;

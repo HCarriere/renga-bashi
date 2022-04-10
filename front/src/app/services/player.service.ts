@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable, zip } from 'rxjs';
+import { map, mergeMap, Observable, zip } from 'rxjs';
 import { Cadavre, CadavreChunks, CadavreProcessor } from '../engine/cadavres';
 import { MapData } from '../engine/map';
 
@@ -29,14 +29,26 @@ export class PlayerService {
   }
 
   public getNextMapAndCadavres(title: string, endAlias: string): Observable<{map: MapData, title: string, alias: string, cadavres: CadavreChunks}> {
-    return zip(this.getNextMap(title, endAlias), this.getMapCadavres(title)).pipe(
+    /*return zip(this.getNextMap(title, endAlias), this.getMapCadavres(title)).pipe(
       map(([map, cadavres]) => ({
         map: map.map, 
         title:map.title, 
         alias:map.alias, 
         cadavres: CadavreProcessor.getCadavreAsChunks(cadavres),
       }))
-    );
+    );*/
+    return this.getNextMap(title, endAlias).pipe(
+      mergeMap(m => {
+        return this.getMapCadavres(m.title).pipe(map(cadavres => {
+          return {
+            map: m.map, 
+            title:m.title, 
+            alias:m.alias, 
+            cadavres: CadavreProcessor.getCadavreAsChunks(cadavres),
+          }
+        }))
+      }),
+    )
   }
 
   public getMap(title: string): Observable<MapData> {

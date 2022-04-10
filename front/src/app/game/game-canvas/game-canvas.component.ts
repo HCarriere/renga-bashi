@@ -14,7 +14,7 @@ export class GameCanvasComponent implements OnInit {
   public map!: MapData;
   public cadavres!: CadavreChunks;
   public player!: Player;
-  public mapTitle = 'map2';
+  public mapTitle = 'START';
   private startPoint!: {x:number, y:number, alias: string};
 
   private playerColor: string;
