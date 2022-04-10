@@ -15,6 +15,9 @@ export class GameCanvasComponent implements OnInit {
   public cadavres!: CadavreChunks;
   public player!: Player;
   public mapTitle = 'START';
+  private startPoint!: {x:number, y:number, alias: string};
+
+  private playerColor: string;
 
   @ViewChild('canvas', { static: true}) 
   private canvas: ElementRef = {} as ElementRef;
@@ -25,6 +28,7 @@ export class GameCanvasComponent implements OnInit {
   private visibleBox: VisibleBox = {x:0, y:0, zoom: 1}
 
   private playerController: PlayerController = {UP: false, LEFT: false, RIGHT: false, DOWN: false, RESPAWN: false};
+  private respawnInitiated = false;
 
   private lastTick = 0;
   private frameRate = 0;
@@ -34,18 +38,23 @@ export class GameCanvasComponent implements OnInit {
   constructor(
     private ngZone: NgZone,
     private playerService: PlayerService,
-  ) { }
+  ) {
+    this.playerColor = MapProcessor.getRandomColor();
+  }
 
   ngOnInit(): void {
     this.context = this.canvas.nativeElement.getContext('2d');
     this.width = this.canvas.nativeElement.width;
     this.height = this.canvas.nativeElement.height;
     
+    // get first map
     this.playerService.getMapAndCadavres(this.mapTitle).subscribe({
       next: ({map, cadavres}) => {
         this.cadavres = cadavres;
         this.map = map;
-        this.player = new Player();
+        // get first point
+        this.startPoint = this.map.starts[0];
+        this.player = new Player(this.startPoint.x || 2, this.startPoint.y || 2, this.playerColor);
       }
     });
     /*this.playerService.getMapCadavres(this.mapTitle).subscribe({
@@ -70,6 +79,7 @@ export class GameCanvasComponent implements OnInit {
 
       // physic
       this.player.update(this.map, this.cadavres, this.playerController);
+      if (this.player.isDead && !this.respawnInitiated) this.respawn();
     }
     
     // tests
@@ -83,6 +93,28 @@ export class GameCanvasComponent implements OnInit {
     requestAnimationFrame(() => {
       this.mainLoop();
     });
+  }
+
+  private respawn() {
+    this.respawnInitiated = true;
+    this.player.isDead = true;
+    // create cadavre (if can)
+    if (this.player.canCreateCadavre) {
+      const cadavre = {
+        x: this.player.x,
+        y: this.player.y,
+        color: this.player.color,
+        rot: this.player.rot,
+        level: this.mapTitle,
+      };
+      if (!this.map.options.disablePersistentCadavres) {
+        this.playerService.addCadavre(cadavre);
+      }
+      CadavreProcessor.addCadavreToChunk(this.cadavres, cadavre);
+    }
+
+    this.player = new Player(this.startPoint.x, this.startPoint.y, this.playerColor);
+    this.respawnInitiated = false;
   }
 
   private getFPS() {
@@ -117,6 +149,9 @@ export class GameCanvasComponent implements OnInit {
     if (event.key === 'ArrowRight') this.playerController.RIGHT = false;
     if (event.key === 'ArrowDown') this.playerController.DOWN = false;
     if (event.key === 'ArrowLeft') this.playerController.LEFT = false;
-    if (event.key.toLowerCase() === 'r') this.playerController.RESPAWN = false;
+    if (event.key.toLowerCase() === 'r') {
+      this.respawn();
+      this.playerController.RESPAWN = false;
+    }
   }
 }

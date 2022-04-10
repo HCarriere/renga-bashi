@@ -19,7 +19,7 @@ export interface CadavreChunks {
 
 export class CadavreProcessor {
     
-    static chunkSize = 64;
+    static chunkSize = 32;
     static size = 14;
 
     static draw(cadavres: CadavreChunks, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
@@ -27,7 +27,7 @@ export class CadavreProcessor {
         for (const cadavre of cadavreChunk) {
           context.save();
           context.translate(cadavre.x - visibleBox.x, cadavre.y - visibleBox.y);
-          //context.rotate(cadavre.rot || 0); 
+          context.rotate(cadavre.rot || 0); 
           context.fillStyle = cadavre.color;
           context.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
           context.restore();

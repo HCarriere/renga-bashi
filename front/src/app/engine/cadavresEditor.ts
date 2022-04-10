@@ -1,7 +1,7 @@
 import { MouseStatus } from "../editor/editor-canvas/editor-canvas.component";
 import { EditorService } from "../services/editor.service";
 import { CadavreChunks, CadavreProcessor } from "./cadavres";
-import { Map, VisibleBox } from "./map";
+import { Map, MapProcessor, VisibleBox } from "./map";
 import { EditorMode } from "./mapEditor";
 
 export class CadavreEditorProcessor extends CadavreProcessor {
@@ -20,7 +20,7 @@ export class CadavreEditorProcessor extends CadavreProcessor {
         } else if (this.cooldownCadavre <= 0) {
             // place new cadavre
             const newCadavre = {
-                color: CadavreEditorProcessor.getRandomColor(),
+                color: MapProcessor.getRandomColor(),
                 level: map.title,
                 rot: Math.random() * 3.14,
                 x: mouseStatus.position.x + visibleBox.x,
@@ -31,14 +31,5 @@ export class CadavreEditorProcessor extends CadavreProcessor {
             editorService.addCadavre(newCadavre);
             this.cooldownCadavre = this.maxCooldownCadavre;
         } 
-    }
-
-    static getRandomColor() {
-        let letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
     }
 }

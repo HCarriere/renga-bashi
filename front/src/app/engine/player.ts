@@ -23,6 +23,15 @@ export class Player {
     jumpFrames = 0;
     groundTouched = false;
 
+    public isDead = false;
+    public canCreateCadavre = false;
+
+    constructor(x: number, y: number, color: string) {
+        this.x = x * MapProcessor.tileSize - MapProcessor.tileSize/2;
+        this.y = y * MapProcessor.tileSize - MapProcessor.tileSize/2;
+        this.color = color;
+    }
+
     public draw(context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
         this.updateCamera(visibleBox, width, height);
 
@@ -47,6 +56,8 @@ export class Player {
     }
 
     public update(map: MapData, cadavres: CadavreChunks, playerController: PlayerController) {
+        if (this.isDead) return;
+
         // gravity
         this.vy += 0.6;
 
@@ -63,12 +74,16 @@ export class Player {
         if (playerController.RIGHT) {
             this.vx += 0.5;
         } else {
-            if (this.vx > 0 && this.groundTouched) this.vx = this.vx > 1 ? this.vx - 1 : 0;
+            if (this.vx > 0) 
+                if (this.groundTouched) this.vx = this.vx > 1 ? this.vx - 1 : 0;
+                else this.vx -= 0.1;
         }
         if (playerController.LEFT) {
             this.vx -= 0.5;
         } else {
-            if (this.vx < 0 && this.groundTouched) this.vx = this.vx < 1 ? this.vx + 1 : 0;
+            if (this.vx < 0)
+                if (this.groundTouched) this.vx = this.vx < 1 ? this.vx + 1 : 0;
+                else this.vx += 0.1;
         }
 
         // collisions
@@ -90,6 +105,23 @@ export class Player {
         // terrain
         const collisions = this.getPhysicTypeCollision(map);
         const cadavreCollisions = this.getCadavreCollision(cadavres);
+
+        if (collisions.down == PhysicType.NO_DEATH ||
+            collisions.right == PhysicType.NO_DEATH || 
+            collisions.left == PhysicType.NO_DEATH || 
+            collisions.up == PhysicType.NO_DEATH) {
+            // ded
+            this.canCreateCadavre = false;
+        } else this.canCreateCadavre = true;
+
+        if (collisions.down == PhysicType.DEATH ||
+            collisions.right == PhysicType.DEATH || 
+            collisions.left == PhysicType.DEATH || 
+            collisions.up == PhysicType.DEATH) {
+            // ded
+            this.isDead = true;
+            this.canCreateCadavre = false;
+        }
 
         if (!cadavreCollisions.down) {
             if (collisions.down == PhysicType.COLLISION) {
@@ -218,10 +250,26 @@ export class Player {
             // top
             visibleBox.y += this.vy;
         }
+
+        // catch up to player
+        if (visibleBox.x + screenWidth / 5 > this.x) {
+            visibleBox.x -= 20;
+        }
+        if (visibleBox.x + screenWidth < this.x + screenWidth / 5) {
+            visibleBox.x += 20;
+        }
+        if (visibleBox.y + screenHeight / 5 > this.y) {
+            visibleBox.y -= 20;
+        }
+        if (visibleBox.y + screenHeight < this.y + screenHeight /5) {
+            visibleBox.y += 20;
+        }
+
+
+        // limits
         if (visibleBox.x < 0) visibleBox.x = 0;
         if (visibleBox.y < 0) visibleBox.y = 0;
         visibleBox.x = Math.round(visibleBox.x);
         visibleBox.y = Math.round(visibleBox.y);
     }
-
 }
