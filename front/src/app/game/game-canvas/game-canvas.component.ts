@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
 import { CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
 import { MapData, MapProcessor, VisibleBox } from 'src/app/engine/map';
+import { ParticlesGenerator, ParticlesProcessor } from 'src/app/engine/particles';
 import { Player, PlayerController } from 'src/app/engine/player';
 import { PlayerService } from 'src/app/services/player.service';
 
@@ -75,15 +76,19 @@ export class GameCanvasComponent implements OnInit {
 
   private mainLoop() {
     if (this.map && this.cadavres && this.player) {
+
+      // physic
+      this.player.update(this.map, this.cadavres, this.playerController);
+      ParticlesProcessor.update();
+      
       // graphics
       this.context.clearRect(0, 0, this.width, this.height);
 
       MapProcessor.draw(this.map, this.context, this.width, this.height, this.visibleBox, this.currentFrame);
       CadavreProcessor.draw(this.cadavres, this.context, this.width, this.height, this.visibleBox);
-      this.player.draw(this.context, this.width, this.height, this.visibleBox, this.map)
+      ParticlesProcessor.draw(this.context, this.visibleBox);
+      this.player.draw(this.context, this.width, this.height, this.visibleBox, this.map);
 
-      // physic
-      this.player.update(this.map, this.cadavres, this.playerController);
       if (this.player.isDead && !this.respawnInitiated) this.respawn();
       if (this.player.endTouchedAlias && !this.teleportInitiated) this.endTouched(this.player.endTouchedAlias);
     }
@@ -106,6 +111,14 @@ export class GameCanvasComponent implements OnInit {
     this.player.isDead = true;
     // create cadavre (if can)
     if (this.player.canCreateCadavre) {
+      const gen = new ParticlesGenerator(this.player.x, this.player.y, ['red', this.player.color, this.player.color, this.player.color]);
+      gen.rangeVelocity = {minx: -4+this.player.vx, maxx: 4+this.player.vx, miny: -4+this.player.vy, maxy: 4+this.player.vy};
+      gen.rangeSpawn = {minx: -5, maxx: 5, miny: -5, maxy: -5};
+      gen.gravity = {x: 0, y: 0.1};
+      gen.rangeLife = {min: 4, max: 10};
+      gen.particlePerFrame = 30 ;
+      gen.life = 1;
+      ParticlesProcessor.addGenerator(gen);
       const cadavre = {
         x: this.player.x,
         y: this.player.y,

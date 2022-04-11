@@ -1,5 +1,6 @@
 import { Cadavre, CadavreChunks, CadavreProcessor } from "./cadavres";
 import { MapData, MapProcessor, PhysicType, VisibleBox } from "./map";
+import { ParticlesGenerator, ParticlesProcessor } from "./particles";
 
 export interface PlayerController {
     UP: boolean,
@@ -27,6 +28,8 @@ export class Player {
     public isDead = false;
     public canCreateCadavre = false;
 
+    private particles: ParticlesGenerator;
+
     static physicSettings = {
         gravity: 0.6,
         jumpSpeed: 4,
@@ -53,12 +56,22 @@ export class Player {
         this.deathAudio = new Audio();
         this.deathAudio.src = '../assets/sounds/death.wav';
         this.deathAudio.load();
+        // particles
+        this.particles = new ParticlesGenerator(x, y, ['red']);
+        this.particles.rangeVelocity = {minx: 0, maxx: 0, miny: 0, maxy: 0};
+        this.particles.rangeSpawn = {minx: -2, maxx: 0, miny: -2, maxy: 0};
+        this.particles.gravity = {x: 0, y: -0.1};
+        this.particles.rangeLife = {min: 2, max: 10};
+        this.particles.particlePerFrame = 2;
+        this.particles.life = -1;
     }
 
     public draw(context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox, map:MapData) {
         this.updateCamera(visibleBox, width, height, map);
 
         let mody = 0;
+        let modw = 0;
+        let modh = 0;
         if (!this.groundTouched) {
             this.rot = this.rot + this.vx / 20;
         } else if (Math.abs(this.vx)>0){
@@ -67,15 +80,18 @@ export class Player {
         } else {
             this.rot = 0;
         }
+        if (Math.abs(this.vx) < Math.abs(this.vy)/2) {modh=2;modw=-2;}
 
         context.save();
         context.translate(this.x - visibleBox.x, this.y - visibleBox.y - mody);
         context.rotate(this.rot); 
         context.fillStyle = this.color;
-        context.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+        context.fillRect(-this.size/2-modw/2, -this.size/2-modh/2, this.size+modw, this.size+modh);
         context.fillStyle = 'red';
         context.fillRect(-1, -1, 2, 2);
         context.restore();
+
+        this.particles.draw(context, visibleBox);
     }
 
     public update(map: MapData, cadavres: CadavreChunks, playerController: PlayerController) {
@@ -119,6 +135,7 @@ export class Player {
 
         // stop slow momentum
         if (Math.abs(this.vx) < Player.physicSettings.airControl) this.vx = 0;
+        if (Math.abs(this.vy) < Player.physicSettings.airControl) this.vy = 0;
 
         // limit velocity
         this.vx = this.vx > Player.physicSettings.limit.x ? this.vx = 
@@ -132,6 +149,10 @@ export class Player {
 
         // end
         this.processEnds(map);
+
+        // particles
+        this.particles.updatePosition(this.x, this.y);
+        this.particles.update();
     }
 
     private applyCollision(map: MapData, cadavres: CadavreChunks) {
@@ -152,10 +173,9 @@ export class Player {
             collisions.left == PhysicType.DEATH || 
             collisions.up == PhysicType.DEATH) {
             // ded
-            this.deathAudio.currentTime = 0;
-            this.deathAudio.play();
             this.isDead = true;
             this.canCreateCadavre = false;
+            this.onDeath();
         }
 
         if (!cadavreCollisions.down) {
@@ -188,19 +208,19 @@ export class Player {
                     this.groundTouched = true;
                     this.jumpFrames = 0;
                 } 
-                this.vy = 0;
+                this.vy = -this.vy/5;
             } else {
                 this.groundTouched = false;
             }
         }
         if (cadavreCollisions.right) {
-            this.vx = 0;
+            this.vx = -this.vx/5;
         }
         if (cadavreCollisions.left) {
-            this.vx = 0;
+            this.vx = -this.vx/5;
         }
         if (cadavreCollisions.up) {
-            this.vy = 0;
+            this.vy = -this.vy/5;
         }
     }
 
@@ -278,6 +298,13 @@ export class Player {
     private onJump() {
         this.jumpAudio.currentTime = 0;
         this.jumpAudio.play();
+    }
+
+    private onDeath() {
+        this.deathAudio.currentTime = 0;
+        this.deathAudio.play();
+        const gen = new ParticlesGenerator(this.x, this.y, ['red', this.color, this.color, this.color]);
+        ParticlesProcessor.addGenerator(gen);
     }
 
     private updateCamera(visibleBox: VisibleBox, screenWidth: number, screenHeight: number, map: MapData) {

@@ -63,6 +63,8 @@ export class MapProcessor {
     static drawTile(map: MapData, context : CanvasRenderingContext2D, x: number, y: number, visibleBox: VisibleBox, frame:number, debug = false) {
         if (map.graphicLayer[x] && map.graphicLayer[x][y]) {
             if (map.graphicLayer[x][y].charAt(0) == TileEffect.LAVA) {
+                context.fillStyle = this.getLavaColor(y, x, frame*1.5, map.graphicLayer[x][y].substring(1));
+                context.fillRect(x * MapProcessor.tileSize - visibleBox.x+2, y * MapProcessor.tileSize - visibleBox.y+2, MapProcessor.tileSize-4, MapProcessor.tileSize-4);
                 context.fillStyle = this.getLavaColor(x, y, frame, map.graphicLayer[x][y].substring(1));
             } else if (map.graphicLayer[x][y].charAt(0) == TileEffect.GLOW) {
                 context.shadowBlur = 15;
@@ -77,7 +79,7 @@ export class MapProcessor {
     }
 
     static getLavaColor(x:number, y: number, frame: number, baseColor: string) {
-        return baseColor.substring(0, 7) + Math.floor(Math.cos((x+20*y)/10+frame/50)*70+180).toString(16).padStart(2, '0');
+        return baseColor.substring(0, 7) + Math.floor(Math.cos((x+20*y)/10+frame/40)*70+180).toString(16).padStart(2, '0');
     }
 
     static getRandomColor() {

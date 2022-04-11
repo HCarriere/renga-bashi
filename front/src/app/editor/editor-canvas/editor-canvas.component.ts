@@ -3,6 +3,7 @@ import { CadavreChunks } from 'src/app/engine/cadavres';
 import { CadavreEditorProcessor } from 'src/app/engine/cadavresEditor';
 import { VisibleBox } from 'src/app/engine/map';
 import { Map, MapEditorProcessor } from 'src/app/engine/mapEditor';
+import { ParticlesProcessor } from 'src/app/engine/particles';
 import { EditorService } from 'src/app/services/editor.service';
 
 export interface MouseStatus {
@@ -76,7 +77,7 @@ export class EditorCanvasComponent implements OnInit {
     // editor
     MapEditorProcessor.updateMap(this.map.map, this.mouseStatus, this.visibleBox, this.editorService);
     CadavreEditorProcessor.updateMap(this.cadavres, this.map, this.mouseStatus, this.visibleBox, this.editorService);
-
+    ParticlesProcessor.update();
 
     // graphics
     this.context.clearRect(0, 0, this.width, this.height);
@@ -84,6 +85,7 @@ export class EditorCanvasComponent implements OnInit {
     MapEditorProcessor.draw(this.map.map, this.context, this.width, this.height, this.visibleBox, this.currentFrame, this.editorService.enableDebug);
     MapEditorProcessor.displayBrush(this.map.map, this.context, this.mouseStatus, this.visibleBox, this.editorService);
     if (this.cadavres) CadavreEditorProcessor.draw(this.cadavres, this.context, this.width, this.height, this.visibleBox);
+    ParticlesProcessor.draw(this.context, this.visibleBox);
 
     // tests
     this.getFPS();
