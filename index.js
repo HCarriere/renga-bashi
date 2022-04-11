@@ -3,8 +3,6 @@
 const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
-const fs = require('fs');
-const UglifyJS = require('uglify-es');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -37,11 +35,6 @@ process.on('SIGINT', function() {
         process.exit(0); 
     }); 
 }); 
-
-let mainClientJS = '';
-minifyClientJS(mainJS => {
-    mainClientJS = mainJS;
-});
 
 server.timeout = 0;
 
@@ -186,43 +179,3 @@ function mustBeAdmin(req, res, next) {
     }
 }
 
-// bring every file onto one
-// minify
-// jquery document.ready + launch()
-function minifyClientJS(callback) {
-    let resultFile = '';
-    let redFiles = [];
-    console.log('minifying client code...');
-    fs.readdir('./client/source.dev', (err, jsFiles) => {
-        if(err || !jsFiles || jsFiles.length == 0) {
-            console.log('readdir error :'+err);
-            return callback();
-        }
-        function readJSFile(files, callback, result) {
-            if(files.length == 0) {
-                return callback(result);
-            }
-            if(!result) {
-                result = '';
-            }
-            let currentFile = files.pop();
-            fs.readFile('./client/source.dev/'+currentFile, 'utf8', (err, data) => {
-                result = result.concat(data);
-                readJSFile(files, callback, result);
-            });
-        }
-        readJSFile(jsFiles, concatFiles => {
-            let topCode = `$(document).ready(()=>{${concatFiles} launch(); });`; 
-            let uglyCode = UglifyJS.minify(topCode, {
-                mangle: {
-                    toplevel: true,
-                },
-                nameCache: {}
-            });
-            if(uglyCode.error) {
-                console.log('uglify error:'+uglyCode.error);
-            }
-            return callback(uglyCode.code);
-        });
-    });
-}
