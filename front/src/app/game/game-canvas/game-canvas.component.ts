@@ -131,6 +131,13 @@ export class GameCanvasComponent implements OnInit {
       CadavreProcessor.addCadavreToChunk(this.cadavres, cadavre);
     }
 
+    if (!this.map.options.disablePersistentCadavres) {
+      // refresh cadavres
+      this.playerService.getMapCadavres(this.mapTitle).subscribe({
+        next: cadavres => this.cadavres = CadavreProcessor.getCadavreAsChunks(cadavres)
+      });
+    }
+
     this.player = new Player(this.startPoint.x, this.startPoint.y, this.playerColor);
     this.respawnInitiated = false;
   }
