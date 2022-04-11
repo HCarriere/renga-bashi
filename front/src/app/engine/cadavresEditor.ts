@@ -1,8 +1,8 @@
 import { MouseStatus } from "../editor/editor-canvas/editor-canvas.component";
 import { EditorService } from "../services/editor.service";
 import { CadavreChunks, CadavreProcessor } from "./cadavres";
-import { Map, MapProcessor, VisibleBox } from "./map";
-import { EditorMode } from "./mapEditor";
+import { MapProcessor, VisibleBox } from "./map";
+import { EditorMode, Map } from "./mapEditor";
 
 export class CadavreEditorProcessor extends CadavreProcessor {
 
@@ -16,7 +16,7 @@ export class CadavreEditorProcessor extends CadavreProcessor {
 
         if (mouseStatus.modifiers.shift) {
             // erase cadavre around
-            // TODO
+            
         } else if (this.cooldownCadavre <= 0) {
             // place new cadavre
             const newCadavre = {

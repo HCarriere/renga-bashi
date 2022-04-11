@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
-import { Map } from 'src/app/engine/map';
-import { MapEditorProcessor } from 'src/app/engine/mapEditor';
+import { TileEffect } from 'src/app/engine/map';
+import { Map, MapEditorProcessor } from 'src/app/engine/mapEditor';
 import { EditorService } from 'src/app/services/editor.service';
 import { PlayerService } from 'src/app/services/player.service';
 
@@ -20,6 +20,8 @@ export class EditorComponent implements OnInit {
   public mapSelectorDisplay = false;
   public endAlias!: string;
 
+  TileEffect = TileEffect;
+  
   constructor(
     public editorService: EditorService,
     private playerService: PlayerService,

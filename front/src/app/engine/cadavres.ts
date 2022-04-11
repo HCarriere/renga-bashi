@@ -21,7 +21,7 @@ export interface CadavreChunks {
 export class CadavreProcessor {
     
     static chunkSize = 32;
-    static size = 14;
+    static size = 16;
 
     static draw(cadavres: CadavreChunks, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
       for (const cadavreChunk of cadavres.chunks.values()) {

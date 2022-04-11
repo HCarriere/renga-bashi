@@ -2,6 +2,12 @@
     <app-editor-canvas [map]="map" [cadavres]="cadavres"></app-editor-canvas>
     
     <div class="editor-options">
+        <app-editor-section [title]="'Maps'">
+            <div class="simple-button" (click)="mapSelectorDisplay = !mapSelectorDisplay">Open map ...</div>
+            <div class="simple-button" (click)="saveMap()">Save map</div>
+            <!--<div class="simple-button">Save map & download JSON</div>-->
+        </app-editor-section>
+        
         <app-editor-section [title]="'Map parameters'">
             <ng-container *ngIf="!detailsEdit">
                 <div class="simple-button"  (click)="detailsEdit = true">Edit</div>
@@ -33,6 +39,11 @@
 
         <app-editor-section [title]="'Tile color'" [ngClass]="{'disabled':editorService.mode != 0}">
             <ngx-colors ngx-colors-trigger [(ngModel)]="editorService.selectedColor"></ngx-colors>
+
+            <span class="simple-button" [ngClass]="{'selected':editorService.tileEffect == TileEffect.NONE}" (click)="editorService.tileEffect = TileEffect.NONE">No effect</span>
+            <span class="simple-button" [ngClass]="{'selected':editorService.tileEffect == TileEffect.GLOW}" (click)="editorService.tileEffect = TileEffect.GLOW">Glow</span>
+            <span class="simple-button" [ngClass]="{'selected':editorService.tileEffect == TileEffect.LAVA}" (click)="editorService.tileEffect = TileEffect.LAVA">Lava</span>
+
             <span class="simple-button" (click)="editorService.computeMapColors(map.map)">Refresh map colors</span> <br>
             <div *ngFor="let color of editorService.mapColors" 
                  [ngStyle]="{'background-color': color}" 
@@ -103,11 +114,6 @@
             <div class="cursor-pointer" *ngIf="!editorService.enableDebug" (click)="editorService.toggleDebug()">> Debug disabled</div>
         </app-editor-section>
 
-        <app-editor-section [title]="'Maps'">
-            <div class="simple-button" (click)="mapSelectorDisplay = !mapSelectorDisplay">Open map ...</div>
-            <div class="simple-button" (click)="saveMap()">Save map</div>
-            <!--<div class="simple-button">Save map & download JSON</div>-->
-        </app-editor-section>
     </div>
 </div>
 

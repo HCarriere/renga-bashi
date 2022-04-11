@@ -1,6 +1,18 @@
 import { MouseStatus } from "../editor/editor-canvas/editor-canvas.component";
 import { EditorService } from "../services/editor.service";
-import { Map, MapData, MapProcessor, ObjectType, PhysicType, VisibleBox } from "./map";
+import { MapData, MapProcessor, ObjectType, PhysicType, VisibleBox } from "./map";
+
+export interface Map {
+    title: string;
+    map: MapData;
+    links: Link[];
+}
+
+export interface Link {
+    endAlias: string;
+    destinationMap: string;
+    destinationAlias: string;
+}
 
 export enum EditorMode {
     GRAPHIC = 0,
@@ -14,6 +26,44 @@ export class MapEditorProcessor extends MapProcessor {
     'Le_Mauvais_Chemin','Léon_Morin,_prêtre','Une_femme_est_une_femme','Les_Amours_célèbres','Scandale_sur_la_Riviera','Un_nommé_La_Rocca','Le_Doulos','Cartouche','Un_singe_en_hiver',
     'Le_Jour_le_plus_court','La_Mer_à_boire','Peau','Dragées_au_poivre','LAîné_des_Ferchaux','Les_Don_Juan','LHomme','Cent_Mille_Dollars_au_soleil',
     'Échappement_libre','La_Chasse_à_lhomme','Week-end_à_Zuydcoote','Par_un_beau_matin','Pierrot_le_Fou','Les_Tribulations','Tendre_Voyou','Paris_brûle-t-il_?','Casino_Royale','Le_Voleur','Le_Démoniaque','Ho_!','Le_Cerveau','La_Sirène_du_Mississipi','Un_homme_qui_me_plaît','Borsalino','Les_Mariés','Le_Casse','Docteur_Popaul','La_Scoumoune','LHéritier','Le_Magnifique','Stavisky...','Peur_sur_la_ville','LIncorrigible','LAlpagueur','Le_Corps','LAnimal','Flic_ou_Voyou','Le_Guignolo','Le_Professionnel','LAs_des_as','Le_Marginal','Les_Morfalous','Joyeuses_Pâques','Hold-up','Le_Solitaire','Itinéraire','LInconnu_dans_la_maison','Les_Cent_et_Une_Nuits','Les_Misérables','Désiré','Une_chance_sur_deux','Peut-être','Les_Acteurs','Amazone','Un_homme_et_son_chien'];
+
+    static override draw(map: MapData, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox, frame:number, debug = false): void {
+        super.draw(map, context, width, height, visibleBox, frame, debug);
+
+        // debug waypoints
+        if (debug) {
+            for (let start of map.starts) {
+                context.fillStyle = '#FFFF00';
+                context.fillRect(start.x * MapProcessor.tileSize - visibleBox.x+4, start.y * MapProcessor.tileSize - visibleBox.y+4, MapProcessor.tileSize-8, MapProcessor.tileSize-8);
+                context.fillText(start.alias, start.x * MapProcessor.tileSize - visibleBox.x+2, start.y * MapProcessor.tileSize - visibleBox.y-2);
+            }
+            for (let end of map.ends) {
+                context.fillStyle = '#FF00FF';
+                context.fillRect(end.x * MapProcessor.tileSize - visibleBox.x+4, end.y * MapProcessor.tileSize - visibleBox.y+4, MapProcessor.tileSize-8, MapProcessor.tileSize-8);
+                context.fillText(end.alias, end.x * MapProcessor.tileSize - visibleBox.x+2, end.y * MapProcessor.tileSize - visibleBox.y-2);
+            }
+        }
+    }
+
+    static override drawTile(map: MapData, context : CanvasRenderingContext2D, x: number, y: number, visibleBox: VisibleBox, frame:number, debug = false) {
+        // debug map size
+        if (debug) {
+            context.fillStyle = '#11111150';
+            context.fillRect(x * MapProcessor.tileSize - visibleBox.x+1, y * MapProcessor.tileSize - visibleBox.y+1, MapProcessor.tileSize-2, MapProcessor.tileSize-2);
+        }
+
+        super.drawTile(map, context, x, y, visibleBox, frame, debug);
+
+        // debug map collisions
+        if (debug) {
+            if (map.physicLayer[x] && map.physicLayer[x][y]) {
+                if (map.physicLayer[x][y] == PhysicType.COLLISION) context.fillStyle = '#00500090';
+                if (map.physicLayer[x][y] == PhysicType.DEATH) context.fillStyle = '#50000090';
+                if (map.physicLayer[x][y] == PhysicType.NO_DEATH) context.fillStyle = '#50500090';
+                context.fillRect(x * MapProcessor.tileSize - visibleBox.x+1, y * MapProcessor.tileSize - visibleBox.y+1, MapProcessor.tileSize-2, MapProcessor.tileSize-2);
+            }
+        }
+    }
 
     static updateMap(map: MapData, mouseStatus: MouseStatus, visibleBox: VisibleBox, editorService: EditorService): void {
         if (!mouseStatus.clicked || mouseStatus.modifiers.rightclick) return;
@@ -40,8 +90,12 @@ export class MapEditorProcessor extends MapProcessor {
                             else if (editorService.mode == EditorMode.PHYSIC) {map.physicLayer[x][y] = PhysicType.VOID;}
                         } else {
                             // paint
-                            if (editorService.mode == EditorMode.GRAPHIC) {map.graphicLayer[x][y] = editorService.selectedColor;}
-                            else if (editorService.mode == EditorMode.PHYSIC) {map.physicLayer[x][y] = editorService.selectedPhysicType;}
+                            if (editorService.mode == EditorMode.GRAPHIC) {
+                                map.graphicLayer[x][y] = editorService.tileEffect +''+ editorService.selectedColor;
+                            }
+                            else if (editorService.mode == EditorMode.PHYSIC) {
+                                map.physicLayer[x][y] = editorService.selectedPhysicType;
+                            }
                         }
                     }
                 }

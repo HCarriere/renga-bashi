@@ -112,6 +112,10 @@ label {
 span.simple-button {
   display: inline-block;
 }
+.simple-button.selected {
+  border-color: white;
+  color: white;
+}
 .simple-button:hover {
   border-color: white;
 }

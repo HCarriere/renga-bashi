@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Map, MapEditorProcessor } from 'src/app/engine/mapEditor';
 import { EditorService } from 'src/app/services/editor.service';
-import { Map } from 'src/app/engine/map';
 
 @Component({
   selector: 'app-map-selector',
@@ -46,6 +46,10 @@ export class MapSelectorComponent implements OnInit {
 
   selectMap(map: Map) {
     if (!this.endAlias) this.mapSelected.emit(map);
+  }
+
+  newMap() {
+    if (!this.endAlias) this.mapSelected.emit(MapEditorProcessor.initNewMap());
   }
 
   deleteMap(map: Map) {

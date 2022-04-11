@@ -9,6 +9,8 @@
         </div>
         <div class="simple-button danger" *ngIf="!endAlias" (click)="deleteMap(map)">Delete map</div>
     </div>
-
+    <div class="map-wrapper cursor-pointer" *ngIf="!endAlias" (click)="newMap()">
+        NEW MAP
+    </div>
     <div class="exit" (click)="exit()">x</div>
 </div>

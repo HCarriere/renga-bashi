@@ -17,7 +17,7 @@ export class Player {
     vy: number = 0;
     rot: number = 0;
     color: string = 'white';
-    size: number = 12;
+    size: number = 14;
 
     maxJumpFrames = 10;
     jumpFrames = 0;
@@ -40,14 +40,23 @@ export class Player {
         }
     }
 
+    private jumpAudio: HTMLAudioElement;
+    private deathAudio: HTMLAudioElement;
+
     constructor(x: number, y: number, color: string) {
         this.x = x * MapProcessor.tileSize - MapProcessor.tileSize/2;
         this.y = y * MapProcessor.tileSize - MapProcessor.tileSize/2;
         this.color = color;
+        this.jumpAudio = new Audio();
+        this.jumpAudio.src = '../assets/sounds/jump.wav';
+        this.jumpAudio.load();
+        this.deathAudio = new Audio();
+        this.deathAudio.src = '../assets/sounds/death.wav';
+        this.deathAudio.load();
     }
 
-    public draw(context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
-        this.updateCamera(visibleBox, width, height);
+    public draw(context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox, map:MapData) {
+        this.updateCamera(visibleBox, width, height, map);
 
         let mody = 0;
         if (!this.groundTouched) {
@@ -76,6 +85,9 @@ export class Player {
         this.vy += Player.physicSettings.gravity;
 
         if (playerController.UP) {
+            if (this.groundTouched) {
+                this.onJump();
+            }
             if (this.jumpFrames < this.maxJumpFrames) {
                 this.jumpFrames ++;
                 this.vy -= Player.physicSettings.jumpSpeed;
@@ -131,7 +143,7 @@ export class Player {
             collisions.right == PhysicType.NO_DEATH || 
             collisions.left == PhysicType.NO_DEATH || 
             collisions.up == PhysicType.NO_DEATH) {
-            // ded
+            // not ded
             this.canCreateCadavre = false;
         } else this.canCreateCadavre = true;
 
@@ -140,6 +152,8 @@ export class Player {
             collisions.left == PhysicType.DEATH || 
             collisions.up == PhysicType.DEATH) {
             // ded
+            this.deathAudio.currentTime = 0;
+            this.deathAudio.play();
             this.isDead = true;
             this.canCreateCadavre = false;
         }
@@ -259,11 +273,14 @@ export class Player {
     }
 
     private onTouchGround() {
-        
-        console.log('ground')
     }
 
-    private updateCamera(visibleBox: VisibleBox, screenWidth: number, screenHeight: number) {
+    private onJump() {
+        this.jumpAudio.currentTime = 0;
+        this.jumpAudio.play();
+    }
+
+    private updateCamera(visibleBox: VisibleBox, screenWidth: number, screenHeight: number, map: MapData) {
         if (this.vx > 0 && this.x - visibleBox.x > 6 * screenWidth / 9) {
             // right
             visibleBox.x += this.vx;
@@ -297,6 +314,8 @@ export class Player {
 
 
         // limits
+        if (visibleBox.x + screenWidth > map.width * MapProcessor.tileSize) visibleBox.x = map.width * MapProcessor.tileSize - screenWidth;
+        if (visibleBox.y + screenHeight > map.height * MapProcessor.tileSize) visibleBox.y = map.height * MapProcessor.tileSize - screenHeight;
         if (visibleBox.x < 0) visibleBox.x = 0;
         if (visibleBox.y < 0) visibleBox.y = 0;
         visibleBox.x = Math.round(visibleBox.x);

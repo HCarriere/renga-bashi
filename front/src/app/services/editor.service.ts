@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, map, Observable } from 'rxjs';
-import { Map, MapData, ObjectType, PhysicType } from '../engine/map';
-import { EditorMode, MapEditorProcessor } from '../engine/mapEditor';
+import { MapData, ObjectType, PhysicType, TileEffect } from '../engine/map';
+import { EditorMode, Map, MapEditorProcessor } from '../engine/mapEditor';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Cadavre } from '../engine/cadavres';
 
@@ -19,6 +19,7 @@ export class EditorService {
   public brushSize: boolean[][] = [];
   public mode: EditorMode = EditorMode.GRAPHIC;
   public addingObject!: ObjectType;
+  public tileEffect: TileEffect = TileEffect.NONE;
 
   public isAuthentified = false;
 
@@ -90,7 +91,11 @@ export class EditorService {
     this.mapColors = [];
     for (const row of map.graphicLayer) {
       for (const color of row) {
-        if (color && !this.mapColors.includes(color)) this.mapColors.push(color);
+        let c = color; 
+        if (color && !color.startsWith('#')) {
+          c = color.substring(1);
+        }
+        if (c && !this.mapColors.includes(c)) this.mapColors.push(c);
       }
     }
   }

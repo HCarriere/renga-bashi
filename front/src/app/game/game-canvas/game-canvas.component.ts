@@ -36,6 +36,8 @@ export class GameCanvasComponent implements OnInit {
   private deltaTime = 0;
   private currentFrame = 0;
 
+  private music!: HTMLAudioElement;
+
   constructor(
     private ngZone: NgZone,
     private playerService: PlayerService,
@@ -58,15 +60,17 @@ export class GameCanvasComponent implements OnInit {
         this.player = new Player(this.startPoint.x || 2, this.startPoint.y || 2, this.playerColor);
       }
     });
-    /*this.playerService.getMapCadavres(this.mapTitle).subscribe({
-      next: cad => this.cadavres = cad
-    }); */
-
     this.ngZone.runOutsideAngular(() => this.mainLoop());
 
     setTimeout(() => {
       this.resizeCanvas();
     });
+
+    this.music = new Audio();
+    this.music.src = '../assets/sounds/musique.wav';
+    this.music.loop = true;
+    this.music.load();
+    // this.music.play(); // TODO enable this
   }
 
   private mainLoop() {
@@ -74,9 +78,9 @@ export class GameCanvasComponent implements OnInit {
       // graphics
       this.context.clearRect(0, 0, this.width, this.height);
 
-      MapProcessor.draw(this.map, this.context, this.width, this.height, this.visibleBox);
+      MapProcessor.draw(this.map, this.context, this.width, this.height, this.visibleBox, this.currentFrame);
       CadavreProcessor.draw(this.cadavres, this.context, this.width, this.height, this.visibleBox);
-      this.player.draw(this.context, this.width, this.height, this.visibleBox)
+      this.player.draw(this.context, this.width, this.height, this.visibleBox, this.map)
 
       // physic
       this.player.update(this.map, this.cadavres, this.playerController);

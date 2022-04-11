@@ -1,8 +1,4 @@
-export interface Map {
-    title: string;
-    map: MapData;
-    links: Link[];
-}
+
 
 export interface MapData {
     width: number;
@@ -18,13 +14,6 @@ export interface MapData {
 export interface MapOptions {
     disablePersistentCadavres?: boolean;
 }
-
-export interface Link {
-    endAlias: string;
-    destinationMap: string;
-    destinationAlias: string;
-}
-
 
 export interface VisibleBox {
     x: number;
@@ -50,53 +39,45 @@ export enum ObjectType {
     END = 2,
 }
 
+export enum TileEffect {
+    NONE = '',
+    GLOW = 'g',
+    LAVA = 'l',
+}
+
 export class MapProcessor {
 
-    static tileSize = 16; // px on default zoom
+    static tileSize = 20; // px on default zoom
 
-    static draw(map: MapData, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox, debug = false): void {
+    static draw(map: MapData, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox, frame:number, debug = false): void {
         const startTileX = Math.max(0, Math.floor(visibleBox.x/MapProcessor.tileSize));
 	    const startTileY = Math.max(0, Math.floor(visibleBox.y/MapProcessor.tileSize));
 
         for (let x = startTileX; x < Math.min(Math.floor(startTileX + width/MapProcessor.tileSize)+2, map.width); x++) {
             for (let y = startTileY; y < Math.min(Math.floor(startTileY + height/MapProcessor.tileSize)+2, map.height); y++) {
-                
-                // debug map size
-                if (debug) {
-                    context.fillStyle = '#11111150';
-                    context.fillRect(x * MapProcessor.tileSize - visibleBox.x+1, y * MapProcessor.tileSize - visibleBox.y+1, MapProcessor.tileSize-2, MapProcessor.tileSize-2);
-                }
-
-                if (map.graphicLayer[x] && map.graphicLayer[x][y]) {
-                    context.fillStyle = map.graphicLayer[x][y];
-                    context.fillRect(x * MapProcessor.tileSize - visibleBox.x, y * MapProcessor.tileSize - visibleBox.y, MapProcessor.tileSize, MapProcessor.tileSize);
-                }
-
-                // debug map collisions
-                if (debug) {
-                    if (map.physicLayer[x] && map.physicLayer[x][y]) {
-                        if (map.physicLayer[x][y] == PhysicType.COLLISION) context.fillStyle = '#00500090';
-                        if (map.physicLayer[x][y] == PhysicType.DEATH) context.fillStyle = '#50000090';
-                        if (map.physicLayer[x][y] == PhysicType.NO_DEATH) context.fillStyle = '#50500090';
-                        context.fillRect(x * MapProcessor.tileSize - visibleBox.x+1, y * MapProcessor.tileSize - visibleBox.y+1, MapProcessor.tileSize-2, MapProcessor.tileSize-2);
-                    }
-                }
+                this.drawTile(map, context, x, y, visibleBox, frame, debug);
             }
         }
+    }
 
-        // debug waypoints
-        if (debug) {
-            for (let start of map.starts) {
-                context.fillStyle = '#FFFF00';
-                context.fillRect(start.x * MapProcessor.tileSize - visibleBox.x+4, start.y * MapProcessor.tileSize - visibleBox.y+4, MapProcessor.tileSize-8, MapProcessor.tileSize-8);
-                context.fillText(start.alias, start.x * MapProcessor.tileSize - visibleBox.x+2, start.y * MapProcessor.tileSize - visibleBox.y-2);
+    static drawTile(map: MapData, context : CanvasRenderingContext2D, x: number, y: number, visibleBox: VisibleBox, frame:number, debug = false) {
+        if (map.graphicLayer[x] && map.graphicLayer[x][y]) {
+            if (map.graphicLayer[x][y].charAt(0) == TileEffect.LAVA) {
+                context.fillStyle = this.getLavaColor(x, y, frame, map.graphicLayer[x][y].substring(1));
+            } else if (map.graphicLayer[x][y].charAt(0) == TileEffect.GLOW) {
+                context.shadowBlur = 15;
+                context.fillStyle = map.graphicLayer[x][y].substring(1);
+                context.shadowColor = context.fillStyle;
+            } else {
+                context.fillStyle = map.graphicLayer[x][y];
             }
-            for (let end of map.ends) {
-                context.fillStyle = '#FF00FF';
-                context.fillRect(end.x * MapProcessor.tileSize - visibleBox.x+4, end.y * MapProcessor.tileSize - visibleBox.y+4, MapProcessor.tileSize-8, MapProcessor.tileSize-8);
-                context.fillText(end.alias, end.x * MapProcessor.tileSize - visibleBox.x+2, end.y * MapProcessor.tileSize - visibleBox.y-2);
-            }
+            context.fillRect(x * MapProcessor.tileSize - visibleBox.x, y * MapProcessor.tileSize - visibleBox.y, MapProcessor.tileSize, MapProcessor.tileSize);
+            context.shadowBlur = 0;
         }
+    }
+
+    static getLavaColor(x:number, y: number, frame: number, baseColor: string) {
+        return baseColor.substring(0, 7) + Math.floor(Math.cos((x+20*y)/10+frame/50)*70+180).toString(16).padStart(2, '0');
     }
 
     static getRandomColor() {
