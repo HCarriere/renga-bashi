@@ -22,5 +22,9 @@
   "engines": {
     "node": "12.22.11",
     "npm": "8.6.0"
+  },
+  "devDependencies": {
+    "@angular/cli": "^13.3.2",
+    "@angular/compiler-cli": "^13.3.2"
   }
 }
