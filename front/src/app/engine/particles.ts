@@ -19,19 +19,19 @@ export class ParticlesGenerator {
      * -1 : infinite;
      * otherwise in frames
      */
-    public life = 30;
+    public life = 20;
     public particlePerFrame = 8;
     public gravity = {
         x: 0,
-        y: 0.2};
+        y: -0.2};
     public rangeSpawn = {
-        minx: -2,
-        maxx: 2,
-        miny: -10,
-        maxy: -2};
+        minx: -5,
+        maxx: 5,
+        miny: -5,
+        maxy: 5};
     public rangeVelocity = {
-        minx: -2,
-        maxx: 2,
+        minx: 0,
+        maxx: 0,
         miny: -10,
         maxy: -2};
     public rangeLife = {

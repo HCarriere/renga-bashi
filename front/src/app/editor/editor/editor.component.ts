@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
 import { TileEffect } from 'src/app/engine/map';
 import { Map, MapEditorProcessor } from 'src/app/engine/mapEditor';
@@ -20,11 +21,14 @@ export class EditorComponent implements OnInit {
   public mapSelectorDisplay = false;
   public endAlias!: string;
 
+  public downloadJsonHref!: SafeUrl;
+
   TileEffect = TileEffect;
   
   constructor(
     public editorService: EditorService,
     private playerService: PlayerService,
+    private sanitizer: DomSanitizer,
   ) {
     this.map = MapEditorProcessor.initNewMap();
     this.cadavres = CadavreProcessor.getCadavreAsChunks([]);
@@ -88,5 +92,13 @@ export class EditorComponent implements OnInit {
     );
   }
 
+  /**
+   * download the map
+   */
+  public generateDownloadJsonUri() {
+    const json = JSON.stringify(this.map);
+    const uri = this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(json));
+    this.downloadJsonHref = uri;
+  }
   
 }

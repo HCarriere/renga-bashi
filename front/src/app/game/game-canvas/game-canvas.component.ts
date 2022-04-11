@@ -99,7 +99,6 @@ export class GameCanvasComponent implements OnInit {
     this.context.textAlign = 'left';
     this.context.fillStyle = 'white';
     this.context.fillText('fps: '+Math.floor(this.frameRate), 20, 20);
-    this.context.fillText('map: '+(this.map ? this.map.backgroundColor : ''), 20, 40);
 
     requestAnimationFrame(() => {
       this.mainLoop();
@@ -116,7 +115,7 @@ export class GameCanvasComponent implements OnInit {
       gen.rangeSpawn = {minx: -5, maxx: 5, miny: -5, maxy: -5};
       gen.gravity = {x: 0, y: 0.1};
       gen.rangeLife = {min: 4, max: 10};
-      gen.particlePerFrame = 30 ;
+      gen.particlePerFrame = 45 ;
       gen.life = 1;
       ParticlesProcessor.addGenerator(gen);
       const cadavre = {

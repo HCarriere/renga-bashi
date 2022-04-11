@@ -5,7 +5,7 @@
         <app-editor-section [title]="'Maps'">
             <div class="simple-button" (click)="mapSelectorDisplay = !mapSelectorDisplay">Open map ...</div>
             <div class="simple-button" (click)="saveMap()">Save map</div>
-            <!--<div class="simple-button">Save map & download JSON</div>-->
+            <a class="simple-button" title="Download JSON" (click)="generateDownloadJsonUri()" [href]="downloadJsonHref" [download]="'map_rb_'+map.title+'.json'">Download map JSON</a>
         </app-editor-section>
         
         <app-editor-section [title]="'Map parameters'">
