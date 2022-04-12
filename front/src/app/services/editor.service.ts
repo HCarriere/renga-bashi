@@ -12,7 +12,7 @@ import { Cadavre } from '../engine/cadavres';
 })
 export class EditorService {
 
-  public selectedColor: string = '#607d8b';
+  private _selectedColor: string = '#607d8b';
   public selectedPhysicType: PhysicType = PhysicType.COLLISION;
   public mapColors: string[] = [];
   public enableDebug = true;
@@ -100,8 +100,12 @@ export class EditorService {
     }
   }
 
-  public setColor(color: string) {
-    this.selectedColor = color;
+  public set selectedColor(color: string) {
+    if (color.startsWith('#') && color.length == 7)
+      this._selectedColor = color;
+  }
+  public get selectedColor(): string {
+    return this._selectedColor;
   }
 
   public setPhysicType(type: PhysicType) {

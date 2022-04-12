@@ -38,17 +38,19 @@
         </app-editor-section>
 
         <app-editor-section [title]="'Tile color'" [ngClass]="{'disabled':editorService.mode != 0}">
-            <ngx-colors ngx-colors-trigger [(ngModel)]="editorService.selectedColor"></ngx-colors>
+            <ngx-colors ngx-colors-trigger [(ngModel)]="editorService.selectedColor" [format]="'hex'" [colorPickerControls]="'no-alpha'"></ngx-colors>
 
             <span class="simple-button" [ngClass]="{'selected':editorService.tileEffect == TileEffect.NONE}" (click)="editorService.tileEffect = TileEffect.NONE">No effect</span>
             <span class="simple-button" [ngClass]="{'selected':editorService.tileEffect == TileEffect.GLOW}" (click)="editorService.tileEffect = TileEffect.GLOW">Glow</span>
             <span class="simple-button" [ngClass]="{'selected':editorService.tileEffect == TileEffect.LAVA}" (click)="editorService.tileEffect = TileEffect.LAVA">Lava</span>
 
+            <div class="info danger" *ngIf="editorService.tileEffect == TileEffect.GLOW">CAUTION : Glow is performances heavy</div>
+
             <span class="simple-button" (click)="editorService.computeMapColors(map.map)">Refresh map colors</span> <br>
             <div *ngFor="let color of editorService.mapColors" 
                  [ngStyle]="{'background-color': color}" 
                  class="color-from-map"
-                 (click)="editorService.setColor(color)">
+                 (click)="editorService.selectedColor = color">
                 {{color}}
             </div>
         </app-editor-section>

@@ -124,6 +124,10 @@ span.simple-button {
   color: red;
 }
 
+.info.danger {
+  color: red;
+}
+
 /* Components */
 app-editor, app-game {
   width: 100%;
