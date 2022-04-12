@@ -96,12 +96,36 @@ function addCadavre(req, callback, admin = false) {
     });
 }
 
+/**
+ * Remove all cadavres from map
+ * @param {*} title 
+ * @param {*} callback 
+ * @returns 
+ */
 function removeCadavres(title, callback) {
     if(!title) return callback(null, 400, 'missing parameters');
     CadavreModel.deleteMany({level: title}, (err) => {
         if (err) return callback(null, 500, err);
         return callback('ok');
     });
+}
+
+/**
+ * Remove some cadavres
+ * @param {*} title map
+ * @param {*} ids list of ids
+ * @param {*} callback 
+ */
+function removeSomeCadavres(title, ids, callback) {
+    if (!title || !ids) return callback(null, 400, 'missing parameters');
+    const cleanIds = ids.filter(o => o.length > 20);
+
+    CadavreModel.deleteMany({
+        level: title, 
+        _id: {$in: cleanIds}}, err => {
+        if (err) return callback(null, 500, err);
+        return callback('ok');  
+    })
 }
 
 function checkGuid(guid) {
@@ -112,4 +136,5 @@ module.exports = {
     getCadavres,
     addCadavre,
     removeCadavres,
+    removeSomeCadavres,
 };

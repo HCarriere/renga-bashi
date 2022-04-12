@@ -54,6 +54,16 @@ export class EditorService {
     });
   }
 
+  public removeSomeCadavres(title: string, ids: string[]) {
+    const cleanIds = ids.filter(o => o.length > 20);
+    if (cleanIds.length == 0) return;
+
+    this.httpClient.post('/api/cadavres/removesome', {title, ids: cleanIds}).subscribe({
+      next: data => console.log(data),
+      error: err => console.log(err)
+    });
+  }
+
   public removeAllCadavres(title: string) {
     this.httpClient.post('/api/cadavres/remove', {title}).subscribe({
       next: data => console.log(data),

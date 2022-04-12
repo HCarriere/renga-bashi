@@ -84,7 +84,7 @@ export class EditorCanvasComponent implements OnInit {
 
     MapEditorProcessor.draw(this.map.map, this.context, this.width, this.height, this.visibleBox, this.currentFrame, this.editorService.enableDebug);
     MapEditorProcessor.displayBrush(this.map.map, this.context, this.mouseStatus, this.visibleBox, this.editorService);
-    if (this.cadavres) CadavreEditorProcessor.draw(this.cadavres, this.context, this.width, this.height, this.visibleBox);
+    if (this.cadavres) CadavreEditorProcessor.drawEditor(this.cadavres, this.context, this.width, this.height, this.visibleBox, this.editorService, this.mouseStatus);
     ParticlesProcessor.draw(this.context, this.visibleBox);
 
     // tests

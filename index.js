@@ -45,29 +45,45 @@ app
 .use(bodyParser.urlencoded({limit: '100mb', extended: true})) // to support URL-encoded bodies
 
 app
-// cadavres
+
+/**
+ * cadavres
+ */
+// get all cadavres from a map
 .get('/api/cadavres', (req, res) => {
     cadavre.getCadavres(req, (result, status, err) => {
         res.set('Cache-Control', 'no-store');
         handleAPIResponse(res, result, status, err);
     });
 })
+// add a cadavre to map
 .post('/api/cadavres/add', (req, res) => {
     cadavre.addCadavre(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
 })
+// add a cadavre to map (no CD)
 .post('/api/cadavres/adminadd', mustBeAdmin, (req, res) => {
     cadavre.addCadavre(req, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     }, true);
 })
+// remove all from map
 .post('/api/cadavres/remove', mustBeAdmin, (req, res) => {
     cadavre.removeCadavres(req.body.title, (result, status, err) => {
         handleAPIResponse(res, result, status, err);
     });
 })
-// maps
+// remove some from map
+.post('/api/cadavres/removesome', mustBeAdmin, (req, res) => {
+    cadavre.removeSomeCadavres(req.body.title, req.body.ids, (result, status, err) => {
+        handleAPIResponse(res, result, status, err);
+    });
+})
+
+/**
+ * maps
+ */
 .get('/api/map/:title', (req, res) => {
     map.getMap(req, (result, status, err) => {
         res.set('Cache-Control', 'no-store');
