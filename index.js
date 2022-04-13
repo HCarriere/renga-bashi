@@ -14,6 +14,7 @@ const cadavre = require('./app/cadavre/cadavre');
 const map = require('./app/map/map');
 
 const port = process.env.PORT || '3001';
+const WS_PORT = process.env.WS_PORT || '8081';
 const DB_URI = process.env.DB_URI || 'mongodb://localhost/rengabashi'
 const API_PASSWORD = process.env.API_PASSWORD || '25xrwVZOHOY6l0CwJdE93svifcFQwFmDASQGQZpqT8Q=';
 const JWT_SECRET = process.env.JWT_SECRET || 'jwtSecret!'
@@ -44,14 +45,21 @@ app
 .use(bodyParser.json({limit: '100mb', extended: true})) // to support JSON-encoded bodies
 .use(bodyParser.urlencoded({limit: '100mb', extended: true})) // to support URL-encoded bodies
 
-app
+cadavre.createWebSocketServer(WS_PORT);
 
+app
 /**
  * cadavres
  */
 // get all cadavres from a map
 .get('/api/cadavres', (req, res) => {
-    cadavre.getCadavres(req, (result, status, err) => {
+    cadavre.getCadavres(req.query.title, (result, status, err) => {
+        res.set('Cache-Control', 'no-store');
+        handleAPIResponse(res, result, status, err);
+    });
+})
+.get('/api/cadavreshash', (req, res) => {
+    cadavre.getCadavresHash(req.query.title, req.query.localhash, (result, status, err) => {
         res.set('Cache-Control', 'no-store');
         handleAPIResponse(res, result, status, err);
     });
@@ -153,7 +161,7 @@ server.listen(port, (err) => {
     if(err) {
         return console.log('Node launch error', err);
     }
-    console.log(`API listening to *:${port})`);
+    console.log(`API listening to port ${port}`);
 });
 
 function handleAPIResponse(res, result, status, err) {

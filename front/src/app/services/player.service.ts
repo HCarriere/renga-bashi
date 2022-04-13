@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { map, mergeMap, Observable, zip } from 'rxjs';
 import { Cadavre, CadavreChunks, CadavreProcessor } from '../engine/cadavres';
 import { MapData } from '../engine/map';
+import { Md5 } from 'ts-md5/dist/md5';
 
 @Injectable({
   providedIn: 'root'
@@ -65,12 +66,18 @@ export class PlayerService {
     }});
   }
 
-  public addCadavre(cadavre: Cadavre) {
+  public compareCadavresHash(cadavres: Cadavre[], title: string): Observable<boolean | Cadavre[]> {
+    const chain = cadavres.map(c => c.x+'!'+c.y).sort().join('-');
+    const localhash = Md5.hashStr(chain);
+    return this.httpClient.get<boolean | Cadavre[]>(`/api/cadavreshash`, {params: {
+      title: title,
+      localhash: localhash,
+    }});
+  }
+
+  public addCadavre(cadavre: Cadavre): Observable<Cadavre> {
     cadavre.guid = this.guid;
-    this.httpClient.post('/api/cadavres/add', cadavre).subscribe({
-      next: data => console.log(data),
-      error: err => console.log(err)
-    });
+    return this.httpClient.post<Cadavre>('/api/cadavres/add', cadavre);
   }
 
   private getGuid(): string {

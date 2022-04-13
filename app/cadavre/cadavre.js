@@ -1,15 +1,21 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const WebSocket = require('ws');
 const utils = require('../utils');
 const maps = require('../map/map');
-
+const crypto = require('crypto');
 
 let guids = [];
 const maxGuidToKeep = 3;
 const cadavreMaxPathTick = 800;
-const cadavreCooldown = 2000;
+const cadavreCooldown = 1200;
 let guidsCount = 0;
+
+const cadavresHash = [];
+
+let wss;
+const wsClients = new Map();
 
 const cadavreSchema = mongoose.Schema({
     x: Number,
@@ -22,9 +28,7 @@ const cadavreSchema = mongoose.Schema({
 });
 const CadavreModel = mongoose.model('Cadavre', cadavreSchema);
 
-function getCadavres(req, callback) {
-    const level = req.query.title;
-
+function getCadavres(level, callback) {
     if (!level) return callback(null, 400, 'missing parameters');
 
     CadavreModel.find(
@@ -37,6 +41,41 @@ function getCadavres(req, callback) {
         }
     ).sort({date: -1});
 }
+
+/**
+ * Compare cadavres hash and localhash. 
+ * If hash are identical, returns true.
+ * If hash are different, returns cadavres.
+ * @param {*} level 
+ * @param {*} localhash 
+ * @param {*} callback 
+ */
+function getCadavresHash(level, localhash, callback) {
+    if (cadavresHash[level]) {
+        if (cadavresHash[level] == localhash) {
+            return callback(true);
+        }
+    }
+
+    CadavreModel.find(
+        {
+            level,
+        },
+        (err, data) => {
+            if (err) return callback(null, 500, err);
+
+            const chain = data.map(c => c.x+'!'+c.y).sort().join('-');
+            const hash = crypto.createHash('md5').update(chain).digest('hex');
+            cadavresHash[level] = hash;
+            
+            if (hash == localhash) {
+                return callback(true);
+            }
+            return callback(data);
+        }
+    ).sort({date: -1});
+}
+
 
 function addCadavre(req, callback, admin = false) {
     let params = utils.getParamsFromRequest(req, {
@@ -92,7 +131,11 @@ function addCadavre(req, callback, admin = false) {
     const obj = new CadavreModel(params);
     obj.save(err => {
         if (err) return callback(null, 500, err);
-        return callback('ok');
+        // send info to wsClients
+        [...wsClients.keys()].forEach((client) => {
+            client.send(wsObject('cadavre', obj));
+        });
+        return callback(obj);
     });
 }
 
@@ -132,9 +175,50 @@ function checkGuid(guid) {
     return guid.length == 36;
 }
 
+/**
+ * Create the websocket connection
+ * https://github.com/websockets/ws
+ * @param {number} port 
+ */
+function createWebSocketServer(port) {
+    wss = new WebSocket.Server({port});
+    console.log('WebSocket server created on port ' + port)
+
+    wss.on('connection', (ws, req) => {
+        onClientConnect(ws, req);
+
+        ws.on('close', () => {
+            onClientDisconnect(ws)
+        });
+    });
+
+    
+}
+
+function onClientConnect(ws, req) {
+    // const ip = req.socket.remoteAddress;
+    wsClients.set(ws, utils.uuidv4());
+
+    console.log('new client (existing clients : ' + wsClients.size+ ')');
+}
+
+function onClientDisconnect(ws) {
+    wsClients.delete(ws);
+
+    console.log('removing client (existing clients : ' + wsClients.size+ ')');
+}
+
+
+function wsObject(key, obj) {
+    return JSON.stringify({key, obj});
+}
+
+
 module.exports = {
     getCadavres,
     addCadavre,
     removeCadavres,
     removeSomeCadavres,
+    createWebSocketServer,
+    getCadavresHash,
 };

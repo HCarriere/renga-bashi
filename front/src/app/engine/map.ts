@@ -79,7 +79,7 @@ export class MapProcessor {
     }
 
     static getLavaColor(x:number, y: number, frame: number, baseColor: string) {
-        return baseColor.substring(0, 7) + Math.floor(Math.cos((x+20*y)/10+frame/40)*70+180).toString(16).padStart(2, '0');
+        return baseColor.substring(0, 7) + Math.floor(Math.cos((x+20*y)/10+frame/30)*70+180).toString(16).padStart(2, '0');
     }
 
     static getRandomColor() {

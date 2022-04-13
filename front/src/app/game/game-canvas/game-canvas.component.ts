@@ -1,7 +1,7 @@
 import { Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
 import { CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
 import { MapData, MapProcessor, VisibleBox } from 'src/app/engine/map';
-import { ParticlesGenerator, ParticlesProcessor } from 'src/app/engine/particles';
+import { ParticlesProcessor } from 'src/app/engine/particles';
 import { Player, PlayerController } from 'src/app/engine/player';
 import { PlayerService } from 'src/app/services/player.service';
 
@@ -109,15 +109,9 @@ export class GameCanvasComponent implements OnInit {
     this.respawnInitiated = true;
     this.player.isDead = true;
     // create cadavre (if can)
+    this.player.spawnRespawnParticles();
+    
     if (this.player.canCreateCadavre) {
-      const gen = new ParticlesGenerator(this.player.x, this.player.y, ['red', this.player.color, this.player.color, this.player.color]);
-      gen.rangeVelocity = {minx: -4+this.player.vx, maxx: 4+this.player.vx, miny: -4+this.player.vy, maxy: 4+this.player.vy};
-      gen.rangeSpawn = {minx: -5, maxx: 5, miny: -5, maxy: -5};
-      gen.gravity = {x: 0, y: 0.1};
-      gen.rangeLife = {min: 4, max: 10};
-      gen.particlePerFrame = 45 ;
-      gen.life = 1;
-      ParticlesProcessor.addGenerator(gen);
       const cadavre = {
         x: this.player.x,
         y: this.player.y,
@@ -126,16 +120,25 @@ export class GameCanvasComponent implements OnInit {
         level: this.mapTitle,
       };
       if (!this.map.options.disablePersistentCadavres) {
-        this.playerService.addCadavre(cadavre);
-      }
-      CadavreProcessor.addCadavreToChunk(this.cadavres, cadavre);
-    }
+        this.playerService.addCadavre(cadavre).subscribe({
+          next: newCad => {
+            CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
+            // refresh cadavres
+            this.playerService.compareCadavresHash(CadavreProcessor.getChunksAsArray(this.cadavres), this.mapTitle).subscribe({
+              next: res => {
+                if (res !== true && Array.isArray(res)) {
+                  this.cadavres = CadavreProcessor.getCadavreAsChunks(res);
+                }
+                // CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
+              }
+            });
 
-    if (!this.map.options.disablePersistentCadavres) {
-      // refresh cadavres
-      this.playerService.getMapCadavres(this.mapTitle).subscribe({
-        next: cadavres => this.cadavres = CadavreProcessor.getCadavreAsChunks(cadavres)
-      });
+          }
+        });
+      } else {
+        CadavreProcessor.addCadavreToChunk(this.cadavres, cadavre);
+      }
+      
     }
 
     this.player = new Player(this.startPoint.x, this.startPoint.y, this.playerColor);
@@ -192,22 +195,11 @@ export class GameCanvasComponent implements OnInit {
 
   @HostListener('window:keydown', ['$event'])
   keyDown(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp') this.playerController.UP = true;
-    if (event.key === 'ArrowRight') this.playerController.RIGHT = true;
-    if (event.key === 'ArrowDown') this.playerController.DOWN = true;
-    if (event.key === 'ArrowLeft') this.playerController.LEFT = true;
-    if (event.key.toLowerCase() === 'r') this.playerController.RESPAWN = true;
+    this.player.onKeyDown(event.key, this.playerController);
   }
 
   @HostListener('window:keyup', ['$event'])
   keyUp(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp') this.playerController.UP = false;
-    if (event.key === 'ArrowRight') this.playerController.RIGHT = false;
-    if (event.key === 'ArrowDown') this.playerController.DOWN = false;
-    if (event.key === 'ArrowLeft') this.playerController.LEFT = false;
-    if (event.key.toLowerCase() === 'r') {
-      this.respawn();
-      this.playerController.RESPAWN = false;
-    }
+    this.player.onKeyUp(event.key, this.playerController);
   }
 }

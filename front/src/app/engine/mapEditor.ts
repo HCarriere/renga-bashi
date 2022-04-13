@@ -119,6 +119,7 @@ export class MapEditorProcessor extends MapProcessor {
 
     static displayBrush(map: MapData, context : CanvasRenderingContext2D, mouseStatus: MouseStatus, visibleBox: VisibleBox, editorService: EditorService) {
         if (mouseStatus.modifiers.rightclick) return;
+        if (editorService.mode != EditorMode.GRAPHIC && editorService.mode != EditorMode.PHYSIC) return;
         
         const cx = Math.floor((mouseStatus.position.x + visibleBox.x) / MapProcessor.tileSize);
         const cy = Math.floor((mouseStatus.position.y + visibleBox.y) / MapProcessor.tileSize);

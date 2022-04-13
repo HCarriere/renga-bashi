@@ -21,7 +21,7 @@ export interface CadavreChunks {
 
 export class CadavreProcessor {
     
-    static chunkSize = 32;
+    static chunkSize = 40;
     static size = 16;
 
     static draw(cadavres: CadavreChunks, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
@@ -37,11 +37,11 @@ export class CadavreProcessor {
       }
     }
 
-    /**
+  /**
    * create chunks filled with cadavres
    * @param cadavres 
    */
-    static getCadavreAsChunks(cadavres: Cadavre[]): CadavreChunks {
+  static getCadavreAsChunks(cadavres: Cadavre[]): CadavreChunks {
     const chunks = {chunks: new Map<string, Cadavre[]>()};
     
     for (const cadavre of cadavres) {
@@ -70,6 +70,14 @@ export class CadavreProcessor {
       for (let j = cy-1; j<=cy+1; j++) {
         cad = cad.concat(cadavreChunks.chunks.get(`${i}_${j}`) || []);
       }
+    }
+    return cad;
+  }
+
+  static getChunksAsArray(cadavreChunks: CadavreChunks): Cadavre[] {
+    let cad: Cadavre[] = [];
+    for (const value of cadavreChunks.chunks.values()) {
+      cad = cad.concat(value);
     }
     return cad;
   }

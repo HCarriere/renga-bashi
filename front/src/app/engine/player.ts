@@ -11,7 +11,7 @@ export interface PlayerController {
     RESPAWN: boolean,
 }
 
-export class Player extends Physic{
+export class Player extends Physic {
 
     rot = 10;
 
@@ -23,6 +23,9 @@ export class Player extends Physic{
 
     private jumpAudio: HTMLAudioElement;
     private deathAudio: HTMLAudioElement;
+
+    static cadavreCooldown = 100; // frames
+    static currentCadavreCooldown = 0;
 
     constructor(x: number, y: number, color: string) {
         super();
@@ -87,6 +90,9 @@ export class Player extends Physic{
         // particles
         this.particles.updatePosition(this.x, this.y);
         this.particles.update();
+
+        // cooldown
+        if (Player.currentCadavreCooldown > 0) Player.currentCadavreCooldown -= 1;
     }
 
     private processEnds(map: MapData) {
@@ -153,5 +159,36 @@ export class Player extends Physic{
         if (visibleBox.y < 0) visibleBox.y = 0;
         visibleBox.x = Math.round(visibleBox.x);
         visibleBox.y = Math.round(visibleBox.y);
+    }
+
+    public spawnRespawnParticles() {
+        const gen = new ParticlesGenerator(this.x, this.y, ['red', this.color, this.color, this.color]);
+        gen.rangeVelocity = {minx: -4+this.vx, maxx: 4+this.vx, miny: -4+this.vy, maxy: 4+this.vy};
+        gen.rangeSpawn = {minx: -5, maxx: 5, miny: -5, maxy: -5};
+        gen.gravity = {x: 0, y: 0.1};
+        gen.rangeLife = {min: 4, max: 10};
+        gen.particlePerFrame = 45 ;
+        gen.life = 1;
+        ParticlesProcessor.addGenerator(gen);
+    }
+
+    public onKeyDown(key: string, playerController: PlayerController) {
+        if (key === 'ArrowUp' || key === ' ' || key.toLowerCase() === 'z' || key.toLowerCase() === 'w') playerController.UP = true;
+        if (key === 'ArrowRight' || key.toLowerCase() === 'd') playerController.RIGHT = true;
+        // if (key === 'ArrowDown') this.playerController.DOWN = true;
+        if (key === 'ArrowLeft' || key.toLowerCase() === 'q'  || key.toLowerCase() === 'a') playerController.LEFT = true;
+        if (key.toLowerCase() === 'r') playerController.RESPAWN = true;
+    }
+
+    public onKeyUp(key: string, playerController: PlayerController) {
+        if (key === 'ArrowUp' || key === ' ' || key.toLowerCase() === 'z' || key.toLowerCase() === 'w') playerController.UP = false;
+        if (key === 'ArrowRight' || key.toLowerCase() === 'd') playerController.RIGHT = false;
+        if (key === 'ArrowDown') playerController.DOWN = false;
+        if (key === 'ArrowLeft' || key.toLowerCase() === 'q'  || key.toLowerCase() === 'a') playerController.LEFT = false;
+        if (key.toLowerCase() === 'r' && Player.currentCadavreCooldown == 0) {
+            Player.currentCadavreCooldown = Player.cadavreCooldown;
+            this.isDead = true;
+            playerController.RESPAWN = false;
+        }
     }
 }

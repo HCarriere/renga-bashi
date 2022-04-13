@@ -49,8 +49,12 @@ export class EditorComponent implements OnInit {
   }
 
   public updateCadavres() {
-    this.playerService.getMapCadavres(this.map.title).subscribe({
-      next: cad => this.cadavres = CadavreProcessor.getCadavreAsChunks(cad),
+    this.playerService.compareCadavresHash(CadavreProcessor.getChunksAsArray(this.cadavres), this.map.title).subscribe({
+      next: res => {
+        if (res !== true && Array.isArray(res)) {
+          this.cadavres = CadavreProcessor.getCadavreAsChunks(res);
+        }
+      }
     });
   }
 
