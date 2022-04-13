@@ -1,10 +1,11 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const WebSocket = require('ws');
 const utils = require('../utils');
 const maps = require('../map/map');
 const crypto = require('crypto');
+const socketio = require("socket.io");
+
 
 let guids = [];
 const maxGuidToKeep = 3;
@@ -14,8 +15,16 @@ let guidsCount = 0;
 
 const cadavresHash = [];
 
-let wss;
-const wsClients = new Map();
+// socket
+let io;
+/**
+ * Pool of cadavres to be sent to client
+ * - key : mapTitle
+ * - value: cadavres[]
+ */
+let cadavresPool = new Map();
+const loopFrequency = 500; // ms
+let intervalLoopId;
 
 const cadavreSchema = mongoose.Schema({
     x: Number,
@@ -131,10 +140,10 @@ function addCadavre(req, callback, admin = false) {
     const obj = new CadavreModel(params);
     obj.save(err => {
         if (err) return callback(null, 500, err);
-        // send info to wsClients
-        [...wsClients.keys()].forEach((client) => {
-            client.send(wsObject('cadavre', obj));
-        });
+        // pool cadavre (ws)
+        if (!cadavresPool.has(params.level)) cadavresPool.set(params.level, []);
+        cadavresPool.get(params.level).push(obj);
+
         return callback(obj);
     });
 }
@@ -175,43 +184,48 @@ function checkGuid(guid) {
     return guid.length == 36;
 }
 
-/**
- * Create the websocket connection
- * https://github.com/websockets/ws
- * @param {number} port 
- */
-function createWebSocketServer(port) {
-    wss = new WebSocket.Server({port});
-    console.log('WebSocket server created on port ' + port)
 
-    wss.on('connection', (ws, req) => {
-        onClientConnect(ws, req);
+function createWebSocketServer(server) {
+    io = socketio(server, {});
 
-        ws.on('close', () => {
-            onClientDisconnect(ws)
+    io.on('connection', socket => {
+        console.log('client connected to ws');
+
+        socket.join('START');
+
+        socket.on('changeroom', (titles) => {
+            socket.leave(titles.old);
+            socket.join(titles.new);
         });
     });
 
-    
+    console.log('webSocket initialized');
+
+    intervalLoopId = createLoop();
 }
 
-function onClientConnect(ws, req) {
-    // const ip = req.socket.remoteAddress;
-    wsClients.set(ws, utils.uuidv4());
-
-    console.log('new client (existing clients : ' + wsClients.size+ ')');
+function createLoop() {
+    return setInterval(() => {
+        if (cadavresPool.size > 0) {
+            console.log('pool has cadavres');
+            [...cadavresPool.keys()].forEach(title => {
+                sendCadavresToRoom(title, cadavresPool.get(title));
+            });
+            cadavresPool = new Map();
+        }
+    }, loopFrequency);
 }
 
-function onClientDisconnect(ws) {
-    wsClients.delete(ws);
 
-    console.log('removing client (existing clients : ' + wsClients.size+ ')');
+function sendCadavresToRoom(title, cadavres) {
+    if (!cadavres || cadavres.length == 0) {
+        return;
+    }
+    console.log('sending to toom ' + title + ' '+cadavres.length+' cadavres');
+    io.to(title).emit('cadavres', cadavres);
 }
 
 
-function wsObject(key, obj) {
-    return JSON.stringify({key, obj});
-}
 
 
 module.exports = {

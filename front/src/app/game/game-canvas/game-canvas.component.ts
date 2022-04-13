@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
-import { CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
+import { Cadavre, CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
 import { MapData, MapProcessor, VisibleBox } from 'src/app/engine/map';
 import { ParticlesProcessor } from 'src/app/engine/particles';
 import { Player, PlayerController } from 'src/app/engine/player';
@@ -72,6 +72,12 @@ export class GameCanvasComponent implements OnInit {
     this.music.loop = true;
     this.music.load();
     // this.music.play(); // TODO enable this
+
+    CadavreProcessor.initCadavreWebSocket((data: Cadavre[]) => {
+      for (const c of data) {
+        CadavreProcessor.addCadavreToChunk(this.cadavres, c);
+      }
+    });
   }
 
   private mainLoop() {
@@ -122,7 +128,7 @@ export class GameCanvasComponent implements OnInit {
       if (!this.map.options.disablePersistentCadavres) {
         this.playerService.addCadavre(cadavre).subscribe({
           next: newCad => {
-            CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
+            /*CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
             // refresh cadavres
             this.playerService.compareCadavresHash(CadavreProcessor.getChunksAsArray(this.cadavres), this.mapTitle).subscribe({
               next: res => {
@@ -131,7 +137,7 @@ export class GameCanvasComponent implements OnInit {
                 }
                 // CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
               }
-            });
+            });*/
 
           }
         });
@@ -139,6 +145,15 @@ export class GameCanvasComponent implements OnInit {
         CadavreProcessor.addCadavreToChunk(this.cadavres, cadavre);
       }
       
+    } else {
+      this.playerService.compareCadavresHash(CadavreProcessor.getChunksAsArray(this.cadavres), this.mapTitle).subscribe({
+        next: res => {
+          if (res !== true && Array.isArray(res)) {
+            this.cadavres = CadavreProcessor.getCadavreAsChunks(res);
+          }
+          // CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
+        }
+      });
     }
 
     this.player = new Player(this.startPoint.x, this.startPoint.y, this.playerColor);

@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const http = require('http');
+const http = require("http");
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
@@ -14,7 +14,6 @@ const cadavre = require('./app/cadavre/cadavre');
 const map = require('./app/map/map');
 
 const port = process.env.PORT || '3001';
-const WS_PORT = process.env.WS_PORT || '8081';
 const DB_URI = process.env.DB_URI || 'mongodb://localhost/rengabashi'
 const API_PASSWORD = process.env.API_PASSWORD || '25xrwVZOHOY6l0CwJdE93svifcFQwFmDASQGQZpqT8Q=';
 const JWT_SECRET = process.env.JWT_SECRET || 'jwtSecret!'
@@ -45,7 +44,7 @@ app
 .use(bodyParser.json({limit: '100mb', extended: true})) // to support JSON-encoded bodies
 .use(bodyParser.urlencoded({limit: '100mb', extended: true})) // to support URL-encoded bodies
 
-cadavre.createWebSocketServer(WS_PORT);
+cadavre.createWebSocketServer(server);
 
 app
 /**
@@ -147,7 +146,7 @@ app
 })
 
 .get('*', (req, res) => {
-    res.sendFile(__dirname + '/front/dist/index.html');
+    res.sendStatus(404);
 })
 
 // Error handler //////////

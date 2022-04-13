@@ -1,4 +1,5 @@
 import { VisibleBox } from "./map";
+import { io, Socket } from "socket.io-client";
 
 export interface Cadavre {
     x: number;
@@ -21,21 +22,45 @@ export interface CadavreChunks {
 
 export class CadavreProcessor {
     
-    static chunkSize = 40;
-    static size = 16;
+  static chunkSize = 40;
+  static size = 16;
 
-    static draw(cadavres: CadavreChunks, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
-      for (const cadavreChunk of cadavres.chunks.values()) {
-        for (const cadavre of cadavreChunk) {
-          context.save();
-          context.translate(cadavre.x - visibleBox.x, cadavre.y - visibleBox.y);
-          context.rotate(cadavre.rot || 0); 
-          context.fillStyle = cadavre.color;
-          context.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
-          context.restore();
-        }
+  static socket: Socket;
+
+  static draw(cadavres: CadavreChunks, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
+    for (const cadavreChunk of cadavres.chunks.values()) {
+      for (const cadavre of cadavreChunk) {
+        context.save();
+        context.translate(cadavre.x - visibleBox.x, cadavre.y - visibleBox.y);
+        context.rotate(cadavre.rot || 0); 
+        context.fillStyle = cadavre.color;
+        context.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+        context.restore();
       }
     }
+  }
+
+  static initCadavreWebSocket(callback: any) {
+    this.socket = io();
+
+    this.socket.on('connect', () => {
+      console.log('connected', this.socket.id);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('disconnected', this.socket.id); // undefined
+    });
+
+    this.socket.on('cadavres', (data:Cadavre[]) => {
+      console.log('received cadavres', data);
+      callback(data);
+      
+    });
+  }
+
+  static changeRoom(old: string, neww: string) {
+    this.socket.emit('changeroom', {old, new: neww});
+  }
 
   /**
    * create chunks filled with cadavres
@@ -81,4 +106,6 @@ export class CadavreProcessor {
     }
     return cad;
   }
+
+
 }

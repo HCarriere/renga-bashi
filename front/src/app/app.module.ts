@@ -32,7 +32,7 @@ import { GameCanvasComponent } from './game/game-canvas/game-canvas.component';
       },
     }),
     RouterModule.forRoot([
-      { path: 'game', component: GameComponent },
+      { path: '', component: GameComponent },
       { path: 'editor', component: EditorComponent, canActivate: [AuthGuard] },
       { path: 'login', component: LoginComponent},
       { path: '**', component: GameComponent },
