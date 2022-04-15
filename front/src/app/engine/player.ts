@@ -105,11 +105,27 @@ export class Player extends Physic {
     }
 
     public override onTouchGround() {
+        const gen = new ParticlesGenerator(this.x, this.y, [this.color]);
+        gen.life = 1;
+        gen.particlePerFrame = 4;
+        gen.rangeVelocity = {minx:-3,maxx:3,miny:-0.5,maxy:0};
+        gen.gravity = {x:0, y:0};
+        gen.rangeLife = {min:4, max: 5};
+        gen.rangeSpawn = {minx: -5,maxx: 5,miny: 2,maxy: 4};
+        ParticlesProcessor.addGenerator(gen);
     }
 
     public override onJump() {
         this.jumpAudio.currentTime = 0;
         this.jumpAudio.play();
+        const gen = new ParticlesGenerator(this.x, this.y, [this.color]);
+        gen.life = 1;
+        gen.particlePerFrame = 4;
+        gen.rangeVelocity = {minx:-3,maxx:3,miny:-0.5,maxy:0};
+        gen.gravity = {x:0, y:0};
+        gen.rangeLife = {min:4, max: 5};
+        gen.rangeSpawn = {minx: -5,maxx: 5,miny: 2,maxy: 4};
+        ParticlesProcessor.addGenerator(gen);
     }
 
     public override onDeath() {
