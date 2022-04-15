@@ -10,6 +10,7 @@ export interface Cadavre {
     path?: string[][];
     guid?: string;
     _id?: string;
+    ghostTime?: number;
 }
 
 /**
@@ -29,9 +30,18 @@ export class CadavreProcessor {
       for (const cadavre of cadavreChunk) {
         context.save();
         context.translate(cadavre.x - visibleBox.x, cadavre.y - visibleBox.y);
-        context.rotate(cadavre.rot || 0); 
-        context.fillStyle = cadavre.color;
-        context.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+        
+        if (cadavre.ghostTime && cadavre.ghostTime > 0) {
+          context.fillStyle = this.getAlphaColor(cadavre.color, 'AA');
+          const tsize = cadavre.ghostTime / this.size + 2;
+          context.rotate((cadavre.rot || 0) + Math.random());
+          context.fillRect(-this.size / 2 + tsize/2, -this.size / 2 + tsize/2, this.size - tsize, this.size - tsize);
+          cadavre.ghostTime -= 1;
+        } else {
+          context.fillStyle = cadavre.color;
+          context.rotate(cadavre.rot || 0); 
+          context.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+        }
         context.restore();
       }
     }
@@ -51,7 +61,7 @@ export class CadavreProcessor {
     return chunks;
   }
     
-  static addCadavreToChunk(cadavreChunks: CadavreChunks, cadavre: Cadavre) {
+  static addCadavreToChunk(cadavreChunks: CadavreChunks, cadavre: Cadavre, ghostTime = 0) {
 
     const coord =`${Math.floor(cadavre.x / CadavreProcessor.chunkSize)}_${Math.floor(cadavre.y / CadavreProcessor.chunkSize)}`;
 
@@ -60,6 +70,9 @@ export class CadavreProcessor {
     }
     // add cadavre if it doesnt already exist
     if (!cadavreChunks.chunks.get(coord)?.find(o => o.x == cadavre.x && o.y == cadavre.y && o.color == cadavre.color)) {
+      if (ghostTime > 0) {
+        cadavre.ghostTime = ghostTime;
+      }
       cadavreChunks.chunks.get(coord)?.push(cadavre);
     }
   }
@@ -85,5 +98,11 @@ export class CadavreProcessor {
     return cad;
   }
 
+  static getAlphaColor(color: string, hexTransp: string): string {
+    if (color.startsWith('#') && color.length == 7) {
+      return color+hexTransp;
+    }
+    return color;
+  }
 
 }

@@ -48,7 +48,7 @@ export class PlayerService {
       console.log('received cadavres', data);  
       for (const c of data) {
         if(c.level == this.mapTitle) {
-          CadavreProcessor.addCadavreToChunk(this.cadavres, c);
+          CadavreProcessor.addCadavreToChunk(this.cadavres, c, 120);
         }
       }    
     });

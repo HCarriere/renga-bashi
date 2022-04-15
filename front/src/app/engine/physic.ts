@@ -137,24 +137,30 @@ export class Physic {
                     this.jumpFrames = 0;
                 } 
                 this.vy = -this.vy/4;
+                this.onCadavreTouched(cadavreCollisions.down);
             } else {
                 this.groundTouched = false;
             }
         }
         if (cadavreCollisions.right) {
             this.vx = -this.vx/3;
+            this.onCadavreTouched(cadavreCollisions.right);
         }
         if (cadavreCollisions.left) {
             this.vx = -this.vx/3;
+            this.onCadavreTouched(cadavreCollisions.left);
         }
         if (cadavreCollisions.up) {
             this.vy = -this.vy/3;
+            this.onCadavreTouched(cadavreCollisions.up);
         }
     }
 
-    private getCadavreCollision(cadavres: CadavreChunks): {up: boolean, right: boolean, down: boolean, left: boolean} {
-        const collisions = {up: false, right: false, down: false, left: false};
+    private getCadavreCollision(cadavres: CadavreChunks): {up: Cadavre, right: Cadavre, down: Cadavre, left: Cadavre} {
+        const collisions: any = {up: false, right: false, down: false, left: false};
         for (let cadavre of CadavreProcessor.getNearCadavres(this.x, this.y, cadavres)) {
+            if (cadavre.ghostTime && cadavre.ghostTime > 0) continue;
+
             collisions.down = collisions.down || 
                 this.pointIntersectCadavre(this.x - this.size / 2 + 1, this.y + this.vy + this.size / 2, cadavre) || 
                 this.pointIntersectCadavre(this.x + this.size / 2 - 1, this.y + this.vy + this.size / 2, cadavre);
@@ -196,10 +202,10 @@ export class Physic {
         return collisions;
     }
 
-    private pointIntersectCadavre(x: number, y: number, cadavre: Cadavre): boolean {
+    private pointIntersectCadavre(x: number, y: number, cadavre: Cadavre): Cadavre | boolean {
         if (x > cadavre.x - CadavreProcessor.size / 2 && x < cadavre.x + CadavreProcessor.size / 2 &&
             y > cadavre.y - CadavreProcessor.size / 2 && y < cadavre.y + CadavreProcessor.size / 2) {
-            return true;
+            return cadavre;
         }
         return false;
     }
@@ -222,5 +228,7 @@ export class Physic {
     public onDeath() {
         
     }
+
+    public onCadavreTouched(cadavre: Cadavre) {}
 
 }
