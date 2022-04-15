@@ -137,22 +137,22 @@ export class Physic {
                     this.jumpFrames = 0;
                 } 
                 this.vy = -this.vy/4;
-                this.onCadavreTouched(cadavreCollisions.down);
+                this.onCadavreTouched(cadavreCollisions.down, this.vx, this.vy);
             } else {
                 this.groundTouched = false;
             }
         }
         if (cadavreCollisions.right) {
             this.vx = -this.vx/3;
-            this.onCadavreTouched(cadavreCollisions.right);
+            this.onCadavreTouched(cadavreCollisions.right, this.vx, this.vy);
         }
         if (cadavreCollisions.left) {
             this.vx = -this.vx/3;
-            this.onCadavreTouched(cadavreCollisions.left);
+            this.onCadavreTouched(cadavreCollisions.left, this.vx, this.vy);
         }
         if (cadavreCollisions.up) {
             this.vy = -this.vy/3;
-            this.onCadavreTouched(cadavreCollisions.up);
+            this.onCadavreTouched(cadavreCollisions.up, this.vx, this.vy);
         }
     }
 
@@ -229,6 +229,6 @@ export class Physic {
         
     }
 
-    public onCadavreTouched(cadavre: Cadavre) {}
+    public onCadavreTouched(cadavre: Cadavre, x: number, y: number): void {}
 
 }

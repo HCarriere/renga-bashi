@@ -1,4 +1,4 @@
-import { CadavreChunks } from "./cadavres";
+import { Cadavre, CadavreChunks } from "./cadavres";
 import { MapData, MapProcessor, VisibleBox } from "./map";
 import { ParticlesGenerator, ParticlesProcessor } from "./particles";
 import { Physic } from "./physic";
@@ -117,6 +117,10 @@ export class Player extends Physic {
         this.deathAudio.play();
         const gen = new ParticlesGenerator(this.x, this.y, ['red', this.color, this.color, this.color]);
         ParticlesProcessor.addGenerator(gen);
+    }
+
+    public override onCadavreTouched(cadavre: Cadavre, x: number, y: number): void {
+        cadavre.touched = {x: x, y: y, frames: 10};
     }
 
     private updateCamera(visibleBox: VisibleBox, screenWidth: number, screenHeight: number, map: MapData) {

@@ -11,6 +11,7 @@ export interface Cadavre {
     guid?: string;
     _id?: string;
     ghostTime?: number;
+    touched?: {x: number, y: number, frames: number};
 }
 
 /**
@@ -29,7 +30,15 @@ export class CadavreProcessor {
     for (const cadavreChunk of cadavres.chunks.values()) {
       for (const cadavre of cadavreChunk) {
         context.save();
-        context.translate(cadavre.x - visibleBox.x, cadavre.y - visibleBox.y);
+
+        let tx = 0;
+        let ty = 0;
+        if (cadavre.touched && cadavre.touched.frames > 0) {
+          tx = (-cadavre.touched.x * cadavre.touched.frames) / 15;
+          ty = (-cadavre.touched.y * cadavre.touched.frames) / 35;
+          cadavre.touched.frames -= 1;
+        }
+        context.translate(cadavre.x - visibleBox.x + tx, cadavre.y - visibleBox.y + ty);
         
         if (cadavre.ghostTime && cadavre.ghostTime > 0) {
           context.fillStyle = this.getAlphaColor(cadavre.color, 'AA');
