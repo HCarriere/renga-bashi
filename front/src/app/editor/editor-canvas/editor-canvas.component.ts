@@ -66,7 +66,6 @@ export class EditorCanvasComponent implements OnInit {
       this.resizeCanvas();
     });
 
-    CadavreEditorProcessor.initCadavreWebSocket(this.cadavres);
   }
 
   private mainLoop() {

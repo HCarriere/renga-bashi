@@ -23,7 +23,7 @@ let io;
  * - value: cadavres[]
  */
 let cadavresPool = new Map();
-const loopFrequency = 500; // ms
+const loopFrequency = 300; // ms
 let intervalLoopId;
 
 const cadavreSchema = mongoose.Schema({
@@ -181,7 +181,7 @@ function removeSomeCadavres(title, ids, callback) {
 }
 
 function checkGuid(guid) {
-    return guid.length == 36;
+    return guid.length == 8;
 }
 
 
@@ -207,7 +207,6 @@ function createWebSocketServer(server) {
 function createLoop() {
     return setInterval(() => {
         if (cadavresPool.size > 0) {
-            console.log('pool has cadavres');
             [...cadavresPool.keys()].forEach(title => {
                 sendCadavresToRoom(title, cadavresPool.get(title));
             });
@@ -221,7 +220,7 @@ function sendCadavresToRoom(title, cadavres) {
     if (!cadavres || cadavres.length == 0) {
         return;
     }
-    console.log('sending to toom ' + title + ' '+cadavres.length+' cadavres');
+    // console.log('sending to toom ' + title + ' '+cadavres.length+' cadavres');
     io.to(title).emit('cadavres', cadavres);
 }
 

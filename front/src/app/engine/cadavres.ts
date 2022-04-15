@@ -1,5 +1,4 @@
 import { VisibleBox } from "./map";
-import { io, Socket } from "socket.io-client";
 
 export interface Cadavre {
     x: number;
@@ -25,8 +24,6 @@ export class CadavreProcessor {
   static chunkSize = 40;
   static size = 16;
 
-  static socket: Socket;
-
   static draw(cadavres: CadavreChunks, context : CanvasRenderingContext2D, width: number, height: number, visibleBox: VisibleBox) {
     for (const cadavreChunk of cadavres.chunks.values()) {
       for (const cadavre of cadavreChunk) {
@@ -38,28 +35,6 @@ export class CadavreProcessor {
         context.restore();
       }
     }
-  }
-
-  static initCadavreWebSocket(callback: any) {
-    this.socket = io();
-
-    this.socket.on('connect', () => {
-      console.log('connected', this.socket.id);
-    });
-
-    this.socket.on('disconnect', () => {
-      console.log('disconnected', this.socket.id); // undefined
-    });
-
-    this.socket.on('cadavres', (data:Cadavre[]) => {
-      console.log('received cadavres', data);
-      callback(data);
-      
-    });
-  }
-
-  static changeRoom(old: string, neww: string) {
-    this.socket.emit('changeroom', {old, new: neww});
   }
 
   /**
@@ -83,7 +58,10 @@ export class CadavreProcessor {
     if (!cadavreChunks.chunks.has(coord)) {
       cadavreChunks.chunks.set(coord, []);
     }
-    cadavreChunks.chunks.get(coord)?.push(cadavre);
+    // add cadavre if it doesnt already exist
+    if (!cadavreChunks.chunks.get(coord)?.find(o => o.x == cadavre.x && o.y == cadavre.y && o.color == cadavre.color)) {
+      cadavreChunks.chunks.get(coord)?.push(cadavre);
+    }
   }
 
   static getNearCadavres(x: number, y: number, cadavreChunks: CadavreChunks): Cadavre[] {

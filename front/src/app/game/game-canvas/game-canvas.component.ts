@@ -1,8 +1,8 @@
 import { Component, ElementRef, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
-import { Cadavre, CadavreChunks, CadavreProcessor } from 'src/app/engine/cadavres';
-import { MapData, MapProcessor, VisibleBox } from 'src/app/engine/map';
+import { CadavreProcessor } from 'src/app/engine/cadavres';
+import { MapProcessor, VisibleBox } from 'src/app/engine/map';
 import { ParticlesProcessor } from 'src/app/engine/particles';
-import { Player, PlayerController } from 'src/app/engine/player';
+import { Player } from 'src/app/engine/player';
 import { PlayerService } from 'src/app/services/player.service';
 
 @Component({
@@ -12,13 +12,6 @@ import { PlayerService } from 'src/app/services/player.service';
 })
 export class GameCanvasComponent implements OnInit {
 
-  public map!: MapData;
-  public cadavres!: CadavreChunks;
-  public player!: Player;
-  public mapTitle = 'START';
-  private startPoint!: {x:number, y:number, alias: string};
-
-  private playerColor: string;
 
   @ViewChild('canvas', { static: true}) 
   private canvas: ElementRef = {} as ElementRef;
@@ -28,7 +21,6 @@ export class GameCanvasComponent implements OnInit {
   private height = 0;
   private visibleBox: VisibleBox = {x:0, y:0, zoom: 1}
 
-  private playerController: PlayerController = {UP: false, LEFT: false, RIGHT: false, DOWN: false, RESPAWN: false};
   private respawnInitiated = false;
   private teleportInitiated = false;
 
@@ -41,10 +33,8 @@ export class GameCanvasComponent implements OnInit {
 
   constructor(
     private ngZone: NgZone,
-    private playerService: PlayerService,
-  ) {
-    this.playerColor = MapProcessor.getRandomColor();
-  }
+    public playerService: PlayerService,
+  ) {}
 
   ngOnInit(): void {
     this.context = this.canvas.nativeElement.getContext('2d');
@@ -52,13 +42,13 @@ export class GameCanvasComponent implements OnInit {
     this.height = this.canvas.nativeElement.height;
     
     // get first map
-    this.playerService.getMapAndCadavres(this.mapTitle).subscribe({
+    this.playerService.getMapAndCadavres(this.playerService.mapTitle).subscribe({
       next: ({map, cadavres}) => {
-        this.cadavres = cadavres;
-        this.map = map;
+        this.playerService.cadavres = cadavres;
+        this.playerService.map = map;
         // get first point
-        this.startPoint = this.map.starts[0];
-        this.player = new Player(this.startPoint.x || 2, this.startPoint.y || 2, this.playerColor);
+        this.playerService.startPoint = this.playerService.map.starts[0];
+        this.playerService.player = new Player(this.playerService.startPoint.x || 2, this.playerService.startPoint.y || 2, this.playerService.playerColor);
       }
     });
     this.ngZone.runOutsideAngular(() => this.mainLoop());
@@ -72,31 +62,25 @@ export class GameCanvasComponent implements OnInit {
     this.music.loop = true;
     this.music.load();
     // this.music.play(); // TODO enable this
-
-    CadavreProcessor.initCadavreWebSocket((data: Cadavre[]) => {
-      for (const c of data) {
-        CadavreProcessor.addCadavreToChunk(this.cadavres, c);
-      }
-    });
   }
 
   private mainLoop() {
-    if (this.map && this.cadavres && this.player) {
+    if (this.playerService.map && this.playerService.cadavres && this.playerService.player) {
 
       // physic
-      this.player.update(this.map, this.cadavres, this.playerController);
+      this.playerService.player.update(this.playerService.map, this.playerService.cadavres, this.playerService.playerController);
       ParticlesProcessor.update();
       
       // graphics
       this.context.clearRect(0, 0, this.width, this.height);
 
-      MapProcessor.draw(this.map, this.context, this.width, this.height, this.visibleBox, this.currentFrame);
-      CadavreProcessor.draw(this.cadavres, this.context, this.width, this.height, this.visibleBox);
+      MapProcessor.draw(this.playerService.map, this.context, this.width, this.height, this.visibleBox, this.currentFrame);
+      CadavreProcessor.draw(this.playerService.cadavres, this.context, this.width, this.height, this.visibleBox);
       ParticlesProcessor.draw(this.context, this.visibleBox);
-      this.player.draw(this.context, this.width, this.height, this.visibleBox, this.map);
+      this.playerService.player.draw(this.context, this.width, this.height, this.visibleBox, this.playerService.map);
 
-      if (this.player.isDead && !this.respawnInitiated) this.respawn();
-      if (this.player.endTouchedAlias && !this.teleportInitiated) this.endTouched(this.player.endTouchedAlias);
+      if (this.playerService.player.isDead && !this.respawnInitiated) this.respawn();
+      if (this.playerService.player.endTouchedAlias && !this.teleportInitiated) this.endTouched(this.playerService.player.endTouchedAlias);
     }
     
     // tests
@@ -113,79 +97,68 @@ export class GameCanvasComponent implements OnInit {
 
   private respawn() {
     this.respawnInitiated = true;
-    this.player.isDead = true;
-    // create cadavre (if can)
-    this.player.spawnRespawnParticles();
+    this.playerService.player.isDead = true;
+    this.playerService.player.spawnRespawnParticles();
     
-    if (this.player.canCreateCadavre) {
+    // create cadavre (if can)
+    if (this.playerService.player.canCreateCadavre) {
       const cadavre = {
-        x: this.player.x,
-        y: this.player.y,
-        color: this.player.color,
-        rot: this.player.rot,
-        level: this.mapTitle,
+        x: this.playerService.player.x,
+        y: this.playerService.player.y,
+        color: this.playerService.player.color,
+        rot: this.playerService.player.rot,
+        level: this.playerService.mapTitle,
       };
-      if (!this.map.options.disablePersistentCadavres) {
-        this.playerService.addCadavre(cadavre).subscribe({
-          next: newCad => {
-            /*CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
-            // refresh cadavres
-            this.playerService.compareCadavresHash(CadavreProcessor.getChunksAsArray(this.cadavres), this.mapTitle).subscribe({
-              next: res => {
-                if (res !== true && Array.isArray(res)) {
-                  this.cadavres = CadavreProcessor.getCadavreAsChunks(res);
-                }
-                // CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
-              }
-            });*/
+      CadavreProcessor.addCadavreToChunk(this.playerService.cadavres, cadavre);
 
-          }
+      if (!this.playerService.map.options.disablePersistentCadavres) {  
+        this.playerService.addCadavre(cadavre).subscribe({
+          next: newCad => {}
         });
-      } else {
-        CadavreProcessor.addCadavreToChunk(this.cadavres, cadavre);
       }
       
     } else {
-      this.playerService.compareCadavresHash(CadavreProcessor.getChunksAsArray(this.cadavres), this.mapTitle).subscribe({
+      this.playerService.compareCadavresHash(CadavreProcessor.getChunksAsArray(this.playerService.cadavres), this.playerService.mapTitle).subscribe({
         next: res => {
           if (res !== true && Array.isArray(res)) {
-            this.cadavres = CadavreProcessor.getCadavreAsChunks(res);
+            this.playerService.cadavres = CadavreProcessor.getCadavreAsChunks(res);
           }
           // CadavreProcessor.addCadavreToChunk(this.cadavres, newCad);
         }
       });
     }
 
-    this.player = new Player(this.startPoint.x, this.startPoint.y, this.playerColor);
+    this.playerService.player = new Player(this.playerService.startPoint.x, this.playerService.startPoint.y, this.playerService.playerColor);
     this.respawnInitiated = false;
   }
 
   private endTouched(alias: string) {
     this.teleportInitiated = true;
-    const currentMap = this.mapTitle;
-    this.playerService.getNextMapAndCadavres(this.mapTitle, alias).subscribe({
+    const currentMap = this.playerService.mapTitle;
+    this.playerService.getNextMapAndCadavres(this.playerService.mapTitle, alias).subscribe({
       next: ({map, title, alias, cadavres}) => {
-        this.cadavres = cadavres;
-        this.map = map;
-        this.mapTitle = title;
-        this.startPoint = map.starts.find(o => o.alias == alias) || {x:0,y:0,alias:''}; 
+        this.playerService.changeRoom(currentMap, title);
+        this.playerService.cadavres = cadavres;
+        this.playerService.map = map;
+        this.playerService.mapTitle = title;
+        this.playerService.startPoint = map.starts.find(o => o.alias == alias) || {x:0,y:0,alias:''}; 
 
         if (currentMap == title) {
           // same map
-          this.player.x = this.startPoint.x * MapProcessor.tileSize;
-          this.player.y = this.startPoint.y * MapProcessor.tileSize;
-          this.player.endTouchedAlias = '';
+          this.playerService.player.x = this.playerService.startPoint.x * MapProcessor.tileSize;
+          this.playerService.player.y = this.playerService.startPoint.y * MapProcessor.tileSize;
+          this.playerService.player.endTouchedAlias = '';
         } else {
           // new map
-          this.player = new Player(this.startPoint.x || 2, this.startPoint.y || 2, this.playerColor);
+          this.playerService.player = new Player(this.playerService.startPoint.x || 2, this.playerService.startPoint.y || 2, this.playerService.playerColor);
         }
         this.teleportInitiated = false;
         
       },
       error: (err) => {
-        this.player.x = this.startPoint.x * MapProcessor.tileSize;
-        this.player.y = this.startPoint.y * MapProcessor.tileSize;
-        this.player.endTouchedAlias = '';
+        this.playerService.player.x = this.playerService.startPoint.x * MapProcessor.tileSize;
+        this.playerService.player.y = this.playerService.startPoint.y * MapProcessor.tileSize;
+        this.playerService.player.endTouchedAlias = '';
         this.teleportInitiated = false;
       }
     });
@@ -210,11 +183,11 @@ export class GameCanvasComponent implements OnInit {
 
   @HostListener('window:keydown', ['$event'])
   keyDown(event: KeyboardEvent) {
-    this.player.onKeyDown(event.key, this.playerController);
+    this.playerService.player.onKeyDown(event.key, this.playerService.playerController);
   }
 
   @HostListener('window:keyup', ['$event'])
   keyUp(event: KeyboardEvent) {
-    this.player.onKeyUp(event.key, this.playerController);
+    this.playerService.player.onKeyUp(event.key, this.playerService.playerController);
   }
 }
