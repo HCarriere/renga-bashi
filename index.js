@@ -146,7 +146,7 @@ app
 })
 
 .get('*', (req, res) => {
-    res.sendStatus(404);
+    res.sendFile(__dirname + '/front/dist/index.html');
 })
 
 // Error handler //////////
