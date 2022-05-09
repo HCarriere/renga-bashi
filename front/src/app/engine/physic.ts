@@ -6,8 +6,8 @@ import { PlayerController } from "./player";
 export class Physic {
     x = 10;
     y = 10;
-    vx = 0;
-    vy = 0;
+    _vx = 0;
+    _vy = 0;
     size = 14;
 
     maxJumpFrames = 10;
@@ -16,6 +16,11 @@ export class Physic {
 
     public isDead = false;
     public canCreateCadavre = false;
+
+    private static lastTick = 0;
+    public static deltaTime = 0;
+
+    private static targetFPS = 60;
 
     static physicSettings = {
         gravity: 0.6,
@@ -31,6 +36,9 @@ export class Physic {
     }
 
     public update(map: MapData, cadavres: CadavreChunks, playerController: PlayerController) {
+        // get delta time
+        this.processDelta();
+
         // gravity
         this.vy += Physic.physicSettings.gravity;
 
@@ -78,8 +86,8 @@ export class Physic {
             Physic.physicSettings.limit.y : this.vy < -Physic.physicSettings.limit.y ? -Physic.physicSettings.limit.y : this.vy;
         
         // apply velocity
-        this.x += this.vx;
-        this.y += this.vy;
+        this.x += this.vxd;
+        this.y += this.vyd;
 
     }
 
@@ -162,17 +170,17 @@ export class Physic {
             if (cadavre.ghostTime && cadavre.ghostTime > 0) continue;
 
             collisions.down = collisions.down || 
-                this.pointIntersectCadavre(this.x - this.size / 2 + 1, this.y + this.vy + this.size / 2, cadavre) || 
-                this.pointIntersectCadavre(this.x + this.size / 2 - 1, this.y + this.vy + this.size / 2, cadavre);
+                this.pointIntersectCadavre(this.x - this.size / 2 + 1, this.y + this.vyd + this.size / 2, cadavre) || 
+                this.pointIntersectCadavre(this.x + this.size / 2 - 1, this.y + this.vyd + this.size / 2, cadavre);
             collisions.right = collisions.right || 
-                this.pointIntersectCadavre(this.x + this.vx + this.size / 2, this.y + this.size / 2 - 1, cadavre) || 
-                this.pointIntersectCadavre(this.x + this.vx + this.size / 2, this.y - this.size / 2 + 1, cadavre);
+                this.pointIntersectCadavre(this.x + this.vxd + this.size / 2, this.y + this.size / 2 - 1, cadavre) || 
+                this.pointIntersectCadavre(this.x + this.vxd + this.size / 2, this.y - this.size / 2 + 1, cadavre);
             collisions.left = collisions.left || 
-                this.pointIntersectCadavre(this.x + this.vx - this.size / 2, this.y + this.size / 2 - 1, cadavre) ||
-                this.pointIntersectCadavre(this.x + this.vx - this.size / 2, this.y - this.size / 2 + 1, cadavre);
+                this.pointIntersectCadavre(this.x + this.vxd - this.size / 2, this.y + this.size / 2 - 1, cadavre) ||
+                this.pointIntersectCadavre(this.x + this.vxd - this.size / 2, this.y - this.size / 2 + 1, cadavre);
             collisions.up = collisions.up || 
-                this.pointIntersectCadavre(this.x - this.size / 2 + 1, this.y + this.vy - this.size / 2, cadavre) || 
-                this.pointIntersectCadavre(this.x + this.size / 2 - 1, this.y + this.vy - this.size / 2, cadavre);
+                this.pointIntersectCadavre(this.x - this.size / 2 + 1, this.y + this.vyd - this.size / 2, cadavre) || 
+                this.pointIntersectCadavre(this.x + this.size / 2 - 1, this.y + this.vyd - this.size / 2, cadavre);
         }
         return collisions;
     }
@@ -181,24 +189,24 @@ export class Physic {
         const collisions = {up: 0, right: 0, down: 0, left: 0};
         // down
         collisions.down = 
-            this.getPhysicGridAtPosition(map, this.x + this.size / 2-1, this.y + this.vy + this.size / 2) || 
-            this.getPhysicGridAtPosition(map, this.x - this.size / 2+1, this.y + this.vy + this.size / 2);
+            this.getPhysicGridAtPosition(map, this.x + this.size / 2-1, this.y + this.vyd + this.size / 2) || 
+            this.getPhysicGridAtPosition(map, this.x - this.size / 2+1, this.y + this.vyd + this.size / 2);
         
         // right
         collisions.right = 
-            this.getPhysicGridAtPosition(map, this.x + this.vx + this.size / 2 - 1, this.y+this.size / 2-1) || 
-            this.getPhysicGridAtPosition(map, this.x + this.vx + this.size / 2 - 1, this.y-this.size / 2+1);
+            this.getPhysicGridAtPosition(map, this.x + this.vxd + this.size / 2 - 1, this.y+this.size / 2-1) || 
+            this.getPhysicGridAtPosition(map, this.x + this.vxd + this.size / 2 - 1, this.y-this.size / 2+1);
 
         // left
         collisions.left =
-            this.getPhysicGridAtPosition(map, this.x + this.vx - this.size / 2, this.y+this.size / 2-1) ||
-            this.getPhysicGridAtPosition(map, this.x + this.vx - this.size / 2, this.y-this.size / 2+1);
+            this.getPhysicGridAtPosition(map, this.x + this.vxd - this.size / 2, this.y+this.size / 2-1) ||
+            this.getPhysicGridAtPosition(map, this.x + this.vxd - this.size / 2, this.y-this.size / 2+1);
 
         // up
         collisions.up = 
             //this.getPhysicGridAtPosition(map, this.x, this.y + this.vy - this.size / 2);
-            this.getPhysicGridAtPosition(map, this.x + this.size / 2-1, this.y + this.vy - this.size / 2) || 
-            this.getPhysicGridAtPosition(map, this.x - this.size / 2+1, this.y + this.vy - this.size / 2);
+            this.getPhysicGridAtPosition(map, this.x + this.size / 2-1, this.y + this.vyd - this.size / 2) || 
+            this.getPhysicGridAtPosition(map, this.x - this.size / 2+1, this.y + this.vyd - this.size / 2);
         return collisions;
     }
 
@@ -231,4 +239,36 @@ export class Physic {
 
     public onCadavreTouched(cadavre: Cadavre, x: number, y: number): void {}
 
+    private processDelta() {
+        if(!Physic.lastTick){
+            Physic.lastTick = performance.now();
+            return;
+        }
+        Physic.deltaTime = ((performance.now() - Physic.lastTick)/1000) * Physic.targetFPS;
+        Physic.lastTick = performance.now();
+    }
+
+    get vx(): number {
+        return this._vx;
+    }
+
+    get vy(): number {
+        return this._vy;
+    }
+
+    get vxd(): number {
+        return this._vx * Physic.deltaTime;
+    }
+
+    get vyd(): number {
+        return this._vy * Physic.deltaTime;
+    }
+
+    set vx(n: number) {
+        this._vx = n;
+    }
+
+    set vy(n: number) {
+        this._vy = n;
+    }
 }

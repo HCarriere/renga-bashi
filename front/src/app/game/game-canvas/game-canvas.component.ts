@@ -190,4 +190,21 @@ export class GameCanvasComponent implements OnInit {
   keyUp(event: KeyboardEvent) {
     this.playerService.player.onKeyUp(event.key, this.playerService.playerController);
   }
+  
+
+
+  public touchStart(event: TouchEvent) {
+    event.preventDefault();
+    this.playerService.player.handleTouch(event.targetTouches, this.width, this.height, this.playerService.playerController);
+  }
+
+  public touchEnd(event: TouchEvent) {
+    event.preventDefault();
+    this.playerService.player.handleTouch(event.targetTouches, this.width, this.height, this.playerService.playerController);
+  }
+
+  public touchMoving(event: TouchEvent) {
+    event.preventDefault();
+    this.playerService.player.handleTouch(event.targetTouches, this.width, this.height, this.playerService.playerController);
+  }
 }

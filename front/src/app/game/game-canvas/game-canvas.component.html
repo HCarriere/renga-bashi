@@ -1,4 +1,7 @@
 <div class="game-canvas">
-    <canvas #canvas [ngStyle]="{'background-color': playerService.map ? playerService.map.backgroundColor : 'black'}">
+    <canvas #canvas [ngStyle]="{'background-color': playerService.map ? playerService.map.backgroundColor : 'black'}"  
+        (touchmove)="touchMoving($event)"
+        (touchstart)="touchStart($event)"
+        (touchend)="touchEnd($event)">
     </canvas>
 </div>

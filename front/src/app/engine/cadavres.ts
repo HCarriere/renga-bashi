@@ -35,7 +35,7 @@ export class CadavreProcessor {
         let ty = 0;
         if (cadavre.touched && cadavre.touched.frames > 0) {
           tx = (-cadavre.touched.x * cadavre.touched.frames) / 15;
-          ty = (-cadavre.touched.y * cadavre.touched.frames) / 35;
+          ty = (-cadavre.touched.y * cadavre.touched.frames) / 25;
           cadavre.touched.frames -= 1;
         }
         context.translate(cadavre.x - visibleBox.x + tx, cadavre.y - visibleBox.y + ty);

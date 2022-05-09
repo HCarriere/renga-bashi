@@ -142,19 +142,19 @@ export class Player extends Physic {
     private updateCamera(visibleBox: VisibleBox, screenWidth: number, screenHeight: number, map: MapData) {
         if (this.vx > 0 && this.x - visibleBox.x > 6 * screenWidth / 9) {
             // right
-            visibleBox.x += this.vx;
+            visibleBox.x += this.vxd;
         }
         if (this.vx < 0 && this.x - visibleBox.x < 4 * screenWidth / 9) {
             // left
-            visibleBox.x += this.vx;
+            visibleBox.x += this.vxd;
         }
         if (this.vy > 0 && this.y - visibleBox.y > 6 * screenHeight / 9) {
             // bottom
-            visibleBox.y += this.vy;
+            visibleBox.y += this.vyd;
         }
         if (this.vy < 0 && this.y - visibleBox.y < 4 * screenHeight / 9) {
             // top
-            visibleBox.y += this.vy;
+            visibleBox.y += this.vyd;
         }
 
         // catch up to player
@@ -192,6 +192,8 @@ export class Player extends Physic {
         ParticlesProcessor.addGenerator(gen);
     }
 
+    // Keyboard
+
     public onKeyDown(key: string, playerController: PlayerController) {
         if (key === 'ArrowUp' || key === ' ' || key.toLowerCase() === 'z' || key.toLowerCase() === 'w') playerController.UP = true;
         if (key === 'ArrowRight' || key.toLowerCase() === 'd') playerController.RIGHT = true;
@@ -209,6 +211,27 @@ export class Player extends Physic {
             Player.currentCadavreCooldown = Player.cadavreCooldown;
             this.isDead = true;
             playerController.RESPAWN = false;
+        }
+    }
+
+    // touch
+
+    public handleTouch(t: TouchList, width: number, height: number, playerController: PlayerController) {
+        playerController.UP = false;
+        playerController.RIGHT = false;
+        playerController.LEFT = false;
+        playerController.RESPAWN = false;
+
+        for (let i=0; i<t.length; i++) {
+            if (t[i].clientY > height * 0.80) {
+                playerController.UP = true;
+            } else if (t[i].clientY < height * 0.20 && Player.currentCadavreCooldown == 0) {
+                Player.currentCadavreCooldown = Player.cadavreCooldown;
+                this.isDead = true;
+            } else {
+                playerController.RIGHT = (t[i].clientX > width * 0.66)
+                playerController.LEFT = (t[i].clientX < width * 0.33);
+            }
         }
     }
 }
