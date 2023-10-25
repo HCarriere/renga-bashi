@@ -41,14 +41,15 @@ function getCadavres(level, callback) {
     if (!level) return callback(null, 400, 'missing parameters');
 
     CadavreModel.find(
-        {
-            level,
-        },
-        (err, data) => {
-            if (err) return callback(null, 500, err);
-            return callback(data);
-        }
-    ).sort({date: -1});
+    {
+        level,
+    }).sort({date: -1})
+    .then(data => {
+       return callback(data);
+    })
+    .catch(err => {
+        return callback(null, 500, err);
+    });
 }
 
 /**
@@ -67,22 +68,22 @@ function getCadavresHash(level, localhash, callback) {
     }
 
     CadavreModel.find(
-        {
-            level,
-        },
-        (err, data) => {
-            if (err) return callback(null, 500, err);
-
-            const chain = data.map(c => c.x+'!'+c.y).sort().join('-');
-            const hash = crypto.createHash('md5').update(chain).digest('hex');
-            cadavresHash[level] = hash;
-            
-            if (hash == localhash) {
-                return callback(true);
-            }
-            return callback(data);
+    {
+        level,
+    }).sort({date: -1})
+    .then(data => {
+        const chain = data.map(c => c.x+'!'+c.y).sort().join('-');
+        const hash = crypto.createHash('md5').update(chain).digest('hex');
+        cadavresHash[level] = hash;
+        
+        if (hash == localhash) {
+            return callback(true);
         }
-    ).sort({date: -1});
+        return callback(data);       
+    })
+    .catch(err => {
+        return callback(null, 500, err);
+    });
 }
 
 
@@ -138,13 +139,16 @@ function addCadavre(req, callback, admin = false) {
     }
     
     const obj = new CadavreModel(params);
-    obj.save(err => {
-        if (err) return callback(null, 500, err);
+    obj.save()
+    .then(() => {
         // pool cadavre (ws)
         if (!cadavresPool.has(params.level)) cadavresPool.set(params.level, []);
         cadavresPool.get(params.level).push(obj);
 
         return callback(obj);
+    })
+    .catch(err => {
+        return callback(null, 500, err);
     });
 }
 
@@ -156,9 +160,12 @@ function addCadavre(req, callback, admin = false) {
  */
 function removeCadavres(title, callback) {
     if(!title) return callback(null, 400, 'missing parameters');
-    CadavreModel.deleteMany({level: title}, (err) => {
-        if (err) return callback(null, 500, err);
+    CadavreModel.deleteMany({level: title})
+    .then(()=> {
         return callback('ok');
+    })
+    .catch(err => {
+        return callback(null, 500, err);
     });
 }
 
@@ -177,7 +184,7 @@ function removeSomeCadavres(title, ids, callback) {
         _id: {$in: cleanIds}}, err => {
         if (err) return callback(null, 500, err);
         return callback('ok');  
-    })
+    });
 }
 
 function checkGuid(guid) {

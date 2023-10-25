@@ -14,13 +14,15 @@ const cadavre = require('./app/cadavre/cadavre');
 const map = require('./app/map/map');
 
 const port = process.env.PORT || '3001';
-const DB_URI = process.env.DB_URI || 'mongodb://localhost/rengabashi'
-const API_PASSWORD = process.env.API_PASSWORD || '25xrwVZOHOY6l0CwJdE93svifcFQwFmDASQGQZpqT8Q=';
+const DB_URI = process.env.DB_URI || 'mongodb://localhost/rengabashi';
+
+const API_PASSWORD = process.env.API_PASSWORD || 'password';
 const JWT_SECRET = process.env.JWT_SECRET || 'jwtSecret!'
 
 
-mongoose.connect(DB_URI, { useMongoClient: true });
-mongoose.connection.on('error', (err) => {
+mongoose.connect(DB_URI);
+// TODO update below
+/*mongoose.connection.on('error', (err) => {
     console.log('mongoose default connection error: '+err);
 });
 mongoose.connection.on('connected', () => {
@@ -35,6 +37,7 @@ process.on('SIGINT', function() {
         process.exit(0); 
     }); 
 }); 
+*/
 
 server.timeout = 0;
 
@@ -201,4 +204,3 @@ function mustBeAdmin(req, res, next) {
         res.sendStatus(401);
     }
 }
-

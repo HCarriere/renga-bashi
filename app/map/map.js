@@ -25,12 +25,13 @@ function addMap(req, callback) {
     MapModel.findOneAndUpdate(
         {title: req.body.title},
         {title, map, links},
-        {upsert: true},
-        (err, doc) => {
-            if (err) return callback(null, 500, err);
-            return callback(doc, 200);
-        }
-    );
+        {upsert: true})
+    .then(doc => {
+        return callback(doc, 200);
+    })
+    .catch(err => {
+        return callback(null, 500, err);
+    });
 }
 
 
@@ -86,19 +87,25 @@ function _getMap(title, callback) {
     if(cachedMaps[title]) {
         return callback(cachedMaps[title]);
     }
-    MapModel.findOne({title}, (err, data) => {
-        if (err) return callback(null, 500, err);
-        if (!data) return callback(null, 404, title + ' not found');
+    MapModel.findOne({title})
+    .then(data => {
+        if (!data) return callback(null, 500);
         cachedMaps[title] = data;
         return callback(data);
+    })
+    .catch(err => {
+        return callback(null, 500, err);
     });
 }
 
 
 function getAllMaps(callback) {
-    MapModel.find({}, (err, maps) => {
-        if (err) return callback(null, 500, err);
+    MapModel.find({})
+    .then(maps => {
         return callback(maps);
+    })
+    .catch(err => {
+        return callback(null, 500, err);
     });
 }
 
@@ -106,11 +113,13 @@ function getAllMaps(callback) {
 function deleteMap(req, callback) {
     if (!req.params.title) return callback(null, 400, 'missing parameters');
 
-    MapModel.deleteOne({title: req.params.title}, (err) => {
-        if (err) return callback(null, 500, err);
+    MapModel.deleteOne({title: req.params.title})
+    .then(err => { 
         return callback('ok');
+    })
+    .catch(err => {
+        return callback(null, 500, err);
     });
-
 }
 
 
