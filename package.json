@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "heroku-postbuild": "cd front && npm install && ng build"
+    "heroku-postbuild": "cd front && npm install && ng build",
+    "render-postbuild": "npm install && cd front && npm install && npm run build"
   },
   "author": "",
   "license": "ISC",
@@ -20,8 +21,8 @@
     "socket.io": "^4.4.1"
   },
   "engines": {
-    "node": "12.22.11",
-    "npm": "8.6.0"
+    "node": "18.17.1",
+    "npm": "9.6.7"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^13.3.2",
